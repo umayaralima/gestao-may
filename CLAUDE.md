@@ -205,7 +205,7 @@ siga o mesmo estilo.
 
 ## Decisões tomadas na construção (2026-09-18)
 
-- Projeto vive em `C:/Users/maahl/OneDrive/Documentos/May/gestao` (movido do HD externo em 2026-09-19). Next 16 (App Router, `src/`), Tailwind 4, Supabase via `@supabase/ssr`.
+- Projeto vive em `C:/Users/maahl/Documents/May/gestao` (movido do HD externo em 2026-09-19). Next 16 (App Router, `src/`), Tailwind 4, Supabase via `@supabase/ssr`.
 - Schema em `supabase/schema.sql`. `pagamentos` NÃO tem coluna `status`: vem da view `pagamentos_view`
   (`pago` se `data_pagamento`, `atrasado` se `vencimento < hoje`, senão `pendente`).
 - Auth: e-mail/senha, único usuário. `ALLOWED_EMAIL` no `.env.local` trava o login; signup público desligado no painel.

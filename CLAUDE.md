@@ -226,3 +226,29 @@ siga o mesmo estilo.
 - Contratos: aba no projeto, vários por projeto, linha do tempo rascunho → enviado → assinado; marcar registra a data do dia.
   Contrato assinado + projeto em briefing/orcamento_enviado mostra banner sugerindo "Aprovado" (não força).
 - Server actions específicas de aba ficam em `src/app/(app)/projetos/[id]/<aba>/actions.ts`.
+
+## CRM integrado (escopo adicionado em 2026-09-19, ainda não construído)
+
+O sistema também é o CRM da May: acompanha o lead desde o primeiro contato até virar cliente,
+no mesmo lugar dos projetos e pagamentos. Não é um CRM genérico de equipe de vendas: é pra uma
+pessoa saber com quem falar hoje e não deixar proposta esfriar.
+
+**Proposta de escopo mínimo (a validar com a May):**
+
+- **Leads** separados de clientes: nome, contato (WhatsApp/e-mail/Instagram), origem, serviço de interesse
+  (usa `tipos_projeto`), valor estimado, observações.
+- **Funil (pipeline)** com etapas fixas e manuais: `novo` → `em_contato` → `proposta_enviada` → `negociando`
+  → `ganho` | `perdido` (com motivo da perda). Visualização em colunas (kanban simples) e em lista.
+- **Próximo follow-up**: data + nota por lead. Dashboard ganha card "Follow-ups de hoje/atrasados" e a
+  lista de leads destaca os vencidos, no mesmo padrão visual de pagamento atrasado.
+- **Histórico de interações** por lead: registro manual (data, canal, resumo). Sem integração com WhatsApp.
+- **Converter lead em cliente**: ao marcar `ganho`, cria o cliente (e opcionalmente o projeto) já preenchidos
+  com os dados do lead, mantendo o vínculo `cliente.lead_id` pra rastrear origem.
+- Cliente existente também pode receber interações e follow-up (pós-venda, upsell), então a tabela de
+  interações referencia lead **ou** cliente.
+
+**Fora de escopo do CRM na v1:** disparo de mensagens, captura automática de lead de formulário/Instagram,
+automações de e-mail, metas e relatórios de conversão, múltiplos vendedores.
+
+**Ordem sugerida:** construir depois da Fase 2 estar em uso, antes da Fase 3 (integrações), porque não
+depende de serviço externo e resolve dor diária (proposta esquecida).

@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+/* Tokens do Design System "May" (Figma: Starter File - Mayara). Valores exatos do guia. */
+:root {
+  --rosa-50: #f7eef9;
+  --rosa-100: #e7ccee;
+  --rosa-200: #dbb3e5;
+  --rosa-300: #cb90d9;
+  --rosa-400: #c17ad2;
+  --rosa-500: #b159c7;
+  --rosa-600: #a151b5;
+  --rosa-700: #7e3f8d;
+  --rosa-800: #61316d;
+  --rosa-900: #4a2554;
+
+  --lavanda-50: #eae8ec;
+  --lavanda-100: #bfb9c5;
+  --lavanda-200: #a097a9;
+  --lavanda-300: #756782;
+  --lavanda-400: #5a496a;
+  --lavanda-500: #311c45;
+  --lavanda-600: #2d193f;
+  --lavanda-700: #231431;
+  --lavanda-800: #1b0f26;
+  --lavanda-900: #150c1d;
+
+  --branco-absoluto: #ffffff;
+  --neutro-0: #f5f4f5;
+  --neutro-100: #dbd9dd;
+  --neutro-200: #c2bec5;
+  --neutro-400: #8f8896;
+  --neutro-500: #766e7c;
+  --neutro-600: #5c5661;
+  --neutro-700: #433e46;
+  --neutro-800: #29262b;
+  --neutro-900: #0f0e10;
+  --input-fundo-disabled: #fffcfa;
+
+  --sucesso: #179e1d;
+  --alerta: #fd9800;
+  --falha: #d60000;
+  --info: #42179e;
+
+  --radius-smaller: 4px;
+  --radius-medium: 8px;
+  --radius-larger: 24px;
+
+  --sombra-padrao: 0px 17px 36px 0px #0a27290a, 0px 66px 66px 0px #0a272908,
+    0px 149px 89px 0px #0a272905, 0px 264px 106px 0px #0a272903;
+  --gradiente-botao-primario: linear-gradient(to right, var(--rosa-600), var(--rosa-400));
+}
+
+@theme inline {
+  --color-rosa-50: var(--rosa-50);
+  --color-rosa-100: var(--rosa-100);
+  --color-rosa-200: var(--rosa-200);
+  --color-rosa-300: var(--rosa-300);
+  --color-rosa-400: var(--rosa-400);
+  --color-rosa-500: var(--rosa-500);
+  --color-rosa-600: var(--rosa-600);
+  --color-rosa-700: var(--rosa-700);
+  --color-rosa-800: var(--rosa-800);
+  --color-rosa-900: var(--rosa-900);
+
+  --color-lavanda-50: var(--lavanda-50);
+  --color-lavanda-100: var(--lavanda-100);
+  --color-lavanda-200: var(--lavanda-200);
+  --color-lavanda-300: var(--lavanda-300);
+  --color-lavanda-400: var(--lavanda-400);
+  --color-lavanda-500: var(--lavanda-500);
+  --color-lavanda-600: var(--lavanda-600);
+  --color-lavanda-700: var(--lavanda-700);
+  --color-lavanda-800: var(--lavanda-800);
+  --color-lavanda-900: var(--lavanda-900);
+
+  --color-branco: var(--branco-absoluto);
+  --color-neutro-0: var(--neutro-0);
+  --color-neutro-100: var(--neutro-100);
+  --color-neutro-200: var(--neutro-200);
+  --color-neutro-400: var(--neutro-400);
+  --color-neutro-500: var(--neutro-500);
+  --color-neutro-600: var(--neutro-600);
+  --color-neutro-700: var(--neutro-700);
+  --color-neutro-800: var(--neutro-800);
+  --color-neutro-900: var(--neutro-900);
+  --color-input-disabled: var(--input-fundo-disabled);
+
+  --color-sucesso: var(--sucesso);
+  --color-alerta: var(--alerta);
+  --color-falha: var(--falha);
+  --color-info: var(--info);
+
+  --radius-smaller: var(--radius-smaller);
+  --radius-medium: var(--radius-medium);
+  --radius-larger: var(--radius-larger);
+
+  --shadow-padrao: var(--sombra-padrao);
+
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+  --font-serif: var(--font-dm-serif), Georgia, serif;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  background: var(--neutro-0);
+  color: var(--neutro-900);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Títulos do guia: serifa, itálico, peso 400, entrelinha 1.2 */
+h1, h2, h3, .titulo {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.2;
+}

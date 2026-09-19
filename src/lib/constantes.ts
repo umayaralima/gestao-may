@@ -58,3 +58,29 @@ export const ORIGEM_CLIENTE_LABEL: Record<(typeof ORIGENS_CLIENTE)[number], stri
   linkedin: "LinkedIn",
   outro: "Outro",
 };
+
+// ---------- CRM ----------
+export const ETAPAS_LEAD = ["novo", "em_contato", "proposta_enviada", "negociando", "ganho", "perdido"] as const;
+export type EtapaLead = (typeof ETAPAS_LEAD)[number];
+
+export const ETAPA_LEAD_LABEL: Record<EtapaLead, string> = {
+  novo: "Novo",
+  em_contato: "Em contato",
+  proposta_enviada: "Proposta enviada",
+  negociando: "Negociando",
+  ganho: "Ganho",
+  perdido: "Perdido",
+};
+
+/** Etapas que aparecem no funil (kanban). Ganho/perdido ficam na lista de fechados. */
+export const ETAPAS_LEAD_ABERTAS: EtapaLead[] = ["novo", "em_contato", "proposta_enviada", "negociando"];
+
+export const CANAIS_INTERACAO = ["whatsapp", "email", "instagram", "ligacao", "reuniao", "outro"] as const;
+export const CANAL_INTERACAO_LABEL: Record<(typeof CANAIS_INTERACAO)[number], string> = {
+  whatsapp: "WhatsApp",
+  email: "E-mail",
+  instagram: "Instagram",
+  ligacao: "Ligação",
+  reuniao: "Reunião",
+  outro: "Outro",
+};

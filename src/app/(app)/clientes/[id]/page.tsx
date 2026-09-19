@@ -8,21 +8,39 @@ import { Tabela, Td, Th, Thead, Tr } from "@/components/ui/tabela";
 import { ORIGEM_CLIENTE_LABEL } from "@/lib/constantes";
 import { formatBRL, formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
-import type { Cliente, Projeto } from "@/lib/types";
+import type { Cliente, Interacao, Projeto } from "@/lib/types";
 import { excluirCliente } from "../actions";
+import {
+  adiarFollowup,
+  concluirFollowup,
+  excluirInteracao,
+  registrarInteracao,
+  salvarFollowup,
+  type Dono,
+} from "../../crm/actions";
+import { PainelRelacionamento } from "../../crm/painel-relacionamento";
 
 export default async function ClientePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: cliente }, { data: projetos }] = await Promise.all([
+  const [{ data: cliente }, { data: projetos }, { data: interacoes }] = await Promise.all([
     supabase.from("clientes").select("*").eq("id", id).single<Cliente>(),
     supabase.from("projetos").select("*").eq("cliente_id", id).order("criado_em", { ascending: false }).returns<Projeto[]>(),
+    supabase.from("interacoes").select("*").eq("cliente_id", id).order("data", { ascending: false }).order("criado_em", { ascending: false }).returns<Interacao[]>(),
   ]);
 
   if (!cliente) notFound();
 
   const excluir = excluirCliente.bind(null, cliente.id);
+  const dono: Dono = { tipo: "cliente", id: cliente.id };
+  const acoes = {
+    registrarInteracao: registrarInteracao.bind(null, dono),
+    excluirInteracao: excluirInteracao.bind(null, dono),
+    salvarFollowup: salvarFollowup.bind(null, dono),
+    concluirFollowup: concluirFollowup.bind(null, dono),
+    adiarFollowup: adiarFollowup.bind(null, dono),
+  };
 
   const info: Array<[string, React.ReactNode]> = [
     ["Empresa", cliente.empresa],
@@ -31,6 +49,7 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
     ["WhatsApp", cliente.whatsapp],
     ["Origem", cliente.origem ? ORIGEM_CLIENTE_LABEL[cliente.origem as keyof typeof ORIGEM_CLIENTE_LABEL] ?? cliente.origem : null],
     ["Cliente desde", formatDate(cliente.criado_em)],
+    ["Veio de", cliente.lead_id ? <Link href={`/leads/${cliente.lead_id}`} className="text-rosa-700 hover:underline">lead convertido</Link> : "cadastro direto"],
   ];
 
   return (
@@ -116,6 +135,14 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
               </tbody>
             </Tabela>
           )}
+
+          <h2 className="mt-8 mb-3 text-2xl">Relacionamento</h2>
+          <PainelRelacionamento
+            dono={dono}
+            followup={{ data: cliente.proximo_followup, nota: cliente.nota_followup }}
+            interacoes={interacoes ?? []}
+            acoes={acoes}
+          />
         </div>
       </div>
     </>

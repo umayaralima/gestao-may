@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   const { inicio, fim } = primeiroEUltimoDiaDoMes();
   const hoje = hojeISO();
 
-  const [ativos, noMes, atrasados, contratos, proximos] = await Promise.all([
+  const [ativos, noMes, atrasados, contratos, proximos, followLeads, followClientes] = await Promise.all([
     supabase.from("projetos").select("id", { count: "exact", head: true }).in("status", STATUS_PROJETO_ATIVO),
     supabase.from("pagamentos_view").select("valor").neq("status", "pago").gte("vencimento", inicio).lte("vencimento", fim),
     supabase.from("pagamentos_view").select("valor").eq("status", "atrasado"),
@@ -30,7 +30,10 @@ export default async function DashboardPage() {
       .order("vencimento")
       .limit(5)
       .returns<Proximo[]>(),
+    supabase.from("leads").select("id", { count: "exact", head: true }).lte("proximo_followup", hoje).in("etapa", ["novo", "em_contato", "proposta_enviada", "negociando"]),
+    supabase.from("clientes").select("id", { count: "exact", head: true }).lte("proximo_followup", hoje),
   ]);
+  const qtdFollowups = (followLeads.count ?? 0) + (followClientes.count ?? 0);
 
   const soma = (rows: Array<{ valor: number }> | null) => (rows ?? []).reduce((s, r) => s + Number(r.valor), 0);
   const qtdAtrasados = atrasados.data?.length ?? 0;
@@ -48,14 +51,21 @@ export default async function DashboardPage() {
           <h1 className="text-3xl text-neutro-900 sm:text-4xl">Como estão as coisas</h1>
         </div>
         <div className="flex gap-2">
-          <Botao href="/clientes/novo" variante="secundario">
-            Novo cliente
+          <Botao href="/leads/novo" variante="secundario">
+            Novo lead
           </Botao>
           <Botao href="/projetos/novo">Novo projeto</Botao>
         </div>
       </div>
 
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <Resumo
+          titulo="Follow-ups"
+          valor={String(qtdFollowups)}
+          href="/leads?ver=lista&filtro=followup"
+          rodape={qtdFollowups ? "pra hoje ou atrasados" : "nada pendente"}
+          alerta={qtdFollowups > 0}
+        />
         <Resumo titulo="Projetos ativos" valor={String(ativos.count ?? 0)} href="/projetos?status=ativos" rodape="orçamento enviado até em revisão" />
         <Resumo titulo="A receber no mês" valor={formatBRL(soma(noMes.data))} href="/pagamentos" rodape={`${noMes.data?.length ?? 0} parcela(s)`} />
         <Resumo

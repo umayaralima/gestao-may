@@ -227,13 +227,13 @@ siga o mesmo estilo.
   Contrato assinado + projeto em briefing/orcamento_enviado mostra banner sugerindo "Aprovado" (não força).
 - Server actions específicas de aba ficam em `src/app/(app)/projetos/[id]/<aba>/actions.ts`.
 
-## CRM integrado (escopo adicionado em 2026-09-19, ainda não construído)
+## CRM integrado (escopo adicionado e construído em 2026-09-19, refinar após uso)
 
 O sistema também é o CRM da May: acompanha o lead desde o primeiro contato até virar cliente,
 no mesmo lugar dos projetos e pagamentos. Não é um CRM genérico de equipe de vendas: é pra uma
 pessoa saber com quem falar hoje e não deixar proposta esfriar.
 
-**Proposta de escopo mínimo (a validar com a May):**
+**Escopo do MVP (aprovado pela May, construído):**
 
 - **Leads** separados de clientes: nome, contato (WhatsApp/e-mail/Instagram), origem, serviço de interesse
   (usa `tipos_projeto`), valor estimado, observações.
@@ -252,3 +252,15 @@ automações de e-mail, metas e relatórios de conversão, múltiplos vendedores
 
 **Ordem sugerida:** construir depois da Fase 2 estar em uso, antes da Fase 3 (integrações), porque não
 depende de serviço externo e resolve dor diária (proposta esquecida).
+
+**Como ficou implementado:**
+- Tabelas `leads` e `interacoes` (interação referencia lead OU cliente); `clientes` ganhou `lead_id`, `proximo_followup`,
+  `nota_followup`. Migração: `supabase/migrations/003_crm.sql`.
+- `/leads`: funil em 4 colunas (novo, em_contato, proposta_enviada, negociando) + "Fechados" recolhido; `?ver=lista` e
+  `?filtro=followup` (só follow-ups de hoje/atrasados). Card com follow-up atrasado ganha anel vermelho.
+- `/leads/[id]`: dropdown de etapa inline (`SelectInline`), motivo da perda quando `perdido`, botão "Converter em cliente"
+  (cria cliente com `lead_id`, marca `ganho`, redireciona pra `/projetos/novo?cliente=&servico=&valor=` pré-preenchido).
+- `PainelRelacionamento` (`src/app/(app)/crm/`) é compartilhado entre lead e cliente: follow-up (feito / adiar 1 dia / 1 semana /
+  reagendar) + timeline de interações. Ações genéricas recebem `Dono = { tipo: "lead" | "cliente", id }`.
+- Única automação: registrar interação num lead `novo` move pra `em_contato` (reversível no dropdown).
+- Dashboard: card "Follow-ups" (leads abertos + clientes com `proximo_followup <= hoje`), vermelho se > 0.

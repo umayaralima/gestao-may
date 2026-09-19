@@ -15,12 +15,15 @@ type Props = {
   tipos: string[];
   projeto?: Projeto;
   clienteInicial?: string;
+  /** Pré-preenchimento (ex.: vindo da conversão de um lead). */
+  inicial?: { tipo?: string; valor_total?: number };
   cancelarHref: string;
 };
 
-export function ProjetoForm({ action, clientes, tipos, projeto, clienteInicial, cancelarHref }: Props) {
+export function ProjetoForm({ action, clientes, tipos, projeto, clienteInicial, inicial, cancelarHref }: Props) {
   // Projeto antigo com tipo que já foi removido das configurações continua aparecendo no select
-  const opcoesTipo = projeto?.tipo && !tipos.includes(projeto.tipo) ? [...tipos, projeto.tipo] : tipos;
+  const tipoAtual = projeto?.tipo ?? inicial?.tipo ?? "";
+  const opcoesTipo = tipoAtual && !tipos.includes(tipoAtual) ? [...tipos, tipoAtual] : tipos;
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
 
   return (
@@ -43,7 +46,7 @@ export function ProjetoForm({ action, clientes, tipos, projeto, clienteInicial, 
           <Input id="nome" name="nome" required defaultValue={projeto?.nome} placeholder="Ex.: Site institucional" />
         </Campo>
         <Campo label="Tipo de serviço" htmlFor="tipo">
-          <Select id="tipo" name="tipo" defaultValue={projeto?.tipo ?? ""}>
+          <Select id="tipo" name="tipo" defaultValue={tipoAtual}>
             <option value="">—</option>
             {opcoesTipo.map((t) => (
               <option key={t} value={t}>
@@ -68,7 +71,7 @@ export function ProjetoForm({ action, clientes, tipos, projeto, clienteInicial, 
           </Select>
         </Campo>
         <Campo label="Valor total (R$)" htmlFor="valor_total">
-          <Input id="valor_total" name="valor_total" type="number" step="0.01" min="0" defaultValue={projeto?.valor_total ?? ""} />
+          <Input id="valor_total" name="valor_total" type="number" step="0.01" min="0" defaultValue={projeto?.valor_total ?? inicial?.valor_total ?? ""} />
         </Campo>
         <Campo label="Link do projeto" htmlFor="link_projeto" hint="Staging, repositório, Figma…">
           <Input id="link_projeto" name="link_projeto" type="url" placeholder="https://" defaultValue={projeto?.link_projeto ?? ""} />

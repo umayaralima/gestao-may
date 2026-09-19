@@ -4,8 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import { criarProjeto } from "../actions";
 import { ProjetoForm } from "../projeto-form";
 
-export default async function NovoProjetoPage({ searchParams }: { searchParams: Promise<{ cliente?: string }> }) {
-  const { cliente } = await searchParams;
+export default async function NovoProjetoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cliente?: string; servico?: string; valor?: string }>;
+}) {
+  const { cliente, servico, valor } = await searchParams;
   const supabase = await createClient();
   const [{ data: clientes }, { data: tipos }] = await Promise.all([
     supabase.from("clientes").select("id, nome, empresa").eq("status", "ativo").order("nome"),
@@ -29,6 +33,7 @@ export default async function NovoProjetoPage({ searchParams }: { searchParams: 
           clientes={clientes}
           tipos={(tipos ?? []).map((t) => t.nome)}
           clienteInicial={cliente}
+          inicial={{ tipo: servico || undefined, valor_total: valor ? Number(valor) : undefined }}
           cancelarHref={cliente ? `/clientes/${cliente}` : "/projetos"}
         />
       )}

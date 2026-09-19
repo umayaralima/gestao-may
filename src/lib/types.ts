@@ -1,4 +1,4 @@
-import type { StatusProjeto, TipoPagamento } from "./constantes";
+import type { EtapaLead, StatusProjeto, TipoPagamento } from "./constantes";
 
 export type Cliente = {
   id: string;
@@ -10,6 +10,9 @@ export type Cliente = {
   origem: string | null;
   status: "ativo" | "inativo";
   observacoes: string | null;
+  lead_id: string | null;
+  proximo_followup: string | null;
+  nota_followup: string | null;
   criado_em: string;
 };
 
@@ -73,5 +76,34 @@ export type Contrato = {
   link_documento: string | null;
   data_envio: string | null;
   data_assinatura: string | null;
+  criado_em: string;
+};
+
+export type Lead = {
+  id: string;
+  nome: string;
+  empresa: string | null;
+  whatsapp: string | null;
+  email: string | null;
+  instagram: string | null;
+  origem: string | null;
+  servico_interesse: string | null;
+  valor_estimado: number | null;
+  etapa: EtapaLead;
+  motivo_perda: string | null;
+  proximo_followup: string | null;
+  nota_followup: string | null;
+  observacoes: string | null;
+  criado_em: string;
+  atualizado_em: string;
+};
+
+export type Interacao = {
+  id: string;
+  lead_id: string | null;
+  cliente_id: string | null;
+  data: string;
+  canal: string | null;
+  resumo: string;
   criado_em: string;
 };

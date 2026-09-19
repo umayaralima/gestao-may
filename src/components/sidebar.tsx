@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 
 const itens = [
   { href: "/", label: "Dashboard" },
+  { href: "/leads", label: "Leads" },
   { href: "/clientes", label: "Clientes" },
   { href: "/projetos", label: "Projetos" },
   { href: "/pagamentos", label: "Pagamentos" },

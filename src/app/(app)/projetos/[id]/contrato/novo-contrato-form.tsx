@@ -15,8 +15,8 @@ export function NovoContratoForm({ action }: { action: (prev: FormState, formDat
   }, [state]);
 
   return (
-    <form ref={ref} action={formAction} className="space-y-4 rounded-medium border-2 border-dashed border-neutro-100 p-4">
-      <p className="text-sm font-medium text-neutro-700">Novo contrato</p>
+    <form ref={ref} action={formAction} className="space-y-4 rounded-[12px] border-2 border-dashed border-borda p-4">
+      <p className="text-sm font-medium text-texto-suave">Novo contrato</p>
       <Campo label="Link do documento" htmlFor="link_documento" hint="Autentique, Google Docs, PDF no Drive… Pode deixar vazio e preencher depois.">
         <Input id="link_documento" name="link_documento" type="url" placeholder="https://" />
       </Campo>

@@ -22,7 +22,7 @@ export default async function NovoProjetoPage({
       {!clientes?.length ? (
         <Vazio>
           Projeto sem cliente não existe.{" "}
-          <Link href="/clientes/novo" className="text-rosa-700 underline">
+          <Link href="/clientes/novo" className="text-rosa-300 underline">
             Cadastre um cliente primeiro
           </Link>
           .

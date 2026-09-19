@@ -26,44 +26,44 @@ export function ListaContratos({ contratos }: { contratos: Contrato[] }) {
         const salvarLink = atualizarLinkContrato.bind(null, c.id, c.projeto_id);
 
         return (
-          <div key={c.id} className="rounded-medium bg-branco p-5 shadow-padrao">
+          <div key={c.id} className="rounded-[12px] bg-superficie p-5 border border-borda">
             {/* Linha do tempo rascunho → enviado → assinado */}
             <ol className="mb-4 flex items-center gap-2">
               {etapas.map((e, i) => (
                 <li key={e.id} className="flex items-center gap-2">
                   <span
                     className={cn(
-                      "rounded-smaller px-2.5 py-1 text-xs font-medium",
-                      i < idx && "bg-rosa-100 text-rosa-800",
+                      "rounded-[8px] px-2.5 py-1 text-xs font-medium",
+                      i < idx && "bg-rosa-900 text-rosa-100",
                       i === idx && (e.id === "assinado" ? "bg-sucesso text-white" : "bg-rosa-600 text-rosa-50"),
-                      i > idx && "bg-neutro-0 text-neutro-400",
+                      i > idx && "bg-superficie-2 text-texto-mudo",
                     )}
                   >
                     {e.label}
                   </span>
-                  {i < etapas.length - 1 && <span className={cn("h-px w-6", i < idx ? "bg-rosa-600" : "bg-neutro-100")} />}
+                  {i < etapas.length - 1 && <span className={cn("h-px w-6", i < idx ? "bg-rosa-600" : "bg-superficie-2")} />}
                 </li>
               ))}
             </ol>
 
             <dl className="mb-4 grid gap-3 text-sm sm:grid-cols-3">
               <div>
-                <dt className="text-xs uppercase tracking-wide text-neutro-500">Criado em</dt>
-                <dd className="text-neutro-800">{formatDate(c.criado_em)}</dd>
+                <dt className="rotulo">Criado em</dt>
+                <dd className="text-texto-suave">{formatDate(c.criado_em)}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-neutro-500">Enviado em</dt>
-                <dd className="text-neutro-800">{formatDate(c.data_envio)}</dd>
+                <dt className="rotulo">Enviado em</dt>
+                <dd className="text-texto-suave">{formatDate(c.data_envio)}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-neutro-500">Assinado em</dt>
-                <dd className={cn("text-neutro-800", c.data_assinatura && "font-medium text-sucesso")}>{formatDate(c.data_assinatura)}</dd>
+                <dt className="rotulo">Assinado em</dt>
+                <dd className={cn("text-texto-suave", c.data_assinatura && "font-medium text-[#5fe07a]")}>{formatDate(c.data_assinatura)}</dd>
               </div>
             </dl>
 
             <form action={salvarLink} className="mb-4 flex items-end gap-2">
               <div className="flex-1">
-                <label htmlFor={`link-${c.id}`} className="mb-1.5 block text-xs uppercase tracking-wide text-neutro-500">
+                <label htmlFor={`link-${c.id}`} className="mb-1.5 block rotulo">
                   Link do documento
                 </label>
                 <Input id={`link-${c.id}`} name="link_documento" type="url" placeholder="https://" defaultValue={c.link_documento ?? ""} />
@@ -78,7 +78,7 @@ export function ListaContratos({ contratos }: { contratos: Contrato[] }) {
               )}
             </form>
 
-            <div className="flex flex-wrap items-center gap-3 border-t border-neutro-0 pt-4">
+            <div className="flex flex-wrap items-center gap-3 border-t border-borda/60 pt-4">
               {c.status === "rascunho" && (
                 <form action={enviar}>
                   <Botao type="submit">Marcar como enviado</Botao>
@@ -93,13 +93,13 @@ export function ListaContratos({ contratos }: { contratos: Contrato[] }) {
               )}
               {c.status !== "rascunho" && (
                 <form action={rascunho}>
-                  <button type="submit" className="text-xs text-neutro-500 underline underline-offset-4 hover:text-neutro-800">
+                  <button type="submit" className="text-xs text-texto-mudo underline underline-offset-4 hover:text-texto-suave">
                     Voltar pra rascunho
                   </button>
                 </form>
               )}
               <form action={excluir} className="ml-auto">
-                <button type="submit" className="text-xs text-falha underline underline-offset-4 hover:opacity-80">
+                <button type="submit" className="text-xs text-[#ff8a8a] underline underline-offset-4 hover:opacity-80">
                   Excluir contrato
                 </button>
               </form>

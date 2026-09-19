@@ -1,10 +1,15 @@
 import { cn } from "@/lib/cn";
 
-/** Card: fundo branco, radius-medium (8px), sombra-padrao do guia. */
+/** Card do wireframe: superfície lavanda-700, borda fina lavanda-400, radius 12px. */
 export function Card({ className, children }: { className?: string; children: React.ReactNode }) {
-  return <div className={cn("rounded-medium bg-branco p-5 shadow-padrao", className)}>{children}</div>;
+  return <div className={cn("rounded-[12px] border border-borda bg-superficie p-5", className)}>{children}</div>;
 }
 
-export function CardTitulo({ children }: { children: React.ReactNode }) {
-  return <h3 className="mb-3 text-lg text-neutro-900">{children}</h3>;
+export function CardTitulo({ children, sub }: { children: React.ReactNode; sub?: string }) {
+  return (
+    <div className="mb-3">
+      <h3 className="font-sans text-base font-semibold not-italic text-texto">{children}</h3>
+      {sub && <p className="text-xs text-texto-mudo">{sub}</p>}
+    </div>
+  );
 }

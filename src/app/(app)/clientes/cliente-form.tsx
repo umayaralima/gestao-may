@@ -18,7 +18,7 @@ export function ClienteForm({ action, cliente, cancelarHref }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
 
   return (
-    <form action={formAction} className="space-y-5 rounded-medium bg-branco p-6 shadow-padrao">
+    <form action={formAction} className="space-y-5 rounded-[12px] bg-superficie p-6 border border-borda">
       <div className="grid gap-5 sm:grid-cols-2">
         <Campo label="Nome *" htmlFor="nome">
           <Input id="nome" name="nome" required defaultValue={cliente?.nome} autoFocus />

@@ -50,7 +50,7 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
             {clientes.map((c) => (
               <Tr key={c.id}>
                 <Td>
-                  <Link href={`/clientes/${c.id}`} className="font-medium text-rosa-700 hover:underline">
+                  <Link href={`/clientes/${c.id}`} className="font-medium text-rosa-300 hover:underline">
                     {c.nome}
                   </Link>
                 </Td>

@@ -6,24 +6,24 @@ type Tamanho = "pequeno" | "medio";
 
 /*
  * Botão do guia "May", em escala de UI:
- *  - primario: gradiente rosa-600→rosa-400, texto rosa-50, hover rosa-700, active rosa-900
- *  - secundario: borda rosa-600, texto rosa-800; hover preenche rosa-600
- *  - terciario: link sublinhado rosa-600 → rosa-700 → rosa-900
+ *  - primario: rosa-600 sólido (wireframe escuro), hover rosa-700, active rosa-900
+ *  - secundario: superfície lavanda com borda; hover borda rosa-600
+ *  - terciario: link sublinhado rosa-300 (legível no fundo escuro)
  *  - perigo: variante extra pra ações destrutivas (não existe no guia; usa `falha`)
  */
 const base =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-smaller font-medium transition-colors " +
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[8px] font-medium transition-colors " +
   "disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rosa-600";
 
 const variantes: Record<Variante, string> = {
   primario:
-    "text-rosa-50 [background:var(--gradiente-botao-primario)] hover:[background:var(--rosa-700)] active:[background:var(--rosa-900)]",
+    "bg-rosa-600 text-rosa-50 hover:bg-rosa-700 active:bg-rosa-900",
   secundario:
-    "border border-rosa-600 text-rosa-800 bg-transparent hover:bg-rosa-600 hover:border-rosa-700 hover:text-rosa-50 active:bg-rosa-700 active:border-rosa-900",
+    "border border-borda-forte bg-superficie-2 text-texto hover:border-rosa-600 hover:bg-superficie-hover active:bg-rosa-900",
   terciario:
-    "text-rosa-600 underline underline-offset-4 hover:text-rosa-700 active:text-rosa-900 px-0",
+    "text-rosa-300 underline underline-offset-4 hover:text-rosa-200 active:text-rosa-400 px-0",
   perigo:
-    "border border-falha text-falha bg-transparent hover:bg-falha hover:text-white active:opacity-80",
+    "border border-falha/50 text-[#ff8a8a] bg-transparent hover:bg-falha hover:text-white active:opacity-80",
 };
 
 const tamanhos: Record<Tamanho, string> = {

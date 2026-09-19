@@ -16,7 +16,7 @@ export function BriefingForm({ action, briefing }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
 
   return (
-    <form action={formAction} className="space-y-5 rounded-medium bg-branco p-6 shadow-padrao">
+    <form action={formAction} className="space-y-5 rounded-[12px] bg-superficie p-6 border border-borda">
       <Campo label="Objetivo do projeto" htmlFor="objetivo" hint="O que o cliente quer alcançar com isso?">
         <Textarea id="objetivo" name="objetivo" defaultValue={briefing?.objetivo ?? ""} />
       </Campo>
@@ -35,18 +35,18 @@ export function BriefingForm({ action, briefing }: Props) {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <label className="flex items-start gap-3 rounded-medium border-2 border-neutro-100 p-4 text-sm has-checked:border-rosa-600 has-checked:bg-rosa-50">
+        <label className="flex items-start gap-3 rounded-[12px] border-2 border-borda p-4 text-sm has-checked:border-rosa-600 has-checked:bg-rosa-900/40">
           <input type="checkbox" name="tem_identidade_visual" defaultChecked={briefing?.tem_identidade_visual ?? false} className="mt-0.5 accent-rosa-600" />
           <span>
-            <span className="block font-medium text-neutro-800">Já tem identidade visual</span>
-            <span className="text-xs text-neutro-500">Logo, paleta, tipografia definidas</span>
+            <span className="block font-medium text-texto-suave">Já tem identidade visual</span>
+            <span className="text-xs text-texto-mudo">Logo, paleta, tipografia definidas</span>
           </span>
         </label>
-        <label className="flex items-start gap-3 rounded-medium border-2 border-neutro-100 p-4 text-sm has-checked:border-rosa-600 has-checked:bg-rosa-50">
+        <label className="flex items-start gap-3 rounded-[12px] border-2 border-borda p-4 text-sm has-checked:border-rosa-600 has-checked:bg-rosa-900/40">
           <input type="checkbox" name="conteudo_disponivel" defaultChecked={briefing?.conteudo_disponivel ?? false} className="mt-0.5 accent-rosa-600" />
           <span>
-            <span className="block font-medium text-neutro-800">Conteúdo pronto</span>
-            <span className="text-xs text-neutro-500">Textos e imagens já disponíveis</span>
+            <span className="block font-medium text-texto-suave">Conteúdo pronto</span>
+            <span className="text-xs text-texto-mudo">Textos e imagens já disponíveis</span>
           </span>
         </label>
       </div>
@@ -70,7 +70,7 @@ export function BriefingForm({ action, briefing }: Props) {
         <Botao type="submit" disabled={pending}>
           {pending ? "Salvando…" : "Salvar briefing"}
         </Botao>
-        {state.ok && <span className="text-sm text-sucesso">Briefing salvo.</span>}
+        {state.ok && <span className="text-sm text-[#5fe07a]">Briefing salvo.</span>}
       </div>
     </form>
   );

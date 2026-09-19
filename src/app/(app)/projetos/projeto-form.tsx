@@ -27,7 +27,7 @@ export function ProjetoForm({ action, clientes, tipos, projeto, clienteInicial, 
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
 
   return (
-    <form action={formAction} className="space-y-5 rounded-medium bg-branco p-6 shadow-padrao">
+    <form action={formAction} className="space-y-5 rounded-[12px] bg-superficie p-6 border border-borda">
       <div className="grid gap-5 sm:grid-cols-2">
         <Campo label="Cliente *" htmlFor="cliente_id">
           <Select id="cliente_id" name="cliente_id" required defaultValue={projeto?.cliente_id ?? clienteInicial ?? ""}>
@@ -54,9 +54,9 @@ export function ProjetoForm({ action, clientes, tipos, projeto, clienteInicial, 
               </option>
             ))}
           </Select>
-          <p className="mt-1 text-xs text-neutro-500">
+          <p className="mt-1 text-xs text-texto-mudo">
             Faltou algum?{" "}
-            <Link href="/configuracoes" className="text-rosa-700 underline">
+            <Link href="/configuracoes" className="text-rosa-300 underline">
               Gerenciar serviços
             </Link>
           </p>

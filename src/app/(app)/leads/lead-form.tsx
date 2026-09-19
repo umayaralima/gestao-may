@@ -20,7 +20,7 @@ export function LeadForm({ action, tipos, lead, cancelarHref }: Props) {
   const opcoesTipo = lead?.servico_interesse && !tipos.includes(lead.servico_interesse) ? [...tipos, lead.servico_interesse] : tipos;
 
   return (
-    <form action={formAction} className="space-y-5 rounded-medium bg-branco p-6 shadow-padrao">
+    <form action={formAction} className="space-y-5 rounded-[12px] bg-superficie p-6 border border-borda">
       <div className="grid gap-5 sm:grid-cols-2">
         <Campo label="Nome *" htmlFor="nome">
           <Input id="nome" name="nome" required defaultValue={lead?.nome} autoFocus />

@@ -1,4 +1,4 @@
-/** Cabeçalho padrão de página: título serifado + ação à direita. */
+/** Cabeçalho de página no padrão do wireframe: título + subtítulo mudo à esquerda, ações à direita. */
 export function PaginaHeader({
   titulo,
   descricao,
@@ -9,19 +9,19 @@ export function PaginaHeader({
   acao?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
       <div>
-        <h1 className="text-3xl text-neutro-900 sm:text-4xl">{titulo}</h1>
-        {descricao && <p className="mt-1 text-sm text-neutro-500">{descricao}</p>}
+        <h1 className="text-2xl text-texto sm:text-3xl">{titulo}</h1>
+        {descricao && <p className="mt-0.5 text-xs text-texto-mudo">{descricao}</p>}
       </div>
-      {acao}
+      {acao && <div className="flex flex-wrap items-center gap-2">{acao}</div>}
     </div>
   );
 }
 
 export function Vazio({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-medium border-2 border-dashed border-neutro-100 p-10 text-center text-sm text-neutro-500">
+    <div className="rounded-[12px] border border-dashed border-borda-forte/60 p-10 text-center text-sm text-texto-mudo">
       {children}
     </div>
   );
@@ -30,7 +30,7 @@ export function Vazio({ children }: { children: React.ReactNode }) {
 export function MensagemErro({ children }: { children?: React.ReactNode }) {
   if (!children) return null;
   return (
-    <p role="alert" className="rounded-smaller border border-falha/40 bg-falha/10 px-3 py-2 text-sm text-falha">
+    <p role="alert" className="rounded-[8px] border border-falha/40 bg-falha/15 px-3 py-2 text-sm text-[#ff8a8a]">
       {children}
     </p>
   );

@@ -16,9 +16,9 @@ export function PagamentoForm({ projetoId, dataInicio }: { projetoId: string; da
   }, [state]);
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-4 rounded-medium border-2 border-dashed border-neutro-100 p-4">
+    <form ref={formRef} action={formAction} className="space-y-4 rounded-[12px] border-2 border-dashed border-borda p-4">
       <input type="hidden" name="projeto_id" value={projetoId} />
-      <p className="text-sm font-medium text-neutro-700">Adicionar parcela</p>
+      <p className="text-sm font-medium text-texto-suave">Adicionar parcela</p>
       <div className="grid gap-4 sm:grid-cols-4">
         <Campo label="Tipo" htmlFor="tipo">
           <Select id="tipo" name="tipo" defaultValue="">

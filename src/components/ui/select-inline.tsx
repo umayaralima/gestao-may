@@ -20,7 +20,7 @@ export function SelectInline({ name, label, value, opcoes, action, className }: 
 
   return (
     <form ref={formRef} action={(fd) => startTransition(() => action(fd))} className="flex items-center gap-2">
-      <label htmlFor={name} className="text-xs uppercase tracking-wide text-neutro-500">
+      <label htmlFor={name} className="rotulo">
         {label}
       </label>
       <Select
@@ -28,7 +28,7 @@ export function SelectInline({ name, label, value, opcoes, action, className }: 
         name={name}
         defaultValue={value}
         disabled={pending}
-        className={cn("w-auto min-w-48 border-rosa-600 font-medium text-rosa-800", className)}
+        className={cn("w-auto min-w-48 border-rosa-600/60 font-medium text-texto", className)}
         onChange={() => formRef.current?.requestSubmit()}
       >
         {opcoes.map((o) => (

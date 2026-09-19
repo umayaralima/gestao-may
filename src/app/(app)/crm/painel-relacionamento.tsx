@@ -35,34 +35,34 @@ export function PainelRelacionamento({ followup, interacoes, acoes }: Props) {
       <Card className={cn(atrasado && "ring-2 ring-falha", ehHoje && "ring-2 ring-alerta")}>
         <div className="flex items-center justify-between">
           <CardTitulo>Próximo follow-up</CardTitulo>
-          {atrasado && <span className="rounded-smaller bg-falha px-2 py-0.5 text-xs font-semibold uppercase text-white">Atrasado</span>}
-          {ehHoje && <span className="rounded-smaller bg-alerta px-2 py-0.5 text-xs font-semibold uppercase text-white">Hoje</span>}
+          {atrasado && <span className="rounded-[8px] bg-falha px-2 py-0.5 text-xs font-semibold uppercase text-white">Atrasado</span>}
+          {ehHoje && <span className="rounded-[8px] bg-alerta px-2 py-0.5 text-xs font-semibold uppercase text-white">Hoje</span>}
         </div>
 
         {followup.data ? (
           <div className="mb-4">
-            <p className={cn("text-2xl", atrasado ? "text-falha" : "text-neutro-900")}>{formatDate(followup.data)}</p>
-            {followup.nota && <p className="mt-1 text-sm text-neutro-700">{followup.nota}</p>}
+            <p className={cn("text-2xl", atrasado ? "text-[#ff8a8a]" : "text-texto")}>{formatDate(followup.data)}</p>
+            {followup.nota && <p className="mt-1 text-sm text-texto-suave">{followup.nota}</p>}
             <div className="mt-3 flex flex-wrap gap-3 text-xs">
               <form action={acoes.concluirFollowup}>
-                <button type="submit" className="font-medium text-sucesso underline underline-offset-4">
+                <button type="submit" className="font-medium text-[#5fe07a] underline underline-offset-4">
                   Feito
                 </button>
               </form>
               <form action={() => acoes.adiarFollowup(1)}>
-                <button type="submit" className="text-neutro-500 underline underline-offset-4 hover:text-neutro-800">
+                <button type="submit" className="text-texto-mudo underline underline-offset-4 hover:text-texto-suave">
                   Adiar 1 dia
                 </button>
               </form>
               <form action={() => acoes.adiarFollowup(7)}>
-                <button type="submit" className="text-neutro-500 underline underline-offset-4 hover:text-neutro-800">
+                <button type="submit" className="text-texto-mudo underline underline-offset-4 hover:text-texto-suave">
                   Adiar 1 semana
                 </button>
               </form>
             </div>
           </div>
         ) : (
-          <p className="mb-4 text-sm text-neutro-500">Nenhum follow-up agendado.</p>
+          <p className="mb-4 text-sm text-texto-mudo">Nenhum follow-up agendado.</p>
         )}
 
         <FollowupForm action={acoes.salvarFollowup} atual={followup} />
@@ -73,24 +73,24 @@ export function PainelRelacionamento({ followup, interacoes, acoes }: Props) {
         <InteracaoForm action={acoes.registrarInteracao} />
 
         {interacoes.length === 0 ? (
-          <p className="mt-4 text-sm text-neutro-500">Nenhuma interação registrada.</p>
+          <p className="mt-4 text-sm text-texto-mudo">Nenhuma interação registrada.</p>
         ) : (
-          <ol className="mt-5 space-y-4 border-l-2 border-neutro-100 pl-4">
+          <ol className="mt-5 space-y-4 border-l-2 border-borda pl-4">
             {interacoes.map((i) => (
               <li key={i.id} className="relative">
                 <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-rosa-600" />
                 <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-xs uppercase tracking-wide text-neutro-500">
+                  <p className="rotulo">
                     {formatDate(i.data)}
                     {i.canal && <> · {CANAL_INTERACAO_LABEL[i.canal as keyof typeof CANAL_INTERACAO_LABEL] ?? i.canal}</>}
                   </p>
                   <form action={() => acoes.excluirInteracao(i.id)}>
-                    <button type="submit" className="text-[11px] text-neutro-400 underline underline-offset-4 hover:text-falha">
+                    <button type="submit" className="text-[11px] text-texto-mudo underline underline-offset-4 hover:text-[#ff8a8a]">
                       excluir
                     </button>
                   </form>
                 </div>
-                <p className="mt-0.5 text-sm whitespace-pre-wrap text-neutro-800">{i.resumo}</p>
+                <p className="mt-0.5 text-sm whitespace-pre-wrap text-texto-suave">{i.resumo}</p>
               </li>
             ))}
           </ol>
@@ -109,7 +109,7 @@ function FollowupForm({
 }) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
   return (
-    <form action={formAction} className="space-y-3 border-t border-neutro-0 pt-4">
+    <form action={formAction} className="space-y-3 border-t border-borda/60 pt-4">
       <div className="grid gap-3 sm:grid-cols-[160px_1fr]">
         <Campo label={atual.data ? "Reagendar" : "Agendar"} htmlFor="proximo_followup">
           <Input id="proximo_followup" name="proximo_followup" type="date" defaultValue={atual.data ?? ""} />

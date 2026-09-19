@@ -264,3 +264,21 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   reagendar) + timeline de interações. Ações genéricas recebem `Dono = { tipo: "lead" | "cliente", id }`.
 - Única automação: registrar interação num lead `novo` move pra `em_contato` (reversível no dropdown).
 - Dashboard: card "Follow-ups" (leads abertos + clientes com `proximo_followup <= hoje`), vermelho se > 0.
+
+## Visual (2026-09-19): tema escuro do wireframe do Figma
+
+- Referência: Figma `Starter File - Mayara`, node `4037:1230` ("Dashboard Wireframe Design"). É um template adaptado; trouxemos
+  o layout e o clima, NÃO os itens de menu de template (E-mails, Relatórios, Tarefas) nem as cores de template (índigo `#7c86ff`,
+  cinza `#6b7699`). Paleta é só a da marca (decisão da May).
+- Tokens semânticos em `globals.css`: `--fundo` (lavanda-900), `--superficie` (lavanda-700), `--superficie-2` (lavanda-600),
+  `--borda` (lavanda-400 a 55%), `--texto` (lavanda-50), `--texto-suave` (lavanda-100), `--texto-mudo`/`--texto-rotulo` (lavanda-200).
+  No Tailwind: `bg-fundo`, `bg-superficie`, `border-borda`, `text-texto`, `text-texto-mudo` etc. Classe utilitária `.rotulo`
+  (10px, caixa alta, tracking 1px) pra seções do menu, cabeçalhos de tabela e cards de métrica.
+- Cards: radius 12px, borda fina, sem sombra. Inputs/botões: radius 8px. Botão primário rosa-600 sólido (não gradiente) no escuro.
+- Estados no escuro usam tons claros pra legibilidade: sucesso `#5fe07a`, alerta `#ffc266`, falha `#ff8a8a` (texto); fundos com
+  os tokens `sucesso/alerta/falha` em alpha. Atrasado continua `bg-falha` sólido com texto branco.
+- Fontes: DM Serif Display itálico só nos títulos de página (h1); títulos de card em sans semibold; números de métrica em
+  JetBrains Mono (`font-mono`), como no wireframe.
+- Marca: `public/marca/` (logos e favicons enviados pela May, PNG transparente). `src/app/icon.png` e `apple-icon.png` são o
+  favicon gradiente recortado (o PNG original tem sombra longa). O PNG `logo-gradiente.png` já traz "Desenvolvedora Web".
+- Ícones do menu: `lucide-react`.

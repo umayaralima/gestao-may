@@ -80,7 +80,7 @@ export default async function ProjetoPage({
       />
 
       {atrasados.length > 0 && (
-        <div className="mb-6 flex items-center justify-between gap-4 rounded-medium bg-falha px-5 py-3 text-white">
+        <div className="mb-6 flex items-center justify-between gap-4 rounded-[12px] bg-falha px-5 py-3 text-white">
           <p className="text-sm font-semibold">
             {atrasados.length} pagamento(s) atrasado(s) · {formatBRL(atrasados.reduce((s, p) => s + Number(p.valor), 0))}
           </p>
@@ -91,8 +91,8 @@ export default async function ProjetoPage({
       )}
 
       {sugerirAprovado && (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-medium border border-rosa-600 bg-rosa-50 px-5 py-3">
-          <p className="text-sm text-rosa-900">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[12px] border border-rosa-600 bg-rosa-900/40 px-5 py-3">
+          <p className="text-sm text-rosa-100">
             Contrato assinado. Quer mudar o projeto pra <strong>Aprovado</strong>?
           </p>
           <form action={aprovar}>
@@ -101,7 +101,7 @@ export default async function ProjetoPage({
         </div>
       )}
 
-      <nav className="mb-6 flex gap-1 border-b border-neutro-100">
+      <nav className="mb-6 flex gap-1 border-b border-borda">
         {abas.map((a) => (
           <Link
             key={a.id}
@@ -109,13 +109,13 @@ export default async function ProjetoPage({
             className={cn(
               "-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors",
               aba === a.id
-                ? "border-rosa-600 text-rosa-800"
-                : "border-transparent text-neutro-500 hover:border-neutro-200 hover:text-neutro-800",
+                ? "border-rosa-600 text-rosa-200"
+                : "border-transparent text-texto-mudo hover:border-borda-forte hover:text-texto-suave",
             )}
           >
             {a.label}
-            {a.id === "briefing" && briefing && <span className="ml-1.5 text-sucesso">•</span>}
-            {a.id === "contrato" && temAssinado && <span className="ml-1.5 text-sucesso">•</span>}
+            {a.id === "briefing" && briefing && <span className="ml-1.5 text-[#5fe07a]">•</span>}
+            {a.id === "contrato" && temAssinado && <span className="ml-1.5 text-[#5fe07a]">•</span>}
           </Link>
         ))}
       </nav>
@@ -127,7 +127,7 @@ export default async function ProjetoPage({
               <CardTitulo>Detalhes</CardTitulo>
               <dl className="grid gap-4 text-sm sm:grid-cols-2">
                 <Item k="Cliente">
-                  <Link href={`/clientes/${projeto.cliente_id}`} className="text-rosa-700 hover:underline">
+                  <Link href={`/clientes/${projeto.cliente_id}`} className="text-rosa-300 hover:underline">
                     {projeto.clientes?.nome ?? "—"}
                   </Link>
                 </Item>
@@ -140,7 +140,7 @@ export default async function ProjetoPage({
                 <Item k="Prazo de entrega">{formatDate(projeto.prazo_entrega)}</Item>
                 <Item k="Link">
                   {projeto.link_projeto ? (
-                    <a href={projeto.link_projeto} target="_blank" rel="noreferrer" className="break-all text-rosa-700 hover:underline">
+                    <a href={projeto.link_projeto} target="_blank" rel="noreferrer" className="break-all text-rosa-300 hover:underline">
                       {projeto.link_projeto}
                     </a>
                   ) : (
@@ -154,9 +154,9 @@ export default async function ProjetoPage({
             <Card>
               <CardTitulo>Observações</CardTitulo>
               {projeto.observacoes ? (
-                <p className="text-sm whitespace-pre-wrap text-neutro-800">{projeto.observacoes}</p>
+                <p className="text-sm whitespace-pre-wrap text-texto-suave">{projeto.observacoes}</p>
               ) : (
-                <p className="text-sm text-neutro-500">Nada anotado ainda.</p>
+                <p className="text-sm text-texto-mudo">Nada anotado ainda.</p>
               )}
             </Card>
           </div>
@@ -166,14 +166,14 @@ export default async function ProjetoPage({
               <CardTitulo>Financeiro</CardTitulo>
               <dl className="space-y-3 text-sm">
                 <Item k="Recebido">
-                  <span className="text-lg font-medium text-sucesso">{formatBRL(totalPago)}</span>
+                  <span className="text-lg font-medium text-[#5fe07a]">{formatBRL(totalPago)}</span>
                 </Item>
                 <Item k="A receber">
                   <span className="text-lg font-medium">{formatBRL(totalPendente)}</span>
                 </Item>
                 {projeto.valor_total !== null && (
                   <Item k="Não parcelado">
-                    <span className={cn(Number(projeto.valor_total) - totalPago - totalPendente !== 0 && "text-alerta")}>
+                    <span className={cn(Number(projeto.valor_total) - totalPago - totalPendente !== 0 && "text-[#ffc266]")}>
                       {formatBRL(Number(projeto.valor_total) - totalPago - totalPendente)}
                     </span>
                   </Item>
@@ -189,22 +189,22 @@ export default async function ProjetoPage({
               <dl className="space-y-3 text-sm">
                 <Item k="Briefing">
                   {briefing ? (
-                    <span className="text-sucesso">Preenchido</span>
+                    <span className="text-[#5fe07a]">Preenchido</span>
                   ) : (
-                    <Link href={`/projetos/${projeto.id}?aba=briefing`} className="text-rosa-700 underline">
+                    <Link href={`/projetos/${projeto.id}?aba=briefing`} className="text-rosa-300 underline">
                       Preencher
                     </Link>
                   )}
                 </Item>
                 <Item k="Contrato">
                   {temAssinado ? (
-                    <span className="text-sucesso">Assinado</span>
+                    <span className="text-[#5fe07a]">Assinado</span>
                   ) : listaContratos.some((c) => c.status === "enviado") ? (
-                    <span className="text-alerta">Aguardando assinatura</span>
+                    <span className="text-[#ffc266]">Aguardando assinatura</span>
                   ) : listaContratos.length ? (
-                    <span className="text-neutro-600">Rascunho</span>
+                    <span className="text-texto-mudo">Rascunho</span>
                   ) : (
-                    <Link href={`/projetos/${projeto.id}?aba=contrato`} className="text-rosa-700 underline">
+                    <Link href={`/projetos/${projeto.id}?aba=contrato`} className="text-rosa-300 underline">
                       Criar
                     </Link>
                   )}
@@ -216,7 +216,7 @@ export default async function ProjetoPage({
               <Botao type="submit" variante="perigo" className="w-full">
                 Excluir projeto
               </Botao>
-              <p className="mt-2 text-xs text-neutro-500">Exclui também briefing, contratos e pagamentos vinculados.</p>
+              <p className="mt-2 text-xs text-texto-mudo">Exclui também briefing, contratos e pagamentos vinculados.</p>
             </form>
           </div>
         </div>
@@ -248,8 +248,8 @@ export default async function ProjetoPage({
 function Item({ k, children }: { k: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-neutro-500">{k}</dt>
-      <dd className="mt-0.5 text-neutro-800">{children}</dd>
+      <dt className="rotulo">{k}</dt>
+      <dd className="mt-0.5 text-texto-suave">{children}</dd>
     </div>
   );
 }

@@ -11,7 +11,7 @@ export function StatusForm({ status, action }: { status: StatusProjeto; action: 
 
   return (
     <form ref={formRef} action={(fd) => startTransition(() => action(fd))} className="flex items-center gap-2">
-      <label htmlFor="status" className="text-xs uppercase tracking-wide text-neutro-500">
+      <label htmlFor="status" className="rotulo">
         Status
       </label>
       <Select
@@ -19,7 +19,7 @@ export function StatusForm({ status, action }: { status: StatusProjeto; action: 
         name="status"
         defaultValue={status}
         disabled={pending}
-        className="w-auto min-w-48 border-rosa-600 font-medium text-rosa-800"
+        className="w-auto min-w-48 border-rosa-600/60 font-medium text-texto"
         onChange={() => formRef.current?.requestSubmit()}
       >
         {STATUS_PROJETO.map((s) => (
@@ -28,7 +28,7 @@ export function StatusForm({ status, action }: { status: StatusProjeto; action: 
           </option>
         ))}
       </Select>
-      {pending && <span className="text-xs text-neutro-500">salvando…</span>}
+      {pending && <span className="text-xs text-texto-mudo">salvando…</span>}
     </form>
   );
 }

@@ -3,17 +3,17 @@ import type { StatusProjeto } from "@/lib/constantes";
 import { STATUS_PROJETO_LABEL } from "@/lib/constantes";
 import type { StatusPagamento } from "@/lib/types";
 
-const base = "inline-flex items-center rounded-smaller px-2 py-0.5 text-xs font-medium";
+const base = "inline-flex items-center rounded-[6px] px-2 py-0.5 text-[11px] font-medium";
 
 const corProjeto: Record<StatusProjeto, string> = {
-  briefing: "bg-neutro-100 text-neutro-700",
-  orcamento_enviado: "bg-rosa-100 text-rosa-800",
-  aprovado: "bg-rosa-200 text-rosa-900",
+  briefing: "bg-lavanda-400/40 text-lavanda-50",
+  orcamento_enviado: "bg-rosa-900 text-rosa-100",
+  aprovado: "bg-rosa-800 text-rosa-50",
   em_desenvolvimento: "bg-rosa-600 text-rosa-50",
-  em_revisao: "bg-lavanda-400 text-lavanda-50",
-  entregue: "bg-lavanda-600 text-lavanda-50",
-  concluido: "bg-sucesso/15 text-sucesso",
-  cancelado: "bg-neutro-200 text-neutro-600 line-through",
+  em_revisao: "bg-rosa-400 text-lavanda-900",
+  entregue: "bg-rosa-200 text-lavanda-900",
+  concluido: "bg-sucesso/20 text-[#5fe07a]",
+  cancelado: "bg-lavanda-400/30 text-lavanda-200 line-through",
 };
 
 export function BadgeProjeto({ status }: { status: StatusProjeto }) {
@@ -25,8 +25,8 @@ export function BadgeProjeto({ status }: { status: StatusProjeto }) {
  * texto branco, não é só um tom discreto.
  */
 const corPagamento: Record<StatusPagamento, string> = {
-  pendente: "bg-alerta/15 text-[#9a5c00]",
-  pago: "bg-sucesso/15 text-sucesso",
+  pendente: "bg-alerta/20 text-[#ffc266]",
+  pago: "bg-sucesso/20 text-[#5fe07a]",
   atrasado: "bg-falha text-white font-semibold uppercase tracking-wide",
 };
 
@@ -42,7 +42,7 @@ export function BadgePagamento({ status }: { status: StatusPagamento }) {
 
 export function BadgeCliente({ status }: { status: "ativo" | "inativo" }) {
   return (
-    <span className={cn(base, status === "ativo" ? "bg-sucesso/15 text-sucesso" : "bg-neutro-100 text-neutro-600")}>
+    <span className={cn(base, status === "ativo" ? "bg-sucesso/20 text-[#5fe07a]" : "bg-lavanda-400/30 text-lavanda-200")}>
       {status === "ativo" ? "Ativo" : "Inativo"}
     </span>
   );

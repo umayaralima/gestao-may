@@ -41,10 +41,10 @@ export default async function ProjetosPage({ searchParams }: { searchParams: Pro
             key={f.valor}
             href={f.valor ? `/projetos?status=${f.valor}` : "/projetos"}
             className={cn(
-              "rounded-smaller border px-3 py-1 text-xs font-medium transition-colors",
+              "rounded-[8px] border px-3 py-1 text-xs font-medium transition-colors",
               status === f.valor
                 ? "border-rosa-600 bg-rosa-600 text-rosa-50"
-                : "border-neutro-100 bg-branco text-neutro-700 hover:border-rosa-600 hover:text-rosa-800",
+                : "border-borda bg-superficie text-texto-suave hover:border-rosa-600 hover:text-rosa-200",
             )}
           >
             {f.label}
@@ -70,7 +70,7 @@ export default async function ProjetosPage({ searchParams }: { searchParams: Pro
             {projetos.map((p) => (
               <Tr key={p.id}>
                 <Td>
-                  <Link href={`/projetos/${p.id}`} className="font-medium text-rosa-700 hover:underline">
+                  <Link href={`/projetos/${p.id}`} className="font-medium text-rosa-300 hover:underline">
                     {p.nome}
                   </Link>
                 </Td>

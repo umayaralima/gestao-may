@@ -62,29 +62,29 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                 const coluna = abertos.filter((l) => l.etapa === etapa);
                 const total = coluna.reduce((s, l) => s + Number(l.valor_estimado ?? 0), 0);
                 return (
-                  <section key={etapa} className="rounded-medium bg-lavanda-50/60 p-3">
+                  <section key={etapa} className="rounded-[12px] bg-superficie/60 p-3">
                     <header className="mb-3 flex items-baseline justify-between px-1">
-                      <h2 className="font-sans text-sm font-semibold not-italic text-neutro-800">
-                        {ETAPA_LEAD_LABEL[etapa]} <span className="font-normal text-neutro-500">({coluna.length})</span>
+                      <h2 className="font-sans text-sm font-semibold not-italic text-texto-suave">
+                        {ETAPA_LEAD_LABEL[etapa]} <span className="font-normal text-texto-mudo">({coluna.length})</span>
                       </h2>
-                      {total > 0 && <span className="text-xs text-neutro-500">{formatBRL(total)}</span>}
+                      {total > 0 && <span className="text-xs text-texto-mudo">{formatBRL(total)}</span>}
                     </header>
                     <div className="space-y-2">
-                      {coluna.length === 0 && <p className="px-1 py-4 text-center text-xs text-neutro-400">vazio</p>}
+                      {coluna.length === 0 && <p className="px-1 py-4 text-center text-xs text-texto-mudo">vazio</p>}
                       {coluna.map((l) => (
                         <Link
                           key={l.id}
                           href={`/leads/${l.id}`}
                           className={cn(
-                            "block rounded-medium bg-branco p-3 shadow-padrao transition-transform hover:-translate-y-0.5",
+                            "block rounded-[12px] bg-superficie p-3 border border-borda transition-transform hover:-translate-y-0.5",
                             l.proximo_followup && l.proximo_followup < hoje && "ring-2 ring-falha",
                           )}
                         >
-                          <p className="font-medium text-neutro-900">{l.nome}</p>
-                          {l.empresa && <p className="text-xs text-neutro-500">{l.empresa}</p>}
+                          <p className="font-medium text-texto">{l.nome}</p>
+                          {l.empresa && <p className="text-xs text-texto-mudo">{l.empresa}</p>}
                           <div className="mt-2 flex flex-wrap items-center justify-between gap-1 text-xs">
-                            <span className="text-neutro-600">{l.servico_interesse ?? "—"}</span>
-                            {l.valor_estimado !== null && <span className="font-medium text-neutro-800">{formatBRL(l.valor_estimado)}</span>}
+                            <span className="text-texto-mudo">{l.servico_interesse ?? "—"}</span>
+                            {l.valor_estimado !== null && <span className="font-medium text-texto-suave">{formatBRL(l.valor_estimado)}</span>}
                           </div>
                           <div className="mt-2">
                             <FollowupTag data={l.proximo_followup} />
@@ -100,7 +100,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
           {fechados.length > 0 && (
             <details className="mt-4">
-              <summary className="cursor-pointer text-sm text-neutro-500 hover:text-neutro-800">
+              <summary className="cursor-pointer text-sm text-texto-mudo hover:text-texto-suave">
                 Fechados ({fechados.length}): ganhos e perdidos
               </summary>
               <div className="mt-3">
@@ -114,9 +114,9 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   );
 }
 
-const chip = "rounded-smaller border px-3 py-1 text-xs font-medium transition-colors";
+const chip = "rounded-[8px] border px-3 py-1 text-xs font-medium transition-colors";
 const chipAtivo = "border-rosa-600 bg-rosa-600 text-rosa-50";
-const chipInativo = "border-neutro-100 bg-branco text-neutro-700 hover:border-rosa-600 hover:text-rosa-800";
+const chipInativo = "border-borda bg-superficie text-texto-suave hover:border-rosa-600 hover:text-rosa-200";
 
 function ListaLeads({ leads }: { leads: Lead[] }) {
   if (!leads.length) return <Vazio>Nada por aqui.</Vazio>;
@@ -137,10 +137,10 @@ function ListaLeads({ leads }: { leads: Lead[] }) {
         {leads.map((l) => (
           <Tr key={l.id} destaque={!!l.proximo_followup && l.proximo_followup < hoje && (ETAPAS_LEAD_ABERTAS as string[]).includes(l.etapa)}>
             <Td>
-              <Link href={`/leads/${l.id}`} className="font-medium text-rosa-700 hover:underline">
+              <Link href={`/leads/${l.id}`} className="font-medium text-rosa-300 hover:underline">
                 {l.nome}
               </Link>
-              {l.empresa && <span className="block text-xs text-neutro-500">{l.empresa}</span>}
+              {l.empresa && <span className="block text-xs text-texto-mudo">{l.empresa}</span>}
             </Td>
             <Td>
               <BadgeEtapa etapa={l.etapa} />

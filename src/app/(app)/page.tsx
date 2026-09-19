@@ -38,17 +38,15 @@ export default async function DashboardPage() {
   const soma = (rows: Array<{ valor: number }> | null) => (rows ?? []).reduce((s, r) => s + Number(r.valor), 0);
   const qtdAtrasados = atrasados.data?.length ?? 0;
 
-  const saudacao = (() => {
-    const h = new Date().getHours();
-    return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
-  })();
+  const mesAno = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date());
+  const subtitulo = `${mesAno.charAt(0).toUpperCase()}${mesAno.slice(1)} · Atualizado agora`;
 
   return (
     <>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm text-neutro-500">{saudacao}, May.</p>
-          <h1 className="text-3xl text-neutro-900 sm:text-4xl">Como estão as coisas</h1>
+          <h1 className="text-2xl text-texto sm:text-3xl">Dashboard</h1>
+          <p className="mt-0.5 text-xs text-texto-mudo">{subtitulo}</p>
         </div>
         <div className="flex gap-2">
           <Botao href="/leads/novo" variante="secundario">
@@ -81,14 +79,14 @@ export default async function DashboardPage() {
       <Card>
         <div className="flex items-center justify-between">
           <CardTitulo>Próximos vencimentos</CardTitulo>
-          <Link href="/pagamentos" className="text-sm text-rosa-700 underline underline-offset-4">
+          <Link href="/pagamentos" className="text-sm text-rosa-300 underline underline-offset-4">
             Ver todos
           </Link>
         </div>
         {!proximos.data?.length ? (
           <Vazio>Nenhum vencimento futuro em aberto.</Vazio>
         ) : (
-          <Tabela className="shadow-none">
+          <Tabela className="border-0 bg-transparent">
             <Thead>
               <tr>
                 <Th>Projeto</Th>
@@ -102,7 +100,7 @@ export default async function DashboardPage() {
               {proximos.data.map((p) => (
                 <Tr key={p.id}>
                   <Td>
-                    <Link href={`/projetos/${p.projeto_id}?aba=pagamentos`} className="font-medium text-rosa-700 hover:underline">
+                    <Link href={`/projetos/${p.projeto_id}?aba=pagamentos`} className="font-medium text-rosa-300 hover:underline">
                       {p.projetos?.nome ?? "—"}
                     </Link>
                   </Td>
@@ -138,14 +136,14 @@ function Resumo({
   const conteudo = (
     <div
       className={cn(
-        "flex h-full flex-col rounded-medium p-5 shadow-padrao transition-transform",
-        alerta ? "bg-falha text-white" : "bg-branco text-neutro-900",
-        href && "hover:-translate-y-0.5",
+        "flex h-full flex-col rounded-[12px] border p-5 transition-colors",
+        alerta ? "border-falha/60 bg-falha/15" : "border-borda bg-superficie",
+        href && (alerta ? "hover:bg-falha/25" : "hover:border-borda-forte"),
       )}
     >
-      <p className={cn("text-xs uppercase tracking-wide", alerta ? "text-white/80" : "text-neutro-500")}>{titulo}</p>
-      <p className="titulo mt-2 text-3xl">{valor}</p>
-      {rodape && <p className={cn("mt-auto pt-3 text-xs", alerta ? "text-white/80" : "text-neutro-500")}>{rodape}</p>}
+      <p className={cn("rotulo", alerta && "text-[#ff8a8a]")}>{titulo}</p>
+      <p className={cn("mt-3 font-mono text-2xl font-semibold tracking-tight", alerta ? "text-[#ff8a8a]" : "text-texto")}>{valor}</p>
+      {rodape && <p className={cn("mt-auto pt-2 text-xs", alerta ? "text-[#ff8a8a]/80" : "text-texto-mudo")}>{rodape}</p>}
     </div>
   );
   return href ? <Link href={href}>{conteudo}</Link> : conteudo;

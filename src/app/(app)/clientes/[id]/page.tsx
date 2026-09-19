@@ -49,7 +49,7 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
     ["WhatsApp", cliente.whatsapp],
     ["Origem", cliente.origem ? ORIGEM_CLIENTE_LABEL[cliente.origem as keyof typeof ORIGEM_CLIENTE_LABEL] ?? cliente.origem : null],
     ["Cliente desde", formatDate(cliente.criado_em)],
-    ["Veio de", cliente.lead_id ? <Link href={`/leads/${cliente.lead_id}`} className="text-rosa-700 hover:underline">lead convertido</Link> : "cadastro direto"],
+    ["Veio de", cliente.lead_id ? <Link href={`/leads/${cliente.lead_id}`} className="text-rosa-300 hover:underline">lead convertido</Link> : "cadastro direto"],
   ];
 
   return (
@@ -75,15 +75,15 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
             <dl className="space-y-3 text-sm">
               {info.map(([k, v]) => (
                 <div key={k}>
-                  <dt className="text-xs uppercase tracking-wide text-neutro-500">{k}</dt>
-                  <dd className="text-neutro-800">{v || "—"}</dd>
+                  <dt className="rotulo">{k}</dt>
+                  <dd className="text-texto-suave">{v || "—"}</dd>
                 </div>
               ))}
             </dl>
             {cliente.observacoes && (
               <>
-                <dt className="mt-4 text-xs uppercase tracking-wide text-neutro-500">Observações</dt>
-                <dd className="mt-1 text-sm whitespace-pre-wrap text-neutro-800">{cliente.observacoes}</dd>
+                <dt className="mt-4 rotulo">Observações</dt>
+                <dd className="mt-1 text-sm whitespace-pre-wrap text-texto-suave">{cliente.observacoes}</dd>
               </>
             )}
           </Card>
@@ -92,7 +92,7 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
             <Botao type="submit" variante="perigo" className="w-full">
               Excluir cliente
             </Botao>
-            <p className="mt-2 text-xs text-neutro-500">Exclui também todos os projetos e pagamentos dele.</p>
+            <p className="mt-2 text-xs text-texto-mudo">Exclui também todos os projetos e pagamentos dele.</p>
           </form>
         </div>
 
@@ -101,7 +101,7 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
           {!projetos?.length ? (
             <Vazio>
               Nenhum projeto ainda.{" "}
-              <Link href={`/projetos/novo?cliente=${cliente.id}`} className="text-rosa-700 underline">
+              <Link href={`/projetos/novo?cliente=${cliente.id}`} className="text-rosa-300 underline">
                 Criar o primeiro
               </Link>
             </Vazio>
@@ -120,7 +120,7 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
                 {projetos.map((p) => (
                   <Tr key={p.id}>
                     <Td>
-                      <Link href={`/projetos/${p.id}`} className="font-medium text-rosa-700 hover:underline">
+                      <Link href={`/projetos/${p.id}`} className="font-medium text-rosa-300 hover:underline">
                         {p.nome}
                       </Link>
                     </Td>

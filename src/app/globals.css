@@ -48,6 +48,18 @@
   --sombra-padrao: 0px 17px 36px 0px #0a27290a, 0px 66px 66px 0px #0a272908,
     0px 149px 89px 0px #0a272905, 0px 264px 106px 0px #0a272903;
   --gradiente-botao-primario: linear-gradient(to right, var(--rosa-600), var(--rosa-400));
+
+  /* Semânticos do tema escuro (wireframe do Figma): fundo lavanda-900, cards lavanda-700 com borda lavanda-400 fina */
+  --fundo: var(--lavanda-900);
+  --superficie: var(--lavanda-700);
+  --superficie-2: var(--lavanda-600);
+  --superficie-hover: var(--lavanda-500);
+  --borda: color-mix(in srgb, var(--lavanda-400) 55%, transparent);
+  --borda-forte: var(--lavanda-400);
+  --texto: var(--lavanda-50);
+  --texto-suave: var(--lavanda-100);
+  --texto-mudo: var(--lavanda-200);
+  --texto-rotulo: var(--lavanda-200);
 }
 
 @theme inline {
@@ -96,8 +108,20 @@
 
   --shadow-padrao: var(--sombra-padrao);
 
+  --color-fundo: var(--fundo);
+  --color-superficie: var(--superficie);
+  --color-superficie-2: var(--superficie-2);
+  --color-superficie-hover: var(--superficie-hover);
+  --color-borda: var(--borda);
+  --color-borda-forte: var(--borda-forte);
+  --color-texto: var(--texto);
+  --color-texto-suave: var(--texto-suave);
+  --color-texto-mudo: var(--texto-mudo);
+  --color-texto-rotulo: var(--texto-rotulo);
+
   --font-sans: var(--font-jakarta), system-ui, sans-serif;
   --font-serif: var(--font-dm-serif), Georgia, serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 }
 
 html {
@@ -106,8 +130,9 @@ html {
 
 body {
   min-height: 100%;
-  background: var(--neutro-0);
-  color: var(--neutro-900);
+  background: var(--fundo);
+  color: var(--texto);
+  color-scheme: dark;
   font-family: var(--font-sans);
   font-weight: 400;
   line-height: 1.5;
@@ -121,3 +146,15 @@ h1, h2, h3, .titulo {
   font-weight: 400;
   line-height: 1.2;
 }
+
+/* Rótulo em caixa alta pequeno do wireframe (seções do menu, cabeçalho de card de métrica) */
+.rotulo {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--texto-rotulo);
+}
+
+/* Inputs de data/select no tema escuro */
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }

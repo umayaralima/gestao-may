@@ -47,9 +47,9 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
   };
 
   const contatos: Array<[string, React.ReactNode]> = [
-    ["WhatsApp", lead.whatsapp ? <a href={`https://wa.me/55${lead.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="text-rosa-700 hover:underline">{lead.whatsapp}</a> : null],
-    ["Instagram", lead.instagram ? <a href={`https://instagram.com/${lead.instagram}`} target="_blank" rel="noreferrer" className="text-rosa-700 hover:underline">@{lead.instagram}</a> : null],
-    ["E-mail", lead.email ? <a href={`mailto:${lead.email}`} className="text-rosa-700 hover:underline">{lead.email}</a> : null],
+    ["WhatsApp", lead.whatsapp ? <a href={`https://wa.me/55${lead.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="text-rosa-300 hover:underline">{lead.whatsapp}</a> : null],
+    ["Instagram", lead.instagram ? <a href={`https://instagram.com/${lead.instagram}`} target="_blank" rel="noreferrer" className="text-rosa-300 hover:underline">@{lead.instagram}</a> : null],
+    ["E-mail", lead.email ? <a href={`mailto:${lead.email}`} className="text-rosa-300 hover:underline">{lead.email}</a> : null],
     ["Origem", lead.origem ? ORIGEM_CLIENTE_LABEL[lead.origem as keyof typeof ORIGEM_CLIENTE_LABEL] ?? lead.origem : null],
     ["Serviço de interesse", lead.servico_interesse],
     ["Valor estimado", lead.valor_estimado !== null ? formatBRL(lead.valor_estimado) : null],
@@ -78,10 +78,10 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
       />
 
       {clienteConvertido ? (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-medium bg-sucesso/10 px-5 py-3">
-          <p className="text-sm text-neutro-800">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[12px] bg-sucesso/10 px-5 py-3">
+          <p className="text-sm text-texto-suave">
             Lead convertido. Cliente:{" "}
-            <Link href={`/clientes/${clienteConvertido.id}`} className="font-medium text-rosa-700 underline">
+            <Link href={`/clientes/${clienteConvertido.id}`} className="font-medium text-rosa-300 underline">
               {clienteConvertido.nome}
             </Link>
           </p>
@@ -91,8 +91,8 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         </div>
       ) : (
         lead.etapa !== "perdido" && (
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-medium border border-rosa-600 bg-rosa-50 px-5 py-3">
-            <p className="text-sm text-rosa-900">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[12px] border border-rosa-600 bg-rosa-900/40 px-5 py-3">
+            <p className="text-sm text-rosa-100">
               {lead.etapa === "ganho" ? "Lead ganho! Falta criar o cadastro de cliente." : "Fechou? Converta em cliente e já abra o projeto."}
             </p>
             <form action={converter}>
@@ -103,9 +103,9 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
       )}
 
       {lead.etapa === "perdido" && (
-        <form action={motivoPerda} className="mb-6 flex flex-wrap items-end gap-2 rounded-medium bg-neutro-100/60 px-5 py-3">
+        <form action={motivoPerda} className="mb-6 flex flex-wrap items-end gap-2 rounded-[12px] bg-superficie-2 px-5 py-3">
           <div className="min-w-64 flex-1">
-            <label htmlFor="motivo_perda" className="mb-1.5 block text-xs uppercase tracking-wide text-neutro-500">
+            <label htmlFor="motivo_perda" className="mb-1.5 block rotulo">
               Motivo da perda
             </label>
             <Input id="motivo_perda" name="motivo_perda" placeholder="Preço, prazo, fechou com outro, sumiu…" defaultValue={lead.motivo_perda ?? ""} />
@@ -126,15 +126,15 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
             <dl className="space-y-3 text-sm">
               {contatos.map(([k, v]) => (
                 <div key={k}>
-                  <dt className="text-xs uppercase tracking-wide text-neutro-500">{k}</dt>
-                  <dd className="text-neutro-800">{v || "—"}</dd>
+                  <dt className="rotulo">{k}</dt>
+                  <dd className="text-texto-suave">{v || "—"}</dd>
                 </div>
               ))}
             </dl>
             {lead.observacoes && (
-              <div className="mt-4 border-t border-neutro-0 pt-3">
-                <p className="text-xs uppercase tracking-wide text-neutro-500">Observações</p>
-                <p className="mt-1 text-sm whitespace-pre-wrap text-neutro-800">{lead.observacoes}</p>
+              <div className="mt-4 border-t border-borda/60 pt-3">
+                <p className="rotulo">Observações</p>
+                <p className="mt-1 text-sm whitespace-pre-wrap text-texto-suave">{lead.observacoes}</p>
               </div>
             )}
           </Card>
@@ -143,7 +143,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
             <Botao type="submit" variante="perigo" className="w-full">
               Excluir lead
             </Botao>
-            <p className="mt-2 text-xs text-neutro-500">Apaga o histórico de interações. O cliente convertido, se houver, fica.</p>
+            <p className="mt-2 text-xs text-texto-mudo">Apaga o histórico de interações. O cliente convertido, se houver, fica.</p>
           </form>
         </div>
 

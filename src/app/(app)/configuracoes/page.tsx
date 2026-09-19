@@ -21,7 +21,7 @@ export default async function ConfiguracoesPage() {
 
       <Card>
         <CardTitulo>Tipos de serviço</CardTitulo>
-        <p className="mb-4 text-sm text-neutro-500">
+        <p className="mb-4 text-sm text-texto-mudo">
           Aparecem no campo &ldquo;Tipo de serviço&rdquo; do projeto. Renomear atualiza os projetos que já usam o nome;
           excluir não apaga projeto nenhum, eles só mantêm o texto antigo.
         </p>
@@ -29,7 +29,7 @@ export default async function ConfiguracoesPage() {
         {!tipos?.length ? (
           <Vazio>Nenhum serviço cadastrado.</Vazio>
         ) : (
-          <ul className="divide-y divide-neutro-0 rounded-medium border border-neutro-100">
+          <ul className="divide-y divide-borda/60 rounded-[12px] border border-borda">
             {tipos.map((t) => {
               const renomear = renomearTipoProjeto.bind(null, t.id);
               const excluir = excluirTipoProjeto.bind(null, t.id);
@@ -41,17 +41,17 @@ export default async function ConfiguracoesPage() {
                       name="nome"
                       defaultValue={t.nome}
                       maxLength={80}
-                      className="w-full rounded-smaller border-2 border-transparent bg-transparent px-2 py-1 text-sm text-neutro-800 hover:border-neutro-100 focus:border-neutro-800 focus:outline-none"
+                      className="w-full rounded-[8px] border-2 border-transparent bg-transparent px-2 py-1 text-sm text-texto-suave hover:border-borda focus:border-rosa-600 focus:outline-none"
                     />
-                    <button type="submit" className="text-xs text-neutro-500 underline underline-offset-4 hover:text-neutro-800">
+                    <button type="submit" className="text-xs text-texto-mudo underline underline-offset-4 hover:text-texto-suave">
                       Salvar
                     </button>
                   </form>
-                  <span className="w-20 text-right text-xs text-neutro-400">
+                  <span className="w-20 text-right text-xs text-texto-mudo">
                     {usos ? `${usos} projeto(s)` : ""}
                   </span>
                   <form action={excluir}>
-                    <button type="submit" className="text-xs text-falha underline underline-offset-4 hover:opacity-80">
+                    <button type="submit" className="text-xs text-[#ff8a8a] underline underline-offset-4 hover:opacity-80">
                       Excluir
                     </button>
                   </form>

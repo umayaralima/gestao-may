@@ -42,12 +42,12 @@ export default async function PagamentosPage({ searchParams }: { searchParams: P
             key={f.valor}
             href={f.valor ? `/pagamentos?status=${f.valor}` : "/pagamentos"}
             className={cn(
-              "rounded-smaller border px-3 py-1 text-xs font-medium transition-colors",
+              "rounded-[8px] border px-3 py-1 text-xs font-medium transition-colors",
               status === f.valor
                 ? f.valor === "atrasado"
                   ? "border-falha bg-falha text-white"
                   : "border-rosa-600 bg-rosa-600 text-rosa-50"
-                : "border-neutro-100 bg-branco text-neutro-700 hover:border-rosa-600 hover:text-rosa-800",
+                : "border-borda bg-superficie text-texto-suave hover:border-rosa-600 hover:text-rosa-200",
             )}
           >
             {f.label}
@@ -77,27 +77,27 @@ export default async function PagamentosPage({ searchParams }: { searchParams: P
               return (
                 <Tr key={p.id} destaque={p.status === "atrasado"}>
                   <Td>
-                    <Link href={`/projetos/${p.projeto_id}?aba=pagamentos`} className="font-medium text-rosa-700 hover:underline">
+                    <Link href={`/projetos/${p.projeto_id}?aba=pagamentos`} className="font-medium text-rosa-300 hover:underline">
                       {p.projetos?.nome ?? "—"}
                     </Link>
                   </Td>
                   <Td>{p.projetos?.clientes?.nome ?? "—"}</Td>
                   <Td>{p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "—"}</Td>
                   <Td className="text-right font-medium">{formatBRL(p.valor)}</Td>
-                  <Td className={p.status === "atrasado" ? "font-semibold text-falha" : ""}>{formatDate(p.vencimento)}</Td>
+                  <Td className={p.status === "atrasado" ? "font-semibold text-[#ff8a8a]" : ""}>{formatDate(p.vencimento)}</Td>
                   <Td>
                     <BadgePagamento status={p.status} />
                   </Td>
                   <Td className="text-right text-xs">
                     {p.status === "pago" ? (
                       <form action={desfazer}>
-                        <button type="submit" className="text-neutro-500 underline underline-offset-4 hover:text-neutro-800">
+                        <button type="submit" className="text-texto-mudo underline underline-offset-4 hover:text-texto-suave">
                           Desfazer
                         </button>
                       </form>
                     ) : (
                       <form action={pagar}>
-                        <button type="submit" className="font-medium text-sucesso underline underline-offset-4 hover:opacity-80">
+                        <button type="submit" className="font-medium text-[#5fe07a] underline underline-offset-4 hover:opacity-80">
                           Marcar pago
                         </button>
                       </form>

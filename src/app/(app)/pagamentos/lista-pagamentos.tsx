@@ -32,7 +32,7 @@ export function ListaPagamentos({ pagamentos }: { pagamentos: Pagamento[] }) {
             <Tr key={p.id} destaque={p.status === "atrasado"}>
               <Td>{p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "—"}</Td>
               <Td className="text-right font-medium">{formatBRL(p.valor)}</Td>
-              <Td className={p.status === "atrasado" ? "font-semibold text-falha" : ""}>{formatDate(p.vencimento)}</Td>
+              <Td className={p.status === "atrasado" ? "font-semibold text-[#ff8a8a]" : ""}>{formatDate(p.vencimento)}</Td>
               <Td>{p.forma_pagamento ? FORMA_PAGAMENTO_LABEL[p.forma_pagamento as keyof typeof FORMA_PAGAMENTO_LABEL] ?? p.forma_pagamento : "—"}</Td>
               <Td>
                 <BadgePagamento status={p.status} />
@@ -42,19 +42,19 @@ export function ListaPagamentos({ pagamentos }: { pagamentos: Pagamento[] }) {
                 <div className="flex justify-end gap-3 text-xs">
                   {p.status === "pago" ? (
                     <form action={desfazer}>
-                      <button type="submit" className="text-neutro-500 underline underline-offset-4 hover:text-neutro-800">
+                      <button type="submit" className="text-texto-mudo underline underline-offset-4 hover:text-texto-suave">
                         Desfazer
                       </button>
                     </form>
                   ) : (
                     <form action={pagar}>
-                      <button type="submit" className="font-medium text-sucesso underline underline-offset-4 hover:opacity-80">
+                      <button type="submit" className="font-medium text-[#5fe07a] underline underline-offset-4 hover:opacity-80">
                         Marcar pago
                       </button>
                     </form>
                   )}
                   <form action={excluir}>
-                    <button type="submit" className="text-falha underline underline-offset-4 hover:opacity-80">
+                    <button type="submit" className="text-[#ff8a8a] underline underline-offset-4 hover:opacity-80">
                       Excluir
                     </button>
                   </form>

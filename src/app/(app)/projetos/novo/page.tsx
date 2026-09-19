@@ -7,7 +7,10 @@ import { ProjetoForm } from "../projeto-form";
 export default async function NovoProjetoPage({ searchParams }: { searchParams: Promise<{ cliente?: string }> }) {
   const { cliente } = await searchParams;
   const supabase = await createClient();
-  const { data: clientes } = await supabase.from("clientes").select("id, nome, empresa").eq("status", "ativo").order("nome");
+  const [{ data: clientes }, { data: tipos }] = await Promise.all([
+    supabase.from("clientes").select("id, nome, empresa").eq("status", "ativo").order("nome"),
+    supabase.from("tipos_projeto").select("nome").order("ordem").order("nome"),
+  ]);
 
   return (
     <div className="max-w-3xl">
@@ -24,6 +27,7 @@ export default async function NovoProjetoPage({ searchParams }: { searchParams: 
         <ProjetoForm
           action={criarProjeto}
           clientes={clientes}
+          tipos={(tipos ?? []).map((t) => t.nome)}
           clienteInicial={cliente}
           cancelarHref={cliente ? `/clientes/${cliente}` : "/projetos"}
         />

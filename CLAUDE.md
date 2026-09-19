@@ -216,3 +216,13 @@ siga o mesmo estilo.
   secundário borda rosa-600; terciário link sublinhado) e o Input (borda 2px neutro-100, foco neutro-800).
 - Mutations via Server Actions em `src/app/(app)/<modulo>/actions.ts`, validação com zod, `revalidatePath` depois.
 - Datas: sempre `date` (string `YYYY-MM-DD`) no banco; formatação pt-BR no `src/lib/format.ts`. Moeda BRL.
+
+## Fase 2 + ajustes (2026-09-19)
+
+- Tipos de projeto NÃO são lista fixa: tabela  (nome único, ordem), editável em .
+   guarda o nome em texto; renomear um tipo propaga pros projetos. Seeds: Landing Page, Página de Vendas,
+  E-commerce, Institucional, Página de Links, Blog. Migração pra bancos já criados: .
+- Briefing: aba no projeto, upsert em  (unique projeto_id).  (jsonb) sem UI por enquanto.
+- Contratos: aba no projeto, vários por projeto, linha do tempo rascunho → enviado → assinado; marcar registra a data do dia.
+  Contrato assinado + projeto em briefing/orcamento_enviado mostra banner sugerindo "Aprovado" (não força).
+- Server actions específicas de aba ficam em .

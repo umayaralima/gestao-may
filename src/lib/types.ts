@@ -1,4 +1,4 @@
-import type { StatusProjeto, TipoPagamento, TipoProjeto } from "./constantes";
+import type { StatusProjeto, TipoPagamento } from "./constantes";
 
 export type Cliente = {
   id: string;
@@ -17,7 +17,8 @@ export type Projeto = {
   id: string;
   cliente_id: string;
   nome: string;
-  tipo: TipoProjeto | null;
+  /** Nome de um serviço em tipos_projeto (texto livre). */
+  tipo: string | null;
   status: StatusProjeto;
   valor_total: number | null;
   data_inicio: string | null;
@@ -40,4 +41,37 @@ export type Pagamento = {
   criado_em: string;
   /** Vem da view `pagamentos_view`. */
   status: StatusPagamento;
+};
+
+export type TipoProjeto = {
+  id: string;
+  nome: string;
+  ordem: number;
+  criado_em: string;
+};
+
+export type Briefing = {
+  id: string;
+  projeto_id: string;
+  objetivo: string | null;
+  publico_alvo: string | null;
+  referencias: string | null;
+  tem_identidade_visual: boolean;
+  cores_preferidas: string | null;
+  conteudo_disponivel: boolean;
+  funcionalidades: string | null;
+  concorrentes: string | null;
+  orcamento_aproximado: number | null;
+  respostas_extra: Record<string, unknown> | null;
+  criado_em: string;
+};
+
+export type Contrato = {
+  id: string;
+  projeto_id: string;
+  status: "rascunho" | "enviado" | "assinado";
+  link_documento: string | null;
+  data_envio: string | null;
+  data_assinatura: string | null;
+  criado_em: string;
 };

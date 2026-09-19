@@ -29,23 +29,6 @@ export const STATUS_PROJETO_ATIVO: StatusProjeto[] = [
   "em_revisao",
 ];
 
-export const TIPO_PROJETO = [
-  "site_institucional",
-  "landing_page",
-  "ecommerce",
-  "sistema",
-  "outro",
-] as const;
-export type TipoProjeto = (typeof TIPO_PROJETO)[number];
-
-export const TIPO_PROJETO_LABEL: Record<TipoProjeto, string> = {
-  site_institucional: "Site institucional",
-  landing_page: "Landing page",
-  ecommerce: "E-commerce",
-  sistema: "Sistema",
-  outro: "Outro",
-};
-
 export const TIPO_PAGAMENTO = ["entrada", "parcela", "pagamento_unico", "final"] as const;
 export type TipoPagamento = (typeof TIPO_PAGAMENTO)[number];
 

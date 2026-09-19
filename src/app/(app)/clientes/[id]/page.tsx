@@ -5,7 +5,7 @@ import { Botao } from "@/components/ui/botao";
 import { Card, CardTitulo } from "@/components/ui/card";
 import { PaginaHeader, Vazio } from "@/components/ui/pagina";
 import { Tabela, Td, Th, Thead, Tr } from "@/components/ui/tabela";
-import { ORIGEM_CLIENTE_LABEL, TIPO_PROJETO_LABEL } from "@/lib/constantes";
+import { ORIGEM_CLIENTE_LABEL } from "@/lib/constantes";
 import { formatBRL, formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { Cliente, Projeto } from "@/lib/types";
@@ -105,7 +105,7 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
                         {p.nome}
                       </Link>
                     </Td>
-                    <Td>{p.tipo ? TIPO_PROJETO_LABEL[p.tipo] : "—"}</Td>
+                    <Td>{p.tipo ?? "—"}</Td>
                     <Td>
                       <BadgeProjeto status={p.status} />
                     </Td>

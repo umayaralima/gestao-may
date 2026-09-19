@@ -4,7 +4,7 @@ import { Botao } from "@/components/ui/botao";
 import { PaginaHeader, Vazio } from "@/components/ui/pagina";
 import { Tabela, Td, Th, Thead, Tr } from "@/components/ui/tabela";
 import { cn } from "@/lib/cn";
-import { STATUS_PROJETO, STATUS_PROJETO_ATIVO, STATUS_PROJETO_LABEL, TIPO_PROJETO_LABEL, type StatusProjeto } from "@/lib/constantes";
+import { STATUS_PROJETO, STATUS_PROJETO_ATIVO, STATUS_PROJETO_LABEL, type StatusProjeto } from "@/lib/constantes";
 import { formatBRL, formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { Projeto } from "@/lib/types";
@@ -79,7 +79,7 @@ export default async function ProjetosPage({ searchParams }: { searchParams: Pro
                     {p.clientes?.nome ?? "—"}
                   </Link>
                 </Td>
-                <Td>{p.tipo ? TIPO_PROJETO_LABEL[p.tipo] : "—"}</Td>
+                <Td>{p.tipo ?? "—"}</Td>
                 <Td>
                   <BadgeProjeto status={p.status} />
                 </Td>

@@ -5,22 +5,26 @@ import { Botao } from "@/components/ui/botao";
 import { Card, CardTitulo } from "@/components/ui/card";
 import { PaginaHeader } from "@/components/ui/pagina";
 import { cn } from "@/lib/cn";
-import { TIPO_PROJETO_LABEL } from "@/lib/constantes";
 import { formatBRL, formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
-import type { Pagamento, Projeto } from "@/lib/types";
+import type { Briefing, Contrato, Pagamento, Projeto } from "@/lib/types";
 import { ListaPagamentos } from "../../pagamentos/lista-pagamentos";
 import { PagamentoForm } from "../../pagamentos/pagamento-form";
 import { excluirProjeto, mudarStatusProjeto } from "../actions";
 import { StatusForm } from "./status-form";
+import { salvarBriefing } from "./briefing/actions";
+import { BriefingForm } from "./briefing/briefing-form";
+import { aprovarProjeto, criarContrato } from "./contrato/actions";
+import { ListaContratos } from "./contrato/lista-contratos";
+import { NovoContratoForm } from "./contrato/novo-contrato-form";
 
 type ProjetoComCliente = Projeto & { clientes: { id: string; nome: string; empresa: string | null } | null };
 
 const abas = [
   { id: "geral", label: "Visão geral" },
+  { id: "briefing", label: "Briefing" },
+  { id: "contrato", label: "Contrato" },
   { id: "pagamentos", label: "Pagamentos" },
-  { id: "briefing", label: "Briefing", fase2: true },
-  { id: "contrato", label: "Contrato", fase2: true },
 ] as const;
 type Aba = (typeof abas)[number]["id"];
 
@@ -36,9 +40,11 @@ export default async function ProjetoPage({
   const aba: Aba = abas.some((a) => a.id === abaParam) ? (abaParam as Aba) : "geral";
 
   const supabase = await createClient();
-  const [{ data: projeto }, { data: pagamentos }] = await Promise.all([
+  const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }] = await Promise.all([
     supabase.from("projetos").select("*, clientes(id, nome, empresa)").eq("id", id).single<ProjetoComCliente>(),
     supabase.from("pagamentos_view").select("*").eq("projeto_id", id).order("vencimento").returns<Pagamento[]>(),
+    supabase.from("briefings").select("*").eq("projeto_id", id).maybeSingle<Briefing>(),
+    supabase.from("contratos").select("*").eq("projeto_id", id).order("criado_em", { ascending: false }).returns<Contrato[]>(),
   ]);
   if (!projeto) notFound();
 
@@ -47,7 +53,15 @@ export default async function ProjetoPage({
   const totalPendente = lista.filter((p) => p.status !== "pago").reduce((s, p) => s + Number(p.valor), 0);
   const atrasados = lista.filter((p) => p.status === "atrasado");
 
+  const listaContratos = contratos ?? [];
+  const temAssinado = listaContratos.some((c) => c.status === "assinado");
+  // Regra: contrato assinado sugere (não força) projeto aprovado
+  const sugerirAprovado = temAssinado && ["briefing", "orcamento_enviado"].includes(projeto.status);
+
   const mudarStatus = mudarStatusProjeto.bind(null, projeto.id);
+  const salvarBriefingDoProjeto = salvarBriefing.bind(null, projeto.id);
+  const criarContratoDoProjeto = criarContrato.bind(null, projeto.id);
+  const aprovar = aprovarProjeto.bind(null, projeto.id);
   const excluir = excluirProjeto.bind(null, projeto.id, projeto.cliente_id);
 
   return (
@@ -76,6 +90,17 @@ export default async function ProjetoPage({
         </div>
       )}
 
+      {sugerirAprovado && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-medium border border-rosa-600 bg-rosa-50 px-5 py-3">
+          <p className="text-sm text-rosa-900">
+            Contrato assinado. Quer mudar o projeto pra <strong>Aprovado</strong>?
+          </p>
+          <form action={aprovar}>
+            <Botao type="submit">Sim, aprovar projeto</Botao>
+          </form>
+        </div>
+      )}
+
       <nav className="mb-6 flex gap-1 border-b border-neutro-100">
         {abas.map((a) => (
           <Link
@@ -89,7 +114,8 @@ export default async function ProjetoPage({
             )}
           >
             {a.label}
-            {"fase2" in a && a.fase2 && <span className="ml-1.5 text-[10px] uppercase text-neutro-400">em breve</span>}
+            {a.id === "briefing" && briefing && <span className="ml-1.5 text-sucesso">•</span>}
+            {a.id === "contrato" && temAssinado && <span className="ml-1.5 text-sucesso">•</span>}
           </Link>
         ))}
       </nav>
@@ -105,7 +131,7 @@ export default async function ProjetoPage({
                     {projeto.clientes?.nome ?? "—"}
                   </Link>
                 </Item>
-                <Item k="Tipo">{projeto.tipo ? TIPO_PROJETO_LABEL[projeto.tipo] : "—"}</Item>
+                <Item k="Tipo">{projeto.tipo ?? "—"}</Item>
                 <Item k="Status">
                   <BadgeProjeto status={projeto.status} />
                 </Item>
@@ -126,7 +152,7 @@ export default async function ProjetoPage({
             </Card>
 
             <Card>
-              <CardTitulo>Observações / briefing</CardTitulo>
+              <CardTitulo>Observações</CardTitulo>
               {projeto.observacoes ? (
                 <p className="text-sm whitespace-pre-wrap text-neutro-800">{projeto.observacoes}</p>
               ) : (
@@ -158,11 +184,39 @@ export default async function ProjetoPage({
               </Botao>
             </Card>
 
+            <Card>
+              <CardTitulo>Andamento</CardTitulo>
+              <dl className="space-y-3 text-sm">
+                <Item k="Briefing">
+                  {briefing ? (
+                    <span className="text-sucesso">Preenchido</span>
+                  ) : (
+                    <Link href={`/projetos/${projeto.id}?aba=briefing`} className="text-rosa-700 underline">
+                      Preencher
+                    </Link>
+                  )}
+                </Item>
+                <Item k="Contrato">
+                  {temAssinado ? (
+                    <span className="text-sucesso">Assinado</span>
+                  ) : listaContratos.some((c) => c.status === "enviado") ? (
+                    <span className="text-alerta">Aguardando assinatura</span>
+                  ) : listaContratos.length ? (
+                    <span className="text-neutro-600">Rascunho</span>
+                  ) : (
+                    <Link href={`/projetos/${projeto.id}?aba=contrato`} className="text-rosa-700 underline">
+                      Criar
+                    </Link>
+                  )}
+                </Item>
+              </dl>
+            </Card>
+
             <form action={excluir}>
               <Botao type="submit" variante="perigo" className="w-full">
                 Excluir projeto
               </Botao>
-              <p className="mt-2 text-xs text-neutro-500">Exclui também os pagamentos vinculados.</p>
+              <p className="mt-2 text-xs text-neutro-500">Exclui também briefing, contratos e pagamentos vinculados.</p>
             </form>
           </div>
         </div>
@@ -175,13 +229,17 @@ export default async function ProjetoPage({
         </div>
       )}
 
-      {(aba === "briefing" || aba === "contrato") && (
-        <Card>
-          <p className="text-sm text-neutro-500">
-            {aba === "briefing" ? "Briefing estruturado" : "Contratos"} entram na Fase 2. Por enquanto, use o campo de
-            observações na aba Visão geral.
-          </p>
-        </Card>
+      {aba === "briefing" && (
+        <div className="max-w-3xl">
+          <BriefingForm action={salvarBriefingDoProjeto} briefing={briefing ?? null} />
+        </div>
+      )}
+
+      {aba === "contrato" && (
+        <div className="max-w-3xl space-y-6">
+          <ListaContratos contratos={listaContratos} />
+          <NovoContratoForm action={criarContratoDoProjeto} />
+        </div>
       )}
     </>
   );

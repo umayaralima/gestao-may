@@ -9,9 +9,10 @@ export default async function EditarProjetoPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: projeto }, { data: clientes }] = await Promise.all([
+  const [{ data: projeto }, { data: clientes }, { data: tipos }] = await Promise.all([
     supabase.from("projetos").select("*").eq("id", id).single<Projeto>(),
     supabase.from("clientes").select("id, nome, empresa").order("nome"),
+    supabase.from("tipos_projeto").select("nome").order("ordem").order("nome"),
   ]);
   if (!projeto) notFound();
 
@@ -20,7 +21,7 @@ export default async function EditarProjetoPage({ params }: { params: Promise<{ 
   return (
     <div className="max-w-3xl">
       <PaginaHeader titulo="Editar projeto" descricao={projeto.nome} />
-      <ProjetoForm action={action} clientes={clientes ?? []} projeto={projeto} cancelarHref={`/projetos/${projeto.id}`} />
+      <ProjetoForm action={action} clientes={clientes ?? []} tipos={(tipos ?? []).map((t) => t.nome)} projeto={projeto} cancelarHref={`/projetos/${projeto.id}`} />
     </div>
   );
 }

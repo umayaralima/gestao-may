@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { STATUS_PROJETO, TIPO_PROJETO } from "@/lib/constantes";
+import { STATUS_PROJETO } from "@/lib/constantes";
 
 export type FormState = { erro?: string };
 
@@ -14,7 +14,7 @@ const projetoSchema = z
   .object({
     cliente_id: z.string().uuid("Selecione o cliente."),
     nome: z.string().trim().min(2, "Informe o nome do projeto."),
-    tipo: z.preprocess(vazioParaNull, z.enum(TIPO_PROJETO).nullable()),
+    tipo: z.preprocess(vazioParaNull, z.string().trim().max(80).nullable()),
     status: z.enum(STATUS_PROJETO).default("briefing"),
     valor_total: z.preprocess(vazioParaNull, z.coerce.number().nonnegative("Valor inválido.").nullable()),
     data_inicio: z.preprocess(vazioParaNull, z.string().date().nullable()),

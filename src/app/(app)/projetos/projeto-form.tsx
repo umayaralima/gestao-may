@@ -4,19 +4,23 @@ import { useActionState } from "react";
 import { Botao } from "@/components/ui/botao";
 import { Campo, Input, Select, Textarea } from "@/components/ui/input";
 import { MensagemErro } from "@/components/ui/pagina";
-import { STATUS_PROJETO, STATUS_PROJETO_LABEL, TIPO_PROJETO, TIPO_PROJETO_LABEL } from "@/lib/constantes";
+import Link from "next/link";
+import { STATUS_PROJETO, STATUS_PROJETO_LABEL } from "@/lib/constantes";
 import type { Projeto } from "@/lib/types";
 import type { FormState } from "./actions";
 
 type Props = {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
   clientes: Array<{ id: string; nome: string; empresa: string | null }>;
+  tipos: string[];
   projeto?: Projeto;
   clienteInicial?: string;
   cancelarHref: string;
 };
 
-export function ProjetoForm({ action, clientes, projeto, clienteInicial, cancelarHref }: Props) {
+export function ProjetoForm({ action, clientes, tipos, projeto, clienteInicial, cancelarHref }: Props) {
+  // Projeto antigo com tipo que já foi removido das configurações continua aparecendo no select
+  const opcoesTipo = projeto?.tipo && !tipos.includes(projeto.tipo) ? [...tipos, projeto.tipo] : tipos;
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
 
   return (
@@ -38,15 +42,21 @@ export function ProjetoForm({ action, clientes, projeto, clienteInicial, cancela
         <Campo label="Nome do projeto *" htmlFor="nome">
           <Input id="nome" name="nome" required defaultValue={projeto?.nome} placeholder="Ex.: Site institucional" />
         </Campo>
-        <Campo label="Tipo" htmlFor="tipo">
+        <Campo label="Tipo de serviço" htmlFor="tipo">
           <Select id="tipo" name="tipo" defaultValue={projeto?.tipo ?? ""}>
             <option value="">—</option>
-            {TIPO_PROJETO.map((t) => (
+            {opcoesTipo.map((t) => (
               <option key={t} value={t}>
-                {TIPO_PROJETO_LABEL[t]}
+                {t}
               </option>
             ))}
           </Select>
+          <p className="mt-1 text-xs text-neutro-500">
+            Faltou algum?{" "}
+            <Link href="/configuracoes" className="text-rosa-700 underline">
+              Gerenciar serviços
+            </Link>
+          </p>
         </Campo>
         <Campo label="Status" htmlFor="status">
           <Select id="status" name="status" defaultValue={projeto?.status ?? "briefing"}>
@@ -71,7 +81,7 @@ export function ProjetoForm({ action, clientes, projeto, clienteInicial, cancela
         </Campo>
       </div>
 
-      <Campo label="Observações / briefing livre" htmlFor="observacoes" hint="Na Fase 1 o briefing fica aqui, em texto livre.">
+      <Campo label="Observações" htmlFor="observacoes" hint="Anotações gerais. O briefing estruturado fica na aba Briefing do projeto.">
         <Textarea id="observacoes" name="observacoes" className="min-h-36" defaultValue={projeto?.observacoes ?? ""} />
       </Campo>
 

@@ -20,14 +20,23 @@ create table public.clientes (
   criado_em   timestamptz not null default now()
 );
 
+-- ---------- TIPOS DE PROJETO (serviços, editáveis em Configurações) ----------
+create table public.tipos_projeto (
+  id        uuid primary key default gen_random_uuid(),
+  nome      text not null unique,
+  ordem     int  not null default 0,
+  criado_em timestamptz not null default now()
+);
+insert into public.tipos_projeto (nome, ordem) values
+  ('Landing Page', 1), ('Página de Vendas', 2), ('E-commerce', 3),
+  ('Institucional', 4), ('Página de Links', 5), ('Blog', 6);
+
 -- ---------- PROJETOS ----------
 create table public.projetos (
   id            uuid primary key default gen_random_uuid(),
   cliente_id    uuid not null references public.clientes(id) on delete cascade,
   nome          text not null,
-  tipo          text
-                check (tipo is null or tipo in
-                  ('site_institucional', 'landing_page', 'ecommerce', 'sistema', 'outro')),
+  tipo          text, -- nome de um serviço em tipos_projeto (texto livre)
   status        text not null default 'briefing'
                 check (status in
                   ('briefing', 'orcamento_enviado', 'aprovado', 'em_desenvolvimento',
@@ -100,12 +109,14 @@ from public.pagamentos p;
 
 -- ---------- RLS: só usuário autenticado (sistema de uso único) ----------
 alter table public.clientes   enable row level security;
+alter table public.tipos_projeto enable row level security;
 alter table public.projetos   enable row level security;
 alter table public.briefings  enable row level security;
 alter table public.contratos  enable row level security;
 alter table public.pagamentos enable row level security;
 
 create policy "auth_all" on public.clientes   for all to authenticated using (true) with check (true);
+create policy "auth_all" on public.tipos_projeto for all to authenticated using (true) with check (true);
 create policy "auth_all" on public.projetos   for all to authenticated using (true) with check (true);
 create policy "auth_all" on public.briefings  for all to authenticated using (true) with check (true);
 create policy "auth_all" on public.contratos  for all to authenticated using (true) with check (true);

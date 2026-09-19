@@ -9,6 +9,7 @@ const itens = [
   { href: "/clientes", label: "Clientes" },
   { href: "/projetos", label: "Projetos" },
   { href: "/pagamentos", label: "Pagamentos" },
+  { href: "/configuracoes", label: "Configurações" },
 ];
 
 export function Sidebar({ email, sair }: { email: string; sair: () => Promise<void> }) {

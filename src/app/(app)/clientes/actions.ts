@@ -6,7 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { ORIGENS_CLIENTE, STATUS_CLIENTE } from "@/lib/constantes";
 
-export type FormState = { erro?: string };
+export type FormState = { erro?: string; ok?: boolean };
 
 const vazioParaNull = (v: unknown) => (typeof v === "string" && v.trim() === "" ? null : v);
 
@@ -25,6 +25,12 @@ function parse(formData: FormData) {
   return clienteSchema.safeParse(Object.fromEntries(formData));
 }
 
+function revalidar(id?: string) {
+  revalidatePath("/clientes");
+  revalidatePath("/");
+  if (id) revalidatePath(`/clientes/${id}`);
+}
+
 export async function criarCliente(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = parse(formData);
   if (!parsed.success) return { erro: parsed.error.issues[0].message };
@@ -33,7 +39,7 @@ export async function criarCliente(_prev: FormState, formData: FormData): Promis
   const { data, error } = await supabase.from("clientes").insert(parsed.data).select("id").single();
   if (error) return { erro: "Não foi possível salvar o cliente." };
 
-  revalidatePath("/clientes");
+  revalidar();
   redirect(`/clientes/${data.id}`);
 }
 
@@ -45,15 +51,30 @@ export async function atualizarCliente(id: string, _prev: FormState, formData: F
   const { error } = await supabase.from("clientes").update(parsed.data).eq("id", id);
   if (error) return { erro: "Não foi possível salvar as alterações." };
 
-  revalidatePath("/clientes");
-  revalidatePath(`/clientes/${id}`);
-  redirect(`/clientes/${id}`);
+  revalidar(id);
+  return { ok: true };
+}
+
+export async function mudarStatusCliente(id: string, formData: FormData) {
+  const status = z.enum(STATUS_CLIENTE).safeParse(formData.get("status"));
+  if (!status.success) return;
+  const supabase = await createClient();
+  await supabase.from("clientes").update({ status: status.data }).eq("id", id);
+  revalidar(id);
 }
 
 export async function excluirCliente(id: string) {
   const supabase = await createClient();
   await supabase.from("clientes").delete().eq("id", id);
-  revalidatePath("/clientes");
+  revalidar();
   revalidatePath("/projetos");
   redirect("/clientes");
+}
+
+export async function excluirClientes(ids: string[]) {
+  if (!ids.length) return;
+  const supabase = await createClient();
+  await supabase.from("clientes").delete().in("id", ids);
+  revalidar();
+  revalidatePath("/projetos");
 }

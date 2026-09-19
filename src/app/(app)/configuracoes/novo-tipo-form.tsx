@@ -1,9 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
-import { Botao } from "@/components/ui/botao";
-import { Input } from "@/components/ui/input";
-import { MensagemErro } from "@/components/ui/pagina";
+import { BotaoConfirmar } from "@/components/ui/modal";
+import { Input, MensagemErro } from "@/components/ui/primitivos";
 import { criarTipoProjeto, type FormState } from "./actions";
 
 export function NovoTipoForm() {
@@ -17,10 +16,8 @@ export function NovoTipoForm() {
   return (
     <form ref={ref} action={action} className="space-y-2">
       <div className="flex gap-2">
-        <Input name="nome" placeholder="Novo serviço, ex.: Identidade visual" required maxLength={80} />
-        <Botao type="submit" disabled={pending}>
-          {pending ? "…" : "Adicionar"}
-        </Botao>
+        <Input name="nome" placeholder="Novo serviço, ex.: Identidade visual" required maxLength={80} className="py-2 text-xs" />
+        <BotaoConfirmar disabled={pending}>{pending ? "…" : "Adicionar"}</BotaoConfirmar>
       </div>
       <MensagemErro>{state.erro}</MensagemErro>
     </form>

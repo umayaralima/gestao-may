@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { CANAIS_INTERACAO } from "@/lib/constantes";
-import { hojeISO } from "@/lib/format";
+import { hojeISO, somarDias } from "@/lib/format";
 
 /*
  * Ações compartilhadas do CRM: interações e follow-up.
@@ -16,13 +16,10 @@ export type FormState = { erro?: string; ok?: boolean };
 
 const vazioParaNull = (v: unknown) => (typeof v === "string" && v.trim() === "" ? null : v);
 
-function caminho(dono: Dono) {
-  return dono.tipo === "lead" ? `/leads/${dono.id}` : `/clientes/${dono.id}`;
-}
-
 function revalidar(dono: Dono) {
-  revalidatePath(caminho(dono));
-  revalidatePath("/leads");
+  revalidatePath(dono.tipo === "lead" ? `/pipeline/${dono.id}` : `/clientes/${dono.id}`);
+  revalidatePath("/pipeline");
+  revalidatePath("/clientes");
   revalidatePath("/");
 }
 
@@ -44,10 +41,9 @@ export async function registrarInteracao(dono: Dono, _prev: FormState, formData:
   });
   if (error) return { erro: "Não foi possível registrar." };
 
-  // Registrar contato de um lead "novo" já o move pra "em contato" (única automação, e é reversível no dropdown)
+  // Única automação do funil: registrar contato num lead em Prospecção move pra Qualificação (reversível).
   if (dono.tipo === "lead") {
-    await supabase.from("leads").update({ atualizado_em: new Date().toISOString() }).eq("id", dono.id).eq("etapa", "novo");
-    await supabase.from("leads").update({ etapa: "em_contato" }).eq("id", dono.id).eq("etapa", "novo");
+    await supabase.from("leads").update({ etapa: "em_contato", atualizado_em: new Date().toISOString() }).eq("id", dono.id).eq("etapa", "novo");
   }
 
   revalidar(dono);
@@ -70,30 +66,22 @@ export async function salvarFollowup(dono: Dono, _prev: FormState, formData: For
   if (!parsed.success) return { erro: parsed.error.issues[0].message };
 
   const supabase = await createClient();
-  const tabela = dono.tipo === "lead" ? "leads" : "clientes";
-  const { error } = await supabase.from(tabela).update(parsed.data).eq("id", dono.id);
+  const { error } = await supabase.from(dono.tipo === "lead" ? "leads" : "clientes").update(parsed.data).eq("id", dono.id);
   if (error) return { erro: "Não foi possível salvar o follow-up." };
 
   revalidar(dono);
   return { ok: true };
 }
 
-/** "Feito": limpa o follow-up atual. A pessoa registra a interação e agenda o próximo se quiser. */
+/** "Feito": limpa o follow-up atual. */
 export async function concluirFollowup(dono: Dono) {
   const supabase = await createClient();
-  const tabela = dono.tipo === "lead" ? "leads" : "clientes";
-  await supabase.from(tabela).update({ proximo_followup: null, nota_followup: null }).eq("id", dono.id);
+  await supabase.from(dono.tipo === "lead" ? "leads" : "clientes").update({ proximo_followup: null, nota_followup: null }).eq("id", dono.id);
   revalidar(dono);
 }
 
 export async function adiarFollowup(dono: Dono, dias: number) {
-  const d = new Date(`${hojeISO()}T00:00:00`);
-  d.setDate(d.getDate() + dias);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const nova = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-
   const supabase = await createClient();
-  const tabela = dono.tipo === "lead" ? "leads" : "clientes";
-  await supabase.from(tabela).update({ proximo_followup: nova }).eq("id", dono.id);
+  await supabase.from(dono.tipo === "lead" ? "leads" : "clientes").update({ proximo_followup: somarDias(hojeISO(), dias) }).eq("id", dono.id);
   revalidar(dono);
 }

@@ -282,3 +282,24 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
 - Marca: `public/marca/` (logos e favicons enviados pela May, PNG transparente). `src/app/icon.png` e `apple-icon.png` são o
   favicon gradiente recortado (o PNG original tem sombra longa). O PNG `logo-gradiente.png` já traz "Desenvolvedora Web".
 - Ícones do menu: `lucide-react`.
+
+## Front-end final: transplante do protótipo do Figma Make (2026-09-19)
+
+- Fonte da verdade visual: código exportado do Figma Make em `C:/Users/maahl/Documents/May/figma-make/src/`
+  (App.tsx, Clients.tsx, Pipeline.tsx, Tasks.tsx, Financeiro.tsx, Reports.tsx, index.css). Link do protótipo:
+  https://www.figma.com/make/TOOCF1MSmSFMaME432CI3p/Dashboard-Wireframe-Design. A May é designer e exigente com o front:
+  ao mexer em tela, copiar classes/estrutura de lá, não inventar.
+- Nomes das telas iguais ao Figma: Dashboard, Clientes, Pipeline (leads), Tarefas, Financeiro (pagamentos), E-mails e
+  Integrações (em breve, desabilitados), Configurações. Projetos é o único acréscimo (briefing e contratos vivem lá).
+- Etapas do Pipeline com os nomes do protótipo: Prospecção, Qualificação, Proposta, Negociação, Fechado (+ Perdido fora do kanban).
+  Valores no banco continuam novo/em_contato/proposta_enviada/negociando/ganho/perdido.
+- Regras da May pro protótipo: (1) animação de entrada nas telas: recharts anima os gráficos ao montar + classe `.entrar`
+  (fade/slide 350ms) nos blocos; (2) filtros no topo de cada seção são o menu hambúrguer `FiltroMenu` (escreve na URL),
+  nunca fileira de botões; (3) Tarefas tem Dia (agrupado como o Make) / Semana (7 colunas) / Mês (calendário).
+- Primitivos em `src/components/ui/primitivos.tsx` (Header, Subbar, Card, KpiCard, Pill, Avatar, Busca, Th/Td/Tr, campos),
+  `modal.tsx` (Modal, Escolha), `filtro-menu.tsx`, `select-inline.tsx`. Cores literais (#231431, #311C45, #968F88…) são
+  propositais: batem 1:1 com o export do Make. Aliases `brand-*`/`dark-*`/`warm-*` no `globals.css` apontam pros tokens do guia.
+- Layout: `flex h-screen`, sidebar 224px, `main` sem scroll; cada tela é `flex flex-col h-full` com Header fixo e conteúdo rolável.
+- Formulários de criação/edição são modais (padrão NewTaskModal). `?novo=1` / `?nova=1` na URL abre o modal (usado pelos atalhos).
+- Tarefas: tabela `tarefas` + `leads.prioridade` na migração `004_tarefas_prioridade.sql`. `supabase/RODAR-AGORA.sql` = 002+003+seed+004.
+- `Reports.tsx` (Relatórios) do Make ainda não foi transplantado: candidato pra Fase 3 junto com "Ver NF"/exportar CSV.

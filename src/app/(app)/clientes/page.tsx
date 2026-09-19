@@ -1,70 +1,68 @@
-import Link from "next/link";
-import { BadgeCliente } from "@/components/ui/badge";
-import { Botao } from "@/components/ui/botao";
-import { Input } from "@/components/ui/input";
-import { PaginaHeader, Vazio } from "@/components/ui/pagina";
-import { Tabela, Td, Th, Thead, Tr } from "@/components/ui/tabela";
+import { FiltroMenu } from "@/components/ui/filtro-menu";
+import { Busca, Subbar } from "@/components/ui/primitivos";
+import { fmt } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
-import type { Cliente } from "@/lib/types";
+import type { Cliente, Contrato, Interacao, Projeto } from "@/lib/types";
+import { ClientesTabela, type ClienteLinha } from "./clientes-tabela";
 
-export default async function ClientesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { q = "" } = await searchParams;
+type ContratoComProjeto = Contrato & { projetos: { cliente_id: string; nome: string } | null };
+
+export default async function ClientesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; novo?: string }> }) {
+  const { q = "", status = "", novo } = await searchParams;
   const supabase = await createClient();
 
-  let query = supabase.from("clientes").select("*").order("nome");
-  if (q.trim()) {
-    const termo = `%${q.trim()}%`;
-    query = query.or(`nome.ilike.${termo},empresa.ilike.${termo}`);
-  }
-  const { data: clientes } = await query.returns<Cliente[]>();
+  const [{ data: clientes }, { data: projetos }, { data: interacoes }, { data: contratos }] = await Promise.all([
+    supabase.from("clientes").select("*").order("criado_em", { ascending: false }).returns<Cliente[]>(),
+    supabase.from("projetos").select("*").order("criado_em", { ascending: false }).returns<Projeto[]>(),
+    supabase.from("interacoes").select("*").not("cliente_id", "is", null).order("data", { ascending: false }).order("criado_em", { ascending: false }).returns<Interacao[]>(),
+    supabase.from("contratos").select("*, projetos(cliente_id, nome)").order("criado_em", { ascending: false }).returns<ContratoComProjeto[]>(),
+  ]);
+
+  const termo = q.trim().toLowerCase();
+  const linhas: ClienteLinha[] = (clientes ?? [])
+    .filter((c) => !status || c.status === status)
+    .filter((c) => !termo || [c.nome, c.empresa, c.email, c.nicho].some((v) => v?.toLowerCase().includes(termo)))
+    .map((c) => {
+      const ps = (projetos ?? []).filter((p) => p.cliente_id === c.id);
+      const ativos = ps.filter((p) => p.status !== "cancelado");
+      const its = (interacoes ?? []).filter((i) => i.cliente_id === c.id);
+      return {
+        cliente: c,
+        valor: ativos.reduce((s, p) => s + Number(p.valor_total ?? 0), 0),
+        negocios: ativos.length,
+        ultimoContato: its[0]?.data ?? null,
+        projetos: ps,
+        interacoes: its,
+        contratos: (contratos ?? []).filter((k) => k.projetos?.cliente_id === c.id).map((k) => ({ ...k, projeto_nome: k.projetos?.nome ?? "" })),
+      };
+    });
+
+  const totalCarteira = linhas.reduce((s, l) => s + l.valor, 0);
+  const ativos = linhas.filter((l) => l.cliente.status === "ativo").length;
 
   return (
-    <>
-      <PaginaHeader
-        titulo="Clientes"
-        descricao={`${clientes?.length ?? 0} cliente(s)`}
-        acao={<Botao href="/clientes/novo">Novo cliente</Botao>}
-      />
-
-      <form className="mb-4 flex max-w-md gap-2">
-        <Input name="q" placeholder="Buscar por nome ou empresa" defaultValue={q} />
-        <Botao type="submit" variante="secundario">
-          Buscar
-        </Botao>
-      </form>
-
-      {!clientes?.length ? (
-        <Vazio>{q ? "Nenhum cliente encontrado pra essa busca." : "Nenhum cliente ainda. Cadastre o primeiro."}</Vazio>
-      ) : (
-        <Tabela>
-          <Thead>
-            <tr>
-              <Th>Nome</Th>
-              <Th>Empresa</Th>
-              <Th>Nicho</Th>
-              <Th>WhatsApp</Th>
-              <Th>Status</Th>
-            </tr>
-          </Thead>
-          <tbody>
-            {clientes.map((c) => (
-              <Tr key={c.id}>
-                <Td>
-                  <Link href={`/clientes/${c.id}`} className="font-medium text-rosa-300 hover:underline">
-                    {c.nome}
-                  </Link>
-                </Td>
-                <Td>{c.empresa ?? "—"}</Td>
-                <Td>{c.nicho ?? "—"}</Td>
-                <Td>{c.whatsapp ?? "—"}</Td>
-                <Td>
-                  <BadgeCliente status={c.status} />
-                </Td>
-              </Tr>
-            ))}
-          </tbody>
-        </Tabela>
-      )}
-    </>
+    <ClientesTabela
+      linhas={linhas}
+      abrirNovo={novo === "1"}
+      sub={
+        <>
+          {linhas.length} registros · {ativos} ativos · <span className="font-mono">{fmt(totalCarteira)}</span> em carteira
+        </>
+      }
+      busca={<Busca placeholder="Buscar cliente, contato ou e-mail…" defaultValue={q} className="w-64" />}
+      subbar={
+        <Subbar>
+          <FiltroMenu
+            param="status"
+            opcoes={[
+              { valor: "", label: "Todos" },
+              { valor: "ativo", label: "Ativo", cor: "#34D399" },
+              { valor: "inativo", label: "Inativo", cor: "#968F88" },
+            ]}
+          />
+          <span className="text-[11px] font-mono text-[#968F88]">{linhas.length} registros</span>
+        </Subbar>
+      }
+    />
   );
 }

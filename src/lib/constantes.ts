@@ -63,16 +63,54 @@ export const ORIGEM_CLIENTE_LABEL: Record<(typeof ORIGENS_CLIENTE)[number], stri
 export const ETAPAS_LEAD = ["novo", "em_contato", "proposta_enviada", "negociando", "ganho", "perdido"] as const;
 export type EtapaLead = (typeof ETAPAS_LEAD)[number];
 
+/** Nomes das etapas iguais ao protótipo do Figma (Pipeline). Valores no banco não mudam. */
 export const ETAPA_LEAD_LABEL: Record<EtapaLead, string> = {
-  novo: "Novo",
-  em_contato: "Em contato",
-  proposta_enviada: "Proposta enviada",
-  negociando: "Negociando",
-  ganho: "Ganho",
+  novo: "Prospecção",
+  em_contato: "Qualificação",
+  proposta_enviada: "Proposta",
+  negociando: "Negociação",
+  ganho: "Fechado",
   perdido: "Perdido",
 };
 
-/** Etapas que aparecem no funil (kanban). Ganho/perdido ficam na lista de fechados. */
+/** Cor de cada etapa no Pipeline (protótipo). */
+export const ETAPA_LEAD_COR: Record<EtapaLead, string> = {
+  novo: "#38BDF8",
+  em_contato: "#C17AD2",
+  proposta_enviada: "#A151B5",
+  negociando: "#FBBF24",
+  ganho: "#34D399",
+  perdido: "#968F88",
+};
+
+export const PRIORIDADES = ["alta", "media", "baixa"] as const;
+export type Prioridade = (typeof PRIORIDADES)[number];
+export const PRIORIDADE_LABEL: Record<Prioridade, string> = { alta: "Alta", media: "Média", baixa: "Baixa" };
+export const PRIORIDADE_COR: Record<Prioridade, string> = { alta: "#F87171", media: "#FBBF24", baixa: "#968F88" };
+
+export const CATEGORIAS_TAREFA = ["ligacao", "email", "reuniao", "proposta", "follow_up", "contrato", "outro"] as const;
+export type CategoriaTarefa = (typeof CATEGORIAS_TAREFA)[number];
+export const CATEGORIA_TAREFA_LABEL: Record<CategoriaTarefa, string> = {
+  ligacao: "Ligação",
+  email: "E-mail",
+  reuniao: "Reunião",
+  proposta: "Proposta",
+  follow_up: "Follow-up",
+  contrato: "Contrato",
+  outro: "Outro",
+};
+export const CATEGORIA_TAREFA_ICONE: Record<CategoriaTarefa, string> = {
+  ligacao: "📞",
+  email: "✉️",
+  reuniao: "📅",
+  proposta: "📄",
+  follow_up: "🔔",
+  contrato: "📝",
+  outro: "•",
+};
+
+/** Colunas do Pipeline (protótipo mostra Fechado como 5ª coluna). Perdido fica fora do kanban. */
+export const ETAPAS_PIPELINE: EtapaLead[] = ["novo", "em_contato", "proposta_enviada", "negociando", "ganho"];
 export const ETAPAS_LEAD_ABERTAS: EtapaLead[] = ["novo", "em_contato", "proposta_enviada", "negociando"];
 
 export const CANAIS_INTERACAO = ["whatsapp", "email", "instagram", "ligacao", "reuniao", "outro"] as const;

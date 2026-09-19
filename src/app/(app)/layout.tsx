@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/sidebar";
 import { createClient } from "@/lib/supabase/server";
 import { sair } from "@/app/login/actions";
 
+/** Shell do protótipo: sidebar fixa + main com rolagem interna por tela. */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const {
@@ -12,11 +13,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!user) redirect("/login");
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="flex h-screen bg-[#150C1D] overflow-hidden">
       <Sidebar email={user.email ?? ""} sair={sair} />
-      <main className="flex-1 px-4 py-6 sm:px-8 sm:py-7">
-        <div className="mx-auto max-w-6xl">{children}</div>
-      </main>
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">{children}</main>
     </div>
   );
 }

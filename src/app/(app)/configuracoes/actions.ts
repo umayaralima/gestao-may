@@ -8,7 +8,8 @@ export type FormState = { erro?: string; ok?: boolean };
 
 function revalidar() {
   revalidatePath("/configuracoes");
-  revalidatePath("/projetos/novo");
+  revalidatePath("/projetos");
+  revalidatePath("/pipeline");
 }
 
 export async function criarTipoProjeto(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -16,13 +17,7 @@ export async function criarTipoProjeto(_prev: FormState, formData: FormData): Pr
   if (!nome.success) return { erro: nome.error.issues[0].message };
 
   const supabase = await createClient();
-  const { data: ultimo } = await supabase
-    .from("tipos_projeto")
-    .select("ordem")
-    .order("ordem", { ascending: false })
-    .limit(1)
-    .maybeSingle<{ ordem: number }>();
-
+  const { data: ultimo } = await supabase.from("tipos_projeto").select("ordem").order("ordem", { ascending: false }).limit(1).maybeSingle<{ ordem: number }>();
   const { error } = await supabase.from("tipos_projeto").insert({ nome: nome.data, ordem: (ultimo?.ordem ?? 0) + 1 });
   if (error) return { erro: error.code === "23505" ? "Já existe um serviço com esse nome." : "Não foi possível salvar." };
 
@@ -41,11 +36,10 @@ export async function renomearTipoProjeto(id: string, formData: FormData) {
   const { error } = await supabase.from("tipos_projeto").update({ nome: nome.data }).eq("id", id);
   if (error) return;
 
-  // Projetos guardam o nome em texto: propaga o rename pra não ficarem órfãos.
+  // Projetos e leads guardam o nome em texto: propaga o rename.
   await supabase.from("projetos").update({ tipo: nome.data }).eq("tipo", atual.nome);
-
+  await supabase.from("leads").update({ servico_interesse: nome.data }).eq("servico_interesse", atual.nome);
   revalidar();
-  revalidatePath("/projetos");
 }
 
 export async function excluirTipoProjeto(id: string) {

@@ -1,5 +1,6 @@
 import { FiltroMenu } from "@/components/ui/filtro-menu";
 import { Busca } from "@/components/ui/primitivos";
+import { getConfiguracoes } from "@/lib/configuracoes";
 import { createClient } from "@/lib/supabase/server";
 import type { Pagamento } from "@/lib/types";
 import { Financeiro, type PagamentoLinha, type ProjetoOpcao } from "./financeiro";
@@ -10,9 +11,10 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: P
   const { q = "", status = "", novo, projeto } = await searchParams;
   const supabase = await createClient();
 
-  const [{ data: pagamentos }, { data: projetos }] = await Promise.all([
+  const [{ data: pagamentos }, { data: projetos }, config] = await Promise.all([
     supabase.from("pagamentos_view").select("*, projetos(id, nome, data_inicio, clientes(id, nome, empresa))").order("vencimento", { ascending: false }).returns<PagamentoJoin[]>(),
     supabase.from("projetos").select("id, nome, data_inicio, clientes(nome, empresa)").neq("status", "cancelado").order("criado_em", { ascending: false }),
+    getConfiguracoes(),
   ]);
 
   const termo = q.trim().toLowerCase();
@@ -38,6 +40,8 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: P
       projetos={opcoes}
       abrirNovo={novo === "1"}
       projetoInicial={projeto}
+      formaPreferida={config.forma_pagamento_preferida}
+      diasAviso={config.dias_aviso_vencimento}
       busca={<Busca key="busca" placeholder="Buscar cliente ou projeto…" defaultValue={q} className="sm:w-52" />}
       filtro={
         <FiltroMenu key="filtro"

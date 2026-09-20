@@ -1,6 +1,7 @@
 import { Children } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { fmtK } from "@/lib/format";
 
 /*
  * Primitivos visuais copiados do protótipo do Figma Make (classes iguais às do código exportado).
@@ -67,6 +68,7 @@ export function KpiCard({
   trend,
   trendUp,
   href,
+  meta,
 }: {
   label: string;
   value: string;
@@ -75,6 +77,8 @@ export function KpiCard({
   trend?: string;
   trendUp?: boolean;
   href?: string;
+  /** meta mensal (Configurações → Financeiro): barra de progresso + % */
+  meta?: { valor: number; atual: number };
 }) {
   const conteudo = (
     <div className={cn("bg-[#231431] border border-[#311C45] rounded-xl p-5 flex flex-col gap-3 h-full", href && "hover:border-[#5A496A] transition-colors")}>
@@ -83,6 +87,17 @@ export function KpiCard({
         <p className={cn("text-2xl font-semibold font-mono tracking-tight", accent ?? "text-[#F5F5F4]")}>{value}</p>
         {sub && <p className="text-xs text-[#968F88] mt-0.5">{sub}</p>}
       </div>
+      {meta && meta.valor > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] text-[#968F88]">Meta {fmtK(meta.valor)}</span>
+            <span className="text-[10px] font-mono text-brand-400">{Math.min(100, Math.round((meta.atual / meta.valor) * 100))}%</span>
+          </div>
+          <div className="h-1 bg-[#311C45] rounded-full overflow-hidden">
+            <div className="h-full bg-brand-400 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (meta.atual / meta.valor) * 100)}%` }} />
+          </div>
+        </div>
+      )}
       {trend && (
         <div className={cn("inline-flex items-center gap-1 text-xs font-medium", trendUp ? "text-emerald-400" : "text-red-400")}>
           <span>{trendUp ? "↑" : "↓"}</span>

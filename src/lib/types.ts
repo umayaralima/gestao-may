@@ -1,4 +1,4 @@
-import type { CategoriaTarefa, EtapaLead, Prioridade, StatusProjeto, TipoPagamento } from "./constantes";
+import type { CategoriaTarefa, EtapaLead, FormaPagamento, Prioridade, StatusProjeto, TipoPagamento } from "./constantes";
 
 export type Cliente = {
   id: string;
@@ -120,4 +120,21 @@ export type Tarefa = {
   vencimento: string | null;
   concluida_em: string | null;
   criado_em: string;
+};
+
+export type Configuracoes = {
+  id: 1;
+  nome: string | null;
+  titulo: string | null;
+  email_contato: string | null;
+  telefone: string | null;
+  empresa: string | null;
+  cnpj: string | null;
+  site: string | null;
+  meta_mensal: number | null;
+  dias_aviso_vencimento: number;
+  dias_negocio_parado: number;
+  forma_pagamento_preferida: FormaPagamento;
+  chave_pix: string | null;
+  atualizado_em: string;
 };

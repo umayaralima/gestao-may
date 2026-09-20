@@ -40,6 +40,7 @@ export const TIPO_PAGAMENTO_LABEL: Record<TipoPagamento, string> = {
 };
 
 export const FORMAS_PAGAMENTO = ["pix", "boleto", "cartao", "transferencia", "outro"] as const;
+export type FormaPagamento = (typeof FORMAS_PAGAMENTO)[number];
 export const FORMA_PAGAMENTO_LABEL: Record<(typeof FORMAS_PAGAMENTO)[number], string> = {
   pix: "Pix",
   boleto: "Boleto",

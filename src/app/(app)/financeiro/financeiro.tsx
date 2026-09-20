@@ -7,7 +7,7 @@ import { BotaoCancelar, BotaoConfirmar, Escolha, Modal } from "@/components/ui/m
 import { Avatar, BotaoPrimario, Campo, Header, Input, KpiCard, MensagemErro, Pill, Select, Subbar, Th, Vazio } from "@/components/ui/primitivos";
 import { cn } from "@/lib/cn";
 import { FORMA_PAGAMENTO_LABEL, FORMAS_PAGAMENTO, TIPO_PAGAMENTO, TIPO_PAGAMENTO_LABEL } from "@/lib/constantes";
-import { fmt, fmtData, hojeISO, mesAnoExtenso } from "@/lib/format";
+import { diffDias, fmt, fmtData, hojeISO, mesAnoExtenso } from "@/lib/format";
 import type { Pagamento } from "@/lib/types";
 import { criarPagamento, desfazerPagamento, excluirPagamento, marcarComoPago, type FormState } from "./actions";
 
@@ -22,12 +22,15 @@ type Props = {
   projetoInicial?: string;
   busca: React.ReactNode;
   filtro: React.ReactNode;
+  /** Configurações → Financeiro */
+  formaPreferida: string;
+  diasAviso: number;
 };
 
 const ICONE_FORMA: Record<string, string> = { pix: "⚡", transferencia: "🏦", boleto: "📄", cartao: "💳", outro: "💰" };
 
 /** Tela Financeiro do protótipo: KPIs, barra tricolor, filtro hambúrguer, tabela, modal "Marcar pago". */
-export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial, busca, filtro }: Props) {
+export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial, busca, filtro, formaPreferida, diasAviso }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [novo, setNovo] = useState(!!abrirNovo);
@@ -47,8 +50,8 @@ export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial,
 
   return (
     <>
-      {novo && <NovoLancamentoModal projetos={projetos} projetoInicial={projetoInicial} onClose={fecharNovo} />}
-      {pagando && <MarcarPagoModal pagamento={pagando} onClose={() => setPagando(null)} />}
+      {novo && <NovoLancamentoModal projetos={projetos} projetoInicial={projetoInicial} formaPreferida={formaPreferida} onClose={fecharNovo} />}
+      {pagando && <MarcarPagoModal pagamento={pagando} formaPreferida={formaPreferida} onClose={() => setPagando(null)} />}
 
       <div className="flex flex-col h-full">
         <Header titulo="Financeiro" sub={`Controle de pagamentos · ${mesAnoExtenso()}`}>
@@ -102,7 +105,7 @@ export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial,
             </thead>
             <tbody>
               {linhas.map((p) => (
-                <LinhaPagamento key={p.id} p={p} onPagar={() => setPagando(p)} />
+                <LinhaPagamento key={p.id} p={p} diasAviso={diasAviso} onPagar={() => setPagando(p)} />
               ))}
             </tbody>
           </table>
@@ -113,10 +116,12 @@ export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial,
   );
 }
 
-function LinhaPagamento({ p, onPagar }: { p: PagamentoLinha; onPagar: () => void }) {
+function LinhaPagamento({ p, diasAviso, onPagar }: { p: PagamentoLinha; diasAviso: number; onPagar: () => void }) {
   const [pending, startTransition] = useTransition();
   const vencido = p.status === "atrasado";
   const pago = p.status === "pago";
+  const diasAteVencer = !pago && !vencido ? diffDias(hojeISO(), p.vencimento) : null;
+  const venceEmBreve = diasAteVencer !== null && diasAteVencer <= diasAviso;
   return (
     <tr className={cn("border-b border-[#311C45]/50 hover:bg-white/[0.02] transition-colors", pending && "opacity-40")}>
       <td className="px-5 py-3.5">
@@ -152,7 +157,15 @@ function LinhaPagamento({ p, onPagar }: { p: PagamentoLinha; onPagar: () => void
         <span className={cn("text-sm font-semibold font-mono", pago ? "text-emerald-400" : vencido ? "text-red-400" : "text-[#DDDBD9]")}>{fmt(p.valor)}</span>
       </td>
       <td className="px-5 py-3.5">
-        {pago ? <Pill tom="success">Pago</Pill> : vencido ? <Pill tom="error">Vencido</Pill> : <Pill tom="warning">Pendente</Pill>}
+        {pago ? (
+          <Pill tom="success">Pago</Pill>
+        ) : vencido ? (
+          <Pill tom="error">Vencido</Pill>
+        ) : venceEmBreve ? (
+          <Pill tom="warning">{diasAteVencer === 0 ? "Vence hoje" : `Vence em ${diasAteVencer}d`}</Pill>
+        ) : (
+          <Pill tom="warning">Pendente</Pill>
+        )}
       </td>
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-2">
@@ -189,8 +202,8 @@ function LinhaPagamento({ p, onPagar }: { p: PagamentoLinha; onPagar: () => void
   );
 }
 
-function MarcarPagoModal({ pagamento, onClose }: { pagamento: PagamentoLinha; onClose: () => void }) {
-  const [forma, setForma] = useState<string>(pagamento.forma_pagamento ?? "pix");
+function MarcarPagoModal({ pagamento, formaPreferida, onClose }: { pagamento: PagamentoLinha; formaPreferida: string; onClose: () => void }) {
+  const [forma, setForma] = useState<string>(pagamento.forma_pagamento ?? formaPreferida);
   const [pending, startTransition] = useTransition();
   return (
     <Modal titulo="Confirmar pagamento" onClose={onClose} largura="sm">
@@ -228,7 +241,7 @@ function MarcarPagoModal({ pagamento, onClose }: { pagamento: PagamentoLinha; on
   );
 }
 
-function NovoLancamentoModal({ projetos, projetoInicial, onClose }: { projetos: ProjetoOpcao[]; projetoInicial?: string; onClose: () => void }) {
+function NovoLancamentoModal({ projetos, projetoInicial, formaPreferida, onClose }: { projetos: ProjetoOpcao[]; projetoInicial?: string; formaPreferida: string; onClose: () => void }) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(criarPagamento, {});
   const [projetoId, setProjetoId] = useState(projetoInicial ?? projetos[0]?.id ?? "");
   const dataInicio = projetos.find((p) => p.id === projetoId)?.data_inicio ?? undefined;
@@ -267,7 +280,7 @@ function NovoLancamentoModal({ projetos, projetoInicial, onClose }: { projetos: 
             <Input id="vencimento" name="vencimento" type="date" required min={dataInicio} defaultValue={hojeISO()} />
           </Campo>
           <Campo label="Forma prevista" htmlFor="forma_pagamento">
-            <Select id="forma_pagamento" name="forma_pagamento" defaultValue="">
+            <Select id="forma_pagamento" name="forma_pagamento" defaultValue={formaPreferida}>
               <option value="">—</option>
               {FORMAS_PAGAMENTO.map((f) => (
                 <option key={f} value={f}>

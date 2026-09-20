@@ -3,6 +3,7 @@ import { Avatar, BotaoLinha, BotaoPrimario, Busca, Header, KpiCard, Td, Th, Tr }
 import { cn } from "@/lib/cn";
 import { CANAL_INTERACAO_LABEL, ETAPA_LEAD_COR, ETAPA_LEAD_LABEL, ETAPAS_PIPELINE, type EtapaLead } from "@/lib/constantes";
 import { fmt, fmtK, fmtRelativo, fmtData, hojeISO, mesAnoExtenso, mesCurto, primeiroEUltimoDiaDoMes, somarDias } from "@/lib/format";
+import { getConfiguracoes } from "@/lib/configuracoes";
 import { createClient } from "@/lib/supabase/server";
 import type { Cliente, Interacao, Lead } from "@/lib/types";
 import { AtividadeSemanal, PipelineDonut, ReceitaMensal, type DiaAtividade, type PontoReceita } from "./graficos";
@@ -20,7 +21,7 @@ export default async function DashboardPage() {
   const mesAnterior = primeiroEUltimoDiaDoMes(new Date(agora.getFullYear(), agora.getMonth() - 1, 1));
   const inicio12m = primeiroEUltimoDiaDoMes(new Date(agora.getFullYear(), agora.getMonth() - 11, 1)).inicio;
 
-  const [pagos, clientes, leads, projetos, interacoes, followups, tarefasHoje] = await Promise.all([
+  const [pagos, clientes, leads, projetos, interacoes, followups, tarefasHoje, config] = await Promise.all([
     supabase.from("pagamentos").select("valor, data_pagamento").not("data_pagamento", "is", null).gte("data_pagamento", inicio12m).returns<Pago[]>(),
     supabase.from("clientes").select("*").order("criado_em", { ascending: false }).returns<Cliente[]>(),
     supabase.from("leads").select("*").returns<Lead[]>(),
@@ -34,6 +35,7 @@ export default async function DashboardPage() {
       .returns<InteracaoComDono[]>(),
     supabase.from("leads").select("id", { count: "exact", head: true }).lte("proximo_followup", hoje).in("etapa", ["novo", "em_contato", "proposta_enviada", "negociando"]),
     supabase.from("tarefas").select("id", { count: "exact", head: true }).lte("vencimento", hoje).is("concluida_em", null),
+    getConfiguracoes(),
   ]);
 
   const listaPagos = pagos.data ?? [];
@@ -121,6 +123,7 @@ export default async function DashboardPage() {
             trend={variacaoReceita === null ? "sem base no mês anterior" : `${Math.abs(variacaoReceita).toFixed(1).replace(".", ",")}% vs. mês anterior`}
             trendUp={variacaoReceita === null ? true : variacaoReceita >= 0}
             href="/financeiro"
+            meta={config.meta_mensal ? { valor: config.meta_mensal, atual: receitaMes } : undefined}
           />
           <KpiCard
             label="Clientes ativos"

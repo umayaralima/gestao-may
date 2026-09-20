@@ -47,3 +47,84 @@ export async function excluirTipoProjeto(id: string) {
   await supabase.from("tipos_projeto").delete().eq("id", id);
   revalidar();
 }
+
+/* ---------- Configurações gerais (tabela `configuracoes`, linha 1) ---------- */
+
+const texto = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .transform((v) => (v === "" ? null : v));
+const inteiro = (min: number, max: number) => z.coerce.number().int().min(min).max(max);
+
+const esquemas = {
+  perfil: z.object({
+    nome: texto(120),
+    titulo: texto(80),
+    email_contato: z.union([z.literal(""), z.string().trim().email("E-mail inválido.")]).transform((v) => (v === "" ? null : v)),
+    telefone: texto(30),
+  }),
+  empresa: z.object({
+    empresa: texto(120),
+    cnpj: texto(20),
+    site: texto(160),
+  }),
+  pipeline: z.object({
+    dias_negocio_parado: inteiro(1, 365),
+  }),
+  financeiro: z.object({
+    meta_mensal: z
+      .string()
+      .trim()
+      .transform((v) => (v === "" ? null : Number(v.replace(/\./g, "").replace(",", "."))))
+      .refine((v) => v === null || (Number.isFinite(v) && v >= 0), "Valor inválido."),
+    dias_aviso_vencimento: inteiro(0, 90),
+    forma_pagamento_preferida: z.enum(["pix", "boleto", "cartao", "transferencia", "outro"]),
+    chave_pix: texto(120),
+  }),
+} as const;
+
+export type SecaoConfig = keyof typeof esquemas;
+
+export async function salvarConfiguracoes(secao: SecaoConfig, _prev: FormState, formData: FormData): Promise<FormState> {
+  const bruto = Object.fromEntries(Array.from(formData.entries()).filter(([k]) => !k.startsWith("$")));
+  const parsed = esquemas[secao].safeParse(bruto);
+  if (!parsed.success) return { erro: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("configuracoes").upsert({ id: 1, ...parsed.data, atualizado_em: new Date().toISOString() });
+  if (error) return { erro: error.code === "42P01" || error.code === "PGRST205" ? "Rode a migração 005_configuracoes.sql no Supabase." : "Não foi possível salvar." };
+
+  revalidar();
+  revalidatePath("/", "layout"); // sidebar (nome/título), dashboard, pipeline, financeiro
+  return { ok: true };
+}
+
+/* ---------- Senha (Supabase Auth) ---------- */
+
+export async function alterarSenha(_prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = z
+    .object({
+      senha_atual: z.string().min(1, "Informe a senha atual."),
+      senha_nova: z.string().min(8, "A nova senha precisa ter pelo menos 8 caracteres."),
+      senha_conf: z.string(),
+    })
+    .refine((v) => v.senha_nova === v.senha_conf, { message: "A confirmação não bate com a nova senha." })
+    .safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) return { erro: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) return { erro: "Sessão expirada. Entre de novo." };
+
+  // Confere a senha atual antes de trocar
+  const { error: erroLogin } = await supabase.auth.signInWithPassword({ email: user.email, password: parsed.data.senha_atual });
+  if (erroLogin) return { erro: "Senha atual incorreta." };
+
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.senha_nova });
+  if (error) return { erro: error.message.includes("different") ? "A nova senha precisa ser diferente da atual." : "Não foi possível alterar a senha." };
+  return { ok: true };
+}

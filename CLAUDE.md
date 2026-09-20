@@ -314,3 +314,18 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   (preset Next.js, root vazio, 3 env vars). Depois do deploy: Supabase → Authentication → URL Configuration → Site URL.
 - Próximos passos combinados: (1) May usa o sistema publicado e manda acertos visuais em lote; (2) Relatórios a partir de
   `figma-make/src/Reports.tsx`; (3) limpar dados fictícios; (4) Fase 3 (InfinitePay, Autentique).
+
+## Responsividade + Configurações (2026-09-20)
+
+- Responsivo: `src/components/app-shell.tsx` (sidebar vira gaveta abaixo de `lg`, barra superior com hambúrguer). Header/Subbar
+  quebram linha; KPIs `grid-cols-2 xl:grid-cols-4`; blocos de 3 colunas `lg:grid-cols-3`; tabelas em `overflow-auto` com `min-w`;
+  painel lateral de Clientes vira overlay no celular. `FiltroMenu` renderiza por portal (`position: fixed`), imune a `overflow`.
+- Configurações (Make `Configuracoes.tsx`, colado pela May no chat; ver `figma-make/src/Configuracoes.tsx.md`): nav lateral de abas
+  Perfil / Empresa / Pipeline / Financeiro / Serviços / Segurança em `src/app/(app)/configuracoes/configuracoes.tsx`.
+  Adaptado pro uso único: sem Notificações (entra junto com a integração de E-mails/Gmail na Fase 3), Segurança só troca de senha
+  (confere a atual via `signInWithPassword`), sem 2FA/sessões/excluir conta. Etapas do pipeline continuam fixas (só leitura).
+- Tabela `configuracoes` (linha única, id=1) na migração `005_configuracoes.sql`; leitura por `getConfiguracoes()` em
+  `src/lib/configuracoes.ts` (cai nos padrões se a migração não rodou). Onde cada campo age: `nome`/`titulo` → rodapé da sidebar;
+  `meta_mensal` → barra no card "Receita do mês" do Dashboard; `dias_negocio_parado` → ⚠ no card do Pipeline;
+  `dias_aviso_vencimento` → pílula "Vence em Nd" no Financeiro; `forma_pagamento_preferida` → padrão dos modais de lançamento/pago.
+- `cn()` não usa tailwind-merge: pra sobrescrever largura de um primitivo, passe prop (ex.: `largura=` no Input de Configurações).

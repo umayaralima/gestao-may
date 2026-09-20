@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
+import { iniciais } from "@/components/ui/primitivos";
 
 /*
  * Sidebar do protótipo (Figma Make, App.tsx → Sidebar): 224px, fundo #1B0F26,
@@ -27,7 +28,7 @@ const configuracoes: Item[] = [
   { href: "/configuracoes", label: "Configurações", Icone: GearIcon },
 ];
 
-export function Sidebar({ email, sair, onFechar }: { email: string; sair: () => Promise<void>; onFechar?: () => void }) {
+export function Sidebar({ email, nome, titulo, sair, onFechar }: { email: string; nome: string; titulo: string; sair: () => Promise<void>; onFechar?: () => void }) {
   const pathname = usePathname();
 
   const Nav = ({ href, label, Icone, emBreve }: Item) => {
@@ -86,11 +87,11 @@ export function Sidebar({ email, sair, onFechar }: { email: string; sair: () => 
       <div className="px-3 py-4 border-t border-[#311C45]">
         <form action={sair} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/4 transition-colors">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-300 to-brand-600 flex items-center justify-center text-[11px] font-semibold text-white shrink-0">
-            MA
+            {iniciais(nome)}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-[#DDDBD9] truncate">Mayara Lima</p>
-            <p className="text-[10px] text-[#968F88] truncate">{email}</p>
+            <p className="text-xs font-medium text-[#DDDBD9] truncate">{nome}</p>
+            <p className="text-[10px] text-[#968F88] truncate" title={email}>{titulo}</p>
           </div>
           <button type="submit" title="Sair" className="text-[#968F88] hover:text-[#DDDBD9] shrink-0">
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none">

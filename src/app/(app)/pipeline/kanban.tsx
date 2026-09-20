@@ -17,10 +17,12 @@ type Props = {
   abrirNovo?: boolean;
   busca: React.ReactNode;
   filtro: React.ReactNode;
+  /** dias sem movimentação pra marcar ⚠ (Configurações → Pipeline) */
+  diasParado: number;
 };
 
 /** Tela Pipeline do protótipo: header, faixa de resumo por etapa e kanban de 5 colunas. */
-export function Kanban({ leads, tipos, abrirNovo, busca, filtro }: Props) {
+export function Kanban({ leads, tipos, abrirNovo, busca, filtro, diasParado }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [novo, setNovo] = useState<EtapaLead | null>(abrirNovo ? "novo" : null);
@@ -89,7 +91,7 @@ export function Kanban({ leads, tipos, abrirNovo, busca, filtro }: Props) {
           ) : (
             <div className="flex gap-4 px-4 md:px-6 py-5 h-full" style={{ minWidth: "max-content" }}>
               {colunas.map((c, idx) => (
-                <Coluna key={c.etapa} etapa={c.etapa} itens={c.itens} total={c.total} onAdicionar={() => setNovo(c.etapa)} podeVoltar={idx > 0} podeAvancar={idx < colunas.length - 1} atraso={idx * 0.05} />
+                <Coluna key={c.etapa} etapa={c.etapa} itens={c.itens} total={c.total} onAdicionar={() => setNovo(c.etapa)} podeVoltar={idx > 0} podeAvancar={idx < colunas.length - 1} atraso={idx * 0.05} diasParado={diasParado} />
               ))}
             </div>
           )}
@@ -107,6 +109,7 @@ function Coluna({
   podeVoltar,
   podeAvancar,
   atraso,
+  diasParado,
 }: {
   etapa: EtapaLead;
   itens: Lead[];
@@ -115,6 +118,7 @@ function Coluna({
   podeVoltar: boolean;
   podeAvancar: boolean;
   atraso: number;
+  diasParado: number;
 }) {
   const cor = ETAPA_LEAD_COR[etapa];
   return (
@@ -134,7 +138,7 @@ function Coluna({
       </div>
       <div className="space-y-3 flex-1 overflow-y-auto pr-1">
         {itens.map((l) => (
-          <CardNegocio key={l.id} lead={l} cor={cor} podeVoltar={podeVoltar} podeAvancar={podeAvancar} />
+          <CardNegocio key={l.id} lead={l} cor={cor} podeVoltar={podeVoltar} podeAvancar={podeAvancar} diasParado={diasParado} />
         ))}
         <button
           type="button"
@@ -151,10 +155,10 @@ function Coluna({
   );
 }
 
-function CardNegocio({ lead, cor, podeVoltar, podeAvancar }: { lead: Lead; cor: string; podeVoltar: boolean; podeAvancar: boolean }) {
+function CardNegocio({ lead, cor, podeVoltar, podeAvancar, diasParado }: { lead: Lead; cor: string; podeVoltar: boolean; podeAvancar: boolean; diasParado: number }) {
   const [pending, startTransition] = useTransition();
   const dias = diffDias(lead.atualizado_em.slice(0, 10), hojeISO());
-  const parado = dias > 10;
+  const parado = dias >= diasParado;
   const followAtrasado = !!lead.proximo_followup && lead.proximo_followup < hojeISO();
   const mover = (d: "prev" | "next") => startTransition(() => moverLead(lead.id, d));
 

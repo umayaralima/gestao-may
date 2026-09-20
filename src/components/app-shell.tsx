@@ -10,7 +10,7 @@ import { Sidebar } from "@/components/sidebar";
  * abaixo disso ela vira uma gaveta aberta por uma barra superior com hambúrguer + logo.
  * A gaveta fecha ao clicar num link, no fundo escurecido ou com Esc.
  */
-export function AppShell({ email, sair, children }: { email: string; sair: () => Promise<void>; children: React.ReactNode }) {
+export function AppShell({ email, nome, titulo, sair, children }: { email: string; nome: string; titulo: string; sair: () => Promise<void>; children: React.ReactNode }) {
   const [aberto, setAberto] = useState(false);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export function AppShell({ email, sair, children }: { email: string; sair: () =>
           aberto ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <Sidebar email={email} sair={sair} onFechar={() => setAberto(false)} />
+        <Sidebar email={email} nome={nome} titulo={titulo} sair={sair} onFechar={() => setAberto(false)} />
       </div>
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">

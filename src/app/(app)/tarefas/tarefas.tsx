@@ -297,14 +297,17 @@ function NavegacaoPeriodo({ visao, base, onChange }: { visao: Visao; base: strin
   const rotulo =
     visao === "semana"
       ? `${fmtData(inicioSemana(base), false)} – ${fmtData(somarDias(inicioSemana(base), 6), false)}`
-      : new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date(`${base}T00:00:00`));
+      : (() => {
+          const s = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date(`${base}T00:00:00`));
+          return s.charAt(0).toUpperCase() + s.slice(1);
+        })();
 
   return (
     <div className="flex items-center gap-1">
       <button type="button" onClick={() => mover(-1)} className="w-6 h-6 rounded-md flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/8">
         ‹
       </button>
-      <span className="text-xs font-medium text-[#DDDBD9] capitalize min-w-[140px] text-center">{rotulo}</span>
+      <span className="text-xs font-medium text-[#DDDBD9] min-w-[140px] text-center">{rotulo}</span>
       <button type="button" onClick={() => mover(1)} className="w-6 h-6 rounded-md flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/8">
         ›
       </button>

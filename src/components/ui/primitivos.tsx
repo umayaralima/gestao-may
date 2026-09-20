@@ -1,3 +1,4 @@
+import { Children } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
@@ -25,14 +26,14 @@ export function Header({
         <h1 className="text-base font-semibold text-[#F5F5F4]">{titulo}</h1>
         {sub && <p className="text-xs text-[#968F88]">{sub}</p>}
       </div>
-      {children && <div className="flex items-center gap-3 shrink-0">{children}</div>}
+      {children && <div className="flex items-center gap-3 shrink-0">{Children.toArray(children)}</div>}
     </header>
   );
 }
 
 /** Barra secundária abaixo do header (filtros, contadores). */
 export function Subbar({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("flex items-center gap-3 px-6 py-3 border-b border-[#311C45] shrink-0", className)}>{children}</div>;
+  return <div className={cn("flex items-center gap-3 px-6 py-3 border-b border-[#311C45] shrink-0", className)}>{Children.toArray(children)}</div>;
 }
 
 /** Área rolável do conteúdo. */

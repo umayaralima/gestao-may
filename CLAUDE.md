@@ -303,3 +303,14 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
 - Formulários de criação/edição são modais (padrão NewTaskModal). `?novo=1` / `?nova=1` na URL abre o modal (usado pelos atalhos).
 - Tarefas: tabela `tarefas` + `leads.prioridade` na migração `004_tarefas_prioridade.sql`. `supabase/RODAR-AGORA.sql` = 002+003+seed+004.
 - `Reports.tsx` (Relatórios) do Make ainda não foi transplantado: candidato pra Fase 3 junto com "Ver NF"/exportar CSV.
+
+## Estado em 2026-09-20 (handoff)
+
+- Tudo conferido no navegador com dados fictícios: Dashboard, Clientes (+ painel lateral), Pipeline, Tarefas (dia/semana/mês),
+  Financeiro, Projetos (abas). Build de produção passa.
+- Banco Supabase (projeto cpetvyyqlufuloelojgd): schema.sql + migrações 002, 003, 004 + seed já rodados. May já cadastrou
+  um cliente real (BuilDesk) no meio dos fictícios; ao limpar o seed, preservar o que não tem id `a0…/b0…/c0…`.
+- GitHub: https://github.com/umayaralima/gestao-may (main). Vercel: deploy sendo configurado pela May
+  (preset Next.js, root vazio, 3 env vars). Depois do deploy: Supabase → Authentication → URL Configuration → Site URL.
+- Próximos passos combinados: (1) May usa o sistema publicado e manda acertos visuais em lote; (2) Relatórios a partir de
+  `figma-make/src/Reports.tsx`; (3) limpar dados fictícios; (4) Fase 3 (InfinitePay, Autentique).

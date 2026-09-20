@@ -97,7 +97,7 @@ export default async function DashboardPage() {
   return (
     <>
       <Header titulo="Dashboard" sub={`${mesAnoExtenso()} · Atualizado agora`}>
-        <Busca placeholder="Buscar clientes…" className="w-52" />
+        <Busca placeholder="Buscar clientes…" className="sm:w-52" />
         <Link
           href="/tarefas"
           title={pendencias ? `${pendencias} pendência(s) pra hoje` : "Nada pendente"}
@@ -112,8 +112,8 @@ export default async function DashboardPage() {
         <BotaoPrimario href="/clientes?novo=1">Novo cliente</BotaoPrimario>
       </Header>
 
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-        <div className="grid grid-cols-4 gap-4 entrar">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-5">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 entrar">
           <KpiCard
             label="Receita do mês"
             value={fmtK(receitaMes)}
@@ -141,12 +141,12 @@ export default async function DashboardPage() {
           <KpiCard label="Ticket médio" value={fmtK(ticketMedio)} sub="por projeto" trend={`${comValor.length} projeto(s) com valor`} trendUp href="/projetos" />
         </div>
 
-        <div className="grid grid-cols-3 gap-4 entrar entrar-1">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 entrar entrar-1">
           <ReceitaMensal dados={receita} />
           <PipelineDonut dados={pipeline} />
         </div>
 
-        <div className="grid grid-cols-3 gap-4 entrar entrar-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 entrar entrar-2">
           <AtividadeSemanal dados={atividade} />
           <div className="bg-[#231431] border border-[#311C45] rounded-xl p-5 flex flex-col">
             <p className="text-sm font-semibold text-[#F5F5F4] mb-4">Atividade recente</p>
@@ -187,7 +187,8 @@ export default async function DashboardPage() {
           {recentes.length === 0 ? (
             <p className="px-5 py-8 text-center text-xs text-[#968F88]">Nenhum cliente cadastrado ainda.</p>
           ) : (
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-[#311C45]">
                   <Th>Cliente</Th>
@@ -225,6 +226,7 @@ export default async function DashboardPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>

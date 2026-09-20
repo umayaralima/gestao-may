@@ -32,7 +32,7 @@ export function ReceitaMensal({ dados }: { dados: PontoReceita[] }) {
   const [periodo, setPeriodo] = useState<3 | 6 | 12>(6);
   const visiveis = dados.slice(-periodo);
   return (
-    <div className="col-span-2 bg-[#231431] border border-[#311C45] rounded-xl p-5">
+    <div className="lg:col-span-2 bg-[#231431] border border-[#311C45] rounded-xl p-5">
       <div className="flex items-start justify-between mb-5">
         <div>
           <p className="text-sm font-semibold text-[#F5F5F4]">Receita mensal</p>
@@ -135,7 +135,7 @@ export type DiaAtividade = { dia: string; mensagens: number; conversas: number }
 
 export function AtividadeSemanal({ dados }: { dados: DiaAtividade[] }) {
   return (
-    <div className="col-span-2 bg-[#231431] border border-[#311C45] rounded-xl p-5">
+    <div className="lg:col-span-2 bg-[#231431] border border-[#311C45] rounded-xl p-5">
       <div className="flex items-start justify-between mb-5">
         <div>
           <p className="text-sm font-semibold text-[#F5F5F4]">Atividade semanal</p>

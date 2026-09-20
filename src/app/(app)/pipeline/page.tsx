@@ -30,9 +30,9 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
       leads={filtrados}
       tipos={(tipos ?? []).map((t) => t.nome)}
       abrirNovo={novo === "1"}
-      busca={<Busca placeholder="Buscar negócio…" defaultValue={q} className="w-44" />}
+      busca={<Busca key="busca" placeholder="Buscar negócio…" defaultValue={q} className="sm:w-44" />}
       filtro={
-        <FiltroMenu
+        <FiltroMenu key="filtro"
           param="prioridade"
           rotulo="Prioridade"
           opcoes={[{ valor: "", label: "Todas" }, ...PRIORIDADES.map((p) => ({ valor: p, label: PRIORIDADE_LABEL[p], cor: PRIORIDADE_COR[p] }))]}

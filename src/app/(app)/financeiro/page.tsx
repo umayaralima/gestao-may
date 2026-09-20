@@ -38,9 +38,9 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: P
       projetos={opcoes}
       abrirNovo={novo === "1"}
       projetoInicial={projeto}
-      busca={<Busca placeholder="Buscar cliente ou projeto…" defaultValue={q} className="w-52" />}
+      busca={<Busca key="busca" placeholder="Buscar cliente ou projeto…" defaultValue={q} className="sm:w-52" />}
       filtro={
-        <FiltroMenu
+        <FiltroMenu key="filtro"
           param="status"
           opcoes={[
             { valor: "", label: "Todos" },

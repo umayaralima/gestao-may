@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { FiltroMenu } from "@/components/ui/filtro-menu";
 import { Busca } from "@/components/ui/primitivos";
 import { CATEGORIA_TAREFA_LABEL, CATEGORIAS_TAREFA, PRIORIDADE_COR, PRIORIDADE_LABEL, PRIORIDADES } from "@/lib/constantes";
@@ -49,12 +50,12 @@ export default async function TarefasPage({
       dataBase={data}
       abrirNova={nova === "1"}
       vinculoInicial={cliente ? `cliente:${cliente}` : undefined}
-      busca={<Busca placeholder="Buscar tarefa ou cliente…" defaultValue={q} className="w-56" />}
+      busca={<Busca key="busca" placeholder="Buscar tarefa ou cliente…" defaultValue={q} />}
       filtros={
-        <>
+        <Fragment key="filtros">
           <FiltroMenu param="categoria" rotulo="Categoria" opcoes={[{ valor: "", label: "Todas" }, ...CATEGORIAS_TAREFA.map((c) => ({ valor: c, label: CATEGORIA_TAREFA_LABEL[c] }))]} />
           <FiltroMenu param="prioridade" rotulo="Prioridade" opcoes={[{ valor: "", label: "Todas" }, ...PRIORIDADES.map((p) => ({ valor: p, label: PRIORIDADE_LABEL[p], cor: PRIORIDADE_COR[p] }))]} />
-        </>
+        </Fragment>
       }
     />
   );

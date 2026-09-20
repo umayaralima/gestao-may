@@ -84,8 +84,8 @@ export function ClientesTabela({ linhas, abrirNovo, sub, busca, subbar }: Props)
 
           {subbar}
 
-          <div className="flex-1 overflow-y-auto">
-            <table className="w-full text-sm">
+          <div className="flex-1 overflow-auto">
+            <table className="w-full min-w-[720px] text-sm">
               <thead className="sticky top-0 bg-[#150C1D] z-10">
                 <tr className="border-b border-[#311C45]">
                   <th className="pl-5 pr-3 py-3">
@@ -177,7 +177,7 @@ function PainelDetalhe({ linha, onClose }: { linha: ClienteLinha; onClose: () =>
   void recebido;
 
   return (
-    <div className="w-80 shrink-0 border-l border-[#311C45] flex flex-col bg-[#1B0F26] overflow-hidden entrar">
+    <div className="fixed inset-y-0 right-0 z-40 w-full max-w-sm shadow-2xl lg:static lg:z-auto lg:w-80 lg:max-w-none lg:shadow-none shrink-0 border-l border-[#311C45] flex flex-col bg-[#1B0F26] overflow-hidden entrar">
       <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[#311C45]">
         <p className="text-xs font-semibold text-[#968F88] uppercase tracking-wider">Detalhes</p>
         <button type="button" onClick={onClose} className="w-6 h-6 rounded-md flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/8 transition-colors">

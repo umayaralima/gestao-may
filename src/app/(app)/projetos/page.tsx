@@ -44,7 +44,7 @@ export default async function ProjetosPage({
           </>
         }
       >
-        <Busca placeholder="Buscar projeto ou cliente…" defaultValue={q} className="w-56" />
+        <Busca placeholder="Buscar projeto ou cliente…" defaultValue={q} />
         <NovoProjetoBotao
           clientes={clientes ?? []}
           tipos={(tipos ?? []).map((t) => t.nome)}
@@ -64,8 +64,8 @@ export default async function ProjetosPage({
         <span className="text-[11px] font-mono text-[#968F88]">{lista.length} registros</span>
       </Subbar>
 
-      <div className="flex-1 overflow-y-auto">
-        <table className="w-full text-sm">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full min-w-[720px] text-sm">
           <thead className="sticky top-0 bg-[#150C1D] z-10">
             <tr className="border-b border-[#311C45]">
               {["Projeto", "Cliente", "Tipo", "Status", "Valor", "Recebido", "Prazo", ""].map((h) => (

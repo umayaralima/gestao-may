@@ -83,7 +83,7 @@ export function Tarefas({ tarefas, vinculos, visao, dataBase, abrirNova, vinculo
           <BotaoPrimario onClick={() => setNova({})}>Nova tarefa</BotaoPrimario>
         </Header>
 
-        <Subbar className="gap-4 overflow-x-auto">
+        <Subbar className="gap-3 md:gap-4">
           {/* Dia / Semana / Mês */}
           <div className="flex items-center gap-1 rounded-lg border border-[#311C45] p-0.5">
             {(["dia", "semana", "mes"] as const).map((v) => (
@@ -106,7 +106,7 @@ export function Tarefas({ tarefas, vinculos, visao, dataBase, abrirNova, vinculo
         </Subbar>
 
         {total > 0 && visao === "dia" && (
-          <div className="px-6 py-3 border-b border-[#311C45] shrink-0">
+          <div className="px-4 md:px-6 py-3 border-b border-[#311C45] shrink-0">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-medium text-[#968F88]">Progresso geral</span>
               <span className="text-[10px] font-mono text-brand-400">{progresso}%</span>
@@ -117,7 +117,7 @@ export function Tarefas({ tarefas, vinculos, visao, dataBase, abrirNova, vinculo
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-auto px-4 md:px-6 py-4">
           {visao === "dia" && <VisaoDia pendentes={pendentes} concluidas={concluidas} onEditar={setEditando} />}
           {visao === "semana" && <VisaoSemana tarefas={tarefas} base={base} onEditar={setEditando} onNova={(d) => setNova({ data: d })} />}
           {visao === "mes" && <VisaoMes tarefas={tarefas} base={base} onEditar={setEditando} onNova={(d) => setNova({ data: d })} />}
@@ -427,14 +427,14 @@ function VisaoMes({ tarefas, base, onEditar, onNova }: { tarefas: TarefaComVincu
               type="button"
               onClick={() => setAberto(d)}
               className={cn(
-                "flex flex-col items-start rounded-lg border p-1.5 min-h-[86px] text-left transition-colors entrar",
+                "flex flex-col items-start rounded-lg border p-1 sm:p-1.5 min-h-[52px] sm:min-h-[86px] text-left transition-colors entrar",
                 doMes ? "bg-[#231431] border-[#311C45] hover:border-[#5A496A]" : "bg-transparent border-[#311C45]/40 opacity-40",
                 ehHoje && "border-brand-400/60",
               )}
               style={{ animationDelay: `${(i % 7) * 0.02}s` }}
             >
               <span className={cn("text-[11px] font-mono", ehHoje ? "text-brand-400 font-semibold" : "text-[#968F88]")}>{Number(d.slice(8, 10))}</span>
-              <div className="mt-1 space-y-0.5 w-full">
+              <div className="mt-1 space-y-0.5 w-full hidden sm:block">
                 {doDia.slice(0, 3).map((t) => (
                   <p key={t.id} className={cn("text-[9px] leading-tight truncate px-1 rounded", t.concluida_em ? "text-[#5A496A] line-through" : atras ? "text-red-300 bg-red-500/10" : "text-[#DDDBD9] bg-white/5")}>
                     {t.titulo}
@@ -442,6 +442,11 @@ function VisaoMes({ tarefas, base, onEditar, onNova }: { tarefas: TarefaComVincu
                 ))}
                 {doDia.length > 3 && <p className="text-[9px] text-[#968F88] px-1">+{doDia.length - 3}</p>}
               </div>
+              {doDia.length > 0 && (
+                <span className={cn("sm:hidden mt-1 text-[9px] font-mono px-1 rounded", atras ? "text-red-300 bg-red-500/10" : pend.length ? "text-[#DDDBD9] bg-white/5" : "text-[#5A496A]")}>
+                  {doDia.length}
+                </span>
+              )}
             </button>
           );
         })}

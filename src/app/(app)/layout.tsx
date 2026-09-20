@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { Sidebar } from "@/components/sidebar";
+import { AppShell } from "@/components/app-shell";
 import { createClient } from "@/lib/supabase/server";
 import { sair } from "@/app/login/actions";
 
-/** Shell do protótipo: sidebar fixa + main com rolagem interna por tela. */
+/** Shell do protótipo: sidebar fixa (gaveta no mobile) + main com rolagem interna por tela. */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const {
@@ -13,9 +13,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!user) redirect("/login");
 
   return (
-    <div className="flex h-screen bg-[#150C1D] overflow-hidden">
-      <Sidebar email={user.email ?? ""} sair={sair} />
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">{children}</main>
-    </div>
+    <AppShell email={user.email ?? ""} sair={sair}>
+      {children}
+    </AppShell>
   );
 }

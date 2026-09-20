@@ -16,15 +16,15 @@ export function BriefingForm({ action, briefing }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
 
   return (
-    <form action={formAction} className="grid grid-cols-3 gap-4">
-      <Card className="col-span-2 space-y-4">
+    <form action={formAction} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <Card className="lg:col-span-2 space-y-4">
         <Campo label="Objetivo do projeto" htmlFor="objetivo" hint="O que o cliente quer alcançar com isso?">
           <Textarea id="objetivo" name="objetivo" rows={3} defaultValue={briefing?.objetivo ?? ""} />
         </Campo>
         <Campo label="Público-alvo" htmlFor="publico_alvo">
           <Textarea id="publico_alvo" name="publico_alvo" rows={2} defaultValue={briefing?.publico_alvo ?? ""} />
         </Campo>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Campo label="Referências visuais" htmlFor="referencias" hint="Links de sites, Pinterest, Behance…">
             <Textarea id="referencias" name="referencias" rows={3} defaultValue={briefing?.referencias ?? ""} />
           </Campo>

@@ -39,7 +39,7 @@ export function TarefaFormModal({ action, vinculos, tarefa, vinculoInicial, data
         <Campo label="Descrição" htmlFor="descricao">
           <Textarea id="descricao" name="descricao" rows={2} placeholder="Detalhes opcionais…" defaultValue={tarefa?.descricao ?? ""} />
         </Campo>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Campo label="Cliente / negócio" htmlFor="vinculo">
             <Select id="vinculo" name="vinculo" defaultValue={vinculoAtual}>
               <option value="">Nenhum</option>
@@ -66,7 +66,7 @@ export function TarefaFormModal({ action, vinculos, tarefa, vinculoInicial, data
             </Select>
           </Campo>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Campo label="Prazo" htmlFor="vencimento">
             <Input id="vencimento" name="vencimento" type="date" defaultValue={tarefa?.vencimento ?? dataInicial ?? ""} />
           </Campo>

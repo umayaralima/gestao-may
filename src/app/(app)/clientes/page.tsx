@@ -49,9 +49,9 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
           {linhas.length} registros · {ativos} ativos · <span className="font-mono">{fmt(totalCarteira)}</span> em carteira
         </>
       }
-      busca={<Busca placeholder="Buscar cliente, contato ou e-mail…" defaultValue={q} className="w-64" />}
+      busca={<Busca key="busca" placeholder="Buscar cliente, contato ou e-mail…" defaultValue={q} className="sm:w-64" />}
       subbar={
-        <Subbar>
+        <Subbar key="subbar">
           <FiltroMenu
             param="status"
             opcoes={[

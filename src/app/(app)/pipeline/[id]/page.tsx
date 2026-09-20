@@ -61,7 +61,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         )}
       </Header>
 
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-5">
         {clienteConvertido && (
           <div className="flex items-center justify-between gap-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 entrar">
             <p className="text-xs text-[#DDDBD9]">
@@ -90,14 +90,14 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           </form>
         )}
 
-        <div className="grid grid-cols-4 gap-4 entrar">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 entrar">
           <KpiCard label="Valor estimado" value={lead.valor_estimado !== null ? fmt(lead.valor_estimado) : "—"} sub={lead.servico_interesse ?? "serviço não definido"} />
           <KpiCard label="Etapa" value={ETAPA_LEAD_LABEL[lead.etapa]} sub={`há ${diasNaEtapa} dia(s) nesta etapa`} accent={diasNaEtapa > 10 ? "text-amber-400" : undefined} />
           <KpiCard label="Prioridade" value={PRIORIDADE_LABEL[lead.prioridade]} accent={lead.prioridade === "alta" ? "text-red-400" : lead.prioridade === "media" ? "text-amber-400" : "text-[#968F88]"} sub={`cadastrado ${fmtData(lead.criado_em)}`} />
           <KpiCard label="Interações" value={String((interacoes ?? []).length)} sub={interacoes?.[0] ? `última ${fmtData(interacoes[0].data)}` : "nenhuma ainda"} />
         </div>
 
-        <div className="grid grid-cols-3 gap-4 entrar entrar-1">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 entrar entrar-1">
           <Card className="space-y-4">
             <div className="flex items-center gap-3">
               <Avatar nome={lead.empresa ?? lead.nome} tamanho={11} />
@@ -156,7 +156,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
             </form>
           </Card>
 
-          <div className="col-span-2">
+          <div className="lg:col-span-2">
             <PainelRelacionamento dono={dono} followup={{ data: lead.proximo_followup, nota: lead.nota_followup }} interacoes={interacoes ?? []} acoes={acoes} />
           </div>
         </div>

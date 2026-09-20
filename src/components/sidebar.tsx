@@ -27,7 +27,7 @@ const configuracoes: Item[] = [
   { href: "/configuracoes", label: "Configurações", Icone: GearIcon },
 ];
 
-export function Sidebar({ email, sair }: { email: string; sair: () => Promise<void> }) {
+export function Sidebar({ email, sair, onFechar }: { email: string; sair: () => Promise<void>; onFechar?: () => void }) {
   const pathname = usePathname();
 
   const Nav = ({ href, label, Icone, emBreve }: Item) => {
@@ -56,8 +56,20 @@ export function Sidebar({ email, sair }: { email: string; sair: () => Promise<vo
 
   return (
     <aside className="flex flex-col w-56 shrink-0 h-full border-r border-[#311C45] bg-[#1B0F26]">
-      <div className="flex items-center px-5 py-5 border-b border-[#311C45]">
+      <div className="flex items-center justify-between px-5 py-5 border-b border-[#311C45]">
         <Image src="/marca/logo-gradiente.png" alt="Mayara" width={531} height={131} priority className="h-7 w-auto" />
+        {onFechar && (
+          <button
+            type="button"
+            onClick={onFechar}
+            aria-label="Fechar menu"
+            className="lg:hidden w-7 h-7 rounded-md flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/8 transition-colors"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 2l8 8M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">

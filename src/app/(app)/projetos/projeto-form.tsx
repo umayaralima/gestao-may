@@ -32,7 +32,7 @@ export function ProjetoFormModal({ action, clientes, tipos, projeto, inicial, on
   return (
     <Modal titulo={projeto ? "Editar projeto" : "Novo projeto"} onClose={onClose} largura="lg">
       <form action={formAction} className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Campo label="Cliente" htmlFor="cliente_id">
             <Select id="cliente_id" name="cliente_id" required defaultValue={projeto?.cliente_id ?? inicial?.cliente_id ?? ""}>
               <option value="" disabled>

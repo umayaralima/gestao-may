@@ -27,7 +27,7 @@ export function ClienteFormModal({ action, cliente, onClose }: Props) {
         <Campo label="Nome" htmlFor="nome">
           <Input id="nome" name="nome" required autoFocus defaultValue={cliente?.nome} placeholder="Nome da pessoa de contato" />
         </Campo>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Campo label="Empresa" htmlFor="empresa">
             <Input id="empresa" name="empresa" defaultValue={cliente?.empresa ?? ""} />
           </Campo>

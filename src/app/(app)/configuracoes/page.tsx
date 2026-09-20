@@ -19,7 +19,7 @@ export default async function ConfiguracoesPage() {
   return (
     <>
       <Header titulo="Configurações" sub="Listas que aparecem nos formulários" />
-      <div className="flex-1 overflow-y-auto px-6 py-5">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5">
         <div className="max-w-2xl space-y-5">
           <Card className="entrar">
             <CardTitulo sub="Aparecem no campo “Tipo de serviço” do projeto e no “Serviço de interesse” do pipeline. Renomear atualiza os registros que já usam o nome; excluir não apaga nada, eles só mantêm o texto antigo.">
@@ -48,7 +48,7 @@ export default async function ConfiguracoesPage() {
                             Salvar
                           </button>
                         </form>
-                        <span className="w-24 text-right text-[10px] font-mono text-[#968F88]">{usos ? `${usos} em uso` : ""}</span>
+                        <span className="hidden sm:block w-24 text-right text-[10px] font-mono text-[#968F88]">{usos ? `${usos} em uso` : ""}</span>
                         <form action={excluir}>
                           <button type="submit" className="px-2.5 py-1 text-[11px] text-[#968F88] hover:text-red-400 border border-[#311C45] hover:border-red-500/30 rounded-lg transition-colors">
                             Excluir

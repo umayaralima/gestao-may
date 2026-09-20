@@ -40,7 +40,7 @@ export function LeadFormModal({ action, tipos, lead, etapaInicial = "novo", onCl
     <Modal titulo={lead ? "Editar negócio" : "Novo negócio"} onClose={onClose}>
       <form action={formAction} className="space-y-4">
         <input type="hidden" name="prioridade" value={prioridade} />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Campo label="Contato" htmlFor="nome">
             <Input id="nome" name="nome" required autoFocus defaultValue={lead?.nome} placeholder="Quem entrou em contato" />
           </Campo>

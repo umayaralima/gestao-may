@@ -56,7 +56,7 @@ export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial,
           <BotaoPrimario onClick={() => setNovo(true)}>Novo lançamento</BotaoPrimario>
         </Header>
 
-        <div className="grid grid-cols-4 gap-4 px-6 py-5 shrink-0 entrar">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 px-4 md:px-6 py-5 shrink-0 entrar">
           <KpiCard label="Total em carteira" value={fmt(total)} sub={`${todas.length} lançamentos`} />
           <KpiCard label="Recebido" value={fmt(totalPago)} sub={`${qtd("pago")} pagamentos`} accent="text-emerald-400" />
           <KpiCard label="A receber" value={fmt(totalPendente)} sub={`${qtd("pendente")} pendentes`} accent="text-amber-400" />
@@ -64,13 +64,13 @@ export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial,
         </div>
 
         {total > 0 && (
-          <div className="px-6 pb-4 shrink-0 entrar entrar-1">
+          <div className="px-4 md:px-6 pb-4 shrink-0 entrar entrar-1">
             <div className="flex rounded-full overflow-hidden h-2 bg-[#311C45]">
               <div className="bg-emerald-500 transition-all duration-700" style={{ width: `${(totalPago / total) * 100}%` }} />
               <div className="bg-amber-500 transition-all duration-700" style={{ width: `${(totalPendente / total) * 100}%` }} />
               <div className="bg-red-500 transition-all duration-700" style={{ width: `${(totalVencido / total) * 100}%` }} />
             </div>
-            <div className="flex items-center gap-4 mt-2">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
               {(
                 [
                   ["Pago", "bg-emerald-500", totalPago],
@@ -91,8 +91,8 @@ export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial,
           <span className="text-[11px] font-mono text-[#968F88]">{linhas.length} registros</span>
         </Subbar>
 
-        <div className="flex-1 overflow-y-auto">
-          <table className="w-full text-sm">
+        <div className="flex-1 overflow-auto">
+          <table className="w-full min-w-[720px] text-sm">
             <thead className="sticky top-0 bg-[#150C1D] z-10">
               <tr className="border-b border-[#311C45]">
                 {["Cliente", "Projeto", "Tipo", "Vencimento", "Pagamento", "Valor", "Status", ""].map((h) => (
@@ -250,7 +250,7 @@ function NovoLancamentoModal({ projetos, projetoInicial, onClose }: { projetos: 
             ))}
           </Select>
         </Campo>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Campo label="Tipo" htmlFor="tipo">
             <Select id="tipo" name="tipo" defaultValue="parcela">
               {TIPO_PAGAMENTO.map((t) => (

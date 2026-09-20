@@ -30,7 +30,8 @@ export function PagamentosProjeto({ pagamentos, projetoId }: { pagamentos: Pagam
         {pagamentos.length === 0 ? (
           <Vazio icone="💰" titulo="Nenhuma parcela cadastrada" sub="Adicione a entrada, parcelas e o pagamento final." />
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="border-b border-[#311C45]">
                 {["Tipo", "Vencimento", "Pagamento", "Valor", "Status", ""].map((h) => (
@@ -44,6 +45,7 @@ export function PagamentosProjeto({ pagamentos, projetoId }: { pagamentos: Pagam
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </>

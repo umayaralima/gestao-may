@@ -16,8 +16,8 @@ const ETAPAS: Array<{ id: Contrato["status"]; label: string }> = [
 
 export function Contratos({ contratos, criar }: { contratos: Contrato[]; criar: (prev: FormState, fd: FormData) => Promise<FormState> }) {
   return (
-    <div className="grid grid-cols-3 gap-4">
-      <div className="col-span-2 space-y-3">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="lg:col-span-2 space-y-3">
         {contratos.length === 0 ? <Vazio icone="📝" titulo="Nenhum contrato ainda" sub="Crie o primeiro ao lado. O documento fica no Autentique, Docs ou onde preferir." /> : contratos.map((c) => <CartaoContrato key={c.id} c={c} />)}
       </div>
       <NovoContrato criar={criar} />
@@ -50,7 +50,7 @@ function CartaoContrato({ c }: { c: Contrato }) {
         ))}
       </ol>
 
-      <div className="grid grid-cols-3 gap-3 text-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
         {[
           ["Criado em", fmtData(c.criado_em)],
           ["Enviado em", fmtData(c.data_envio)],

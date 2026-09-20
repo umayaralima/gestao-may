@@ -55,7 +55,7 @@ export function Kanban({ leads, tipos, abrirNovo, busca, filtro }: Props) {
         </Header>
 
         {/* Faixa de resumo: valor por etapa + barra proporcional */}
-        <div className="flex items-center px-6 py-3 border-b border-[#311C45] gap-0 shrink-0 overflow-x-auto">
+        <div className="flex items-center px-4 md:px-6 py-3 border-b border-[#311C45] gap-0 shrink-0 overflow-x-auto">
           {colunas.map((c, i) => {
             const pct = total > 0 ? (c.total / total) * 100 : 0;
             const cor = ETAPA_LEAD_COR[c.etapa];
@@ -87,7 +87,7 @@ export function Kanban({ leads, tipos, abrirNovo, busca, filtro }: Props) {
           {leads.length === 0 ? (
             <Vazio icone="🎯" titulo="Nenhum negócio no funil" sub="Cadastre quem entrou em contato com você." />
           ) : (
-            <div className="flex gap-4 px-6 py-5 h-full" style={{ minWidth: "max-content" }}>
+            <div className="flex gap-4 px-4 md:px-6 py-5 h-full" style={{ minWidth: "max-content" }}>
               {colunas.map((c, idx) => (
                 <Coluna key={c.etapa} etapa={c.etapa} itens={c.itens} total={c.total} onAdicionar={() => setNovo(c.etapa)} podeVoltar={idx > 0} podeAvancar={idx < colunas.length - 1} atraso={idx * 0.05} />
               ))}

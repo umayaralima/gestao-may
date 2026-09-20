@@ -21,19 +21,19 @@ export function Header({
   className?: string;
 }) {
   return (
-    <header className={cn("flex items-center justify-between px-6 py-4 border-b border-[#311C45] shrink-0 gap-4", className)}>
+    <header className={cn("flex flex-col gap-3 px-4 py-4 border-b border-[#311C45] shrink-0 md:flex-row md:items-center md:justify-between md:gap-4 md:px-6", className)}>
       <div className="min-w-0">
         <h1 className="text-base font-semibold text-[#F5F5F4]">{titulo}</h1>
         {sub && <p className="text-xs text-[#968F88]">{sub}</p>}
       </div>
-      {children && <div className="flex items-center gap-3 shrink-0">{Children.toArray(children)}</div>}
+      {children && <div className="flex flex-wrap items-center gap-2 md:gap-3 md:shrink-0">{Children.toArray(children)}</div>}
     </header>
   );
 }
 
 /** Barra secundária abaixo do header (filtros, contadores). */
 export function Subbar({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("flex items-center gap-3 px-6 py-3 border-b border-[#311C45] shrink-0", className)}>{Children.toArray(children)}</div>;
+  return <div className={cn("flex flex-wrap items-center gap-3 px-4 py-3 border-b border-[#311C45] shrink-0 md:px-6", className)}>{Children.toArray(children)}</div>;
 }
 
 /** Área rolável do conteúdo. */
@@ -215,7 +215,7 @@ export function Avatar({ nome, tamanho = 8, className }: { nome: string; tamanho
 /** Campo de busca do header. */
 export function Busca({ placeholder, defaultValue, name = "q", className }: { placeholder: string; defaultValue?: string; name?: string; className?: string }) {
   return (
-    <form className="relative">
+    <form className="relative flex-1 min-w-[180px] sm:flex-none">
       <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#968F88]" width="12" height="12" viewBox="0 0 14 14" fill="none">
         <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.5" />
         <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -226,7 +226,7 @@ export function Busca({ placeholder, defaultValue, name = "q", className }: { pl
         placeholder={placeholder}
         defaultValue={defaultValue}
         className={cn(
-          "bg-[#231431] border border-[#311C45] rounded-lg pl-8 pr-3 py-2 text-xs text-[#DDDBD9] placeholder:text-[#968F88] outline-none focus:border-brand-400/60 focus:ring-1 focus:ring-brand-400/20 transition-all w-56",
+          "bg-[#231431] border border-[#311C45] rounded-lg pl-8 pr-3 py-2 text-xs text-[#DDDBD9] placeholder:text-[#968F88] outline-none focus:border-brand-400/60 focus:ring-1 focus:ring-brand-400/20 transition-all w-full sm:w-56",
           className,
         )}
       />

@@ -83,7 +83,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
       </Header>
 
       {/* Abas */}
-      <div className="flex items-center gap-1 px-6 border-b border-[#311C45] shrink-0">
+      <div className="flex items-center gap-1 px-4 md:px-6 border-b border-[#311C45] shrink-0 overflow-x-auto">
         {ABAS.map((a) => {
           const marcador = (a.id === "briefing" && briefing) || (a.id === "contrato" && temAssinado) ? "ok" : a.id === "pagamentos" && atrasados.length ? "alerta" : null;
           return (
@@ -103,7 +103,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
         })}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-5">
         {atrasados.length > 0 && (
           <div className="flex items-center justify-between gap-4 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 entrar">
             <p className="text-xs text-red-400 font-medium">
@@ -129,7 +129,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
 
         {aba === "geral" && (
           <>
-            <div className="grid grid-cols-4 gap-4 entrar">
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 entrar">
               <KpiCard label="Valor do projeto" value={fmt(projeto.valor_total)} sub={naoParcelado !== null && Math.abs(naoParcelado) > 0.009 ? `${fmt(naoParcelado)} sem parcela` : "tudo parcelado"} />
               <KpiCard label="Recebido" value={fmt(totalPago)} accent="text-emerald-400" sub={`${lista.filter((p) => p.status === "pago").length} pago(s)`} />
               <KpiCard label="A receber" value={fmt(totalPendente + totalAtrasado)} accent={totalAtrasado > 0 ? "text-red-400" : "text-amber-400"} sub={totalAtrasado > 0 ? `${fmt(totalAtrasado)} vencido` : `${lista.filter((p) => p.status === "pendente").length} pendente(s)`} />
@@ -141,10 +141,10 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4 entrar entrar-1">
-              <Card className="col-span-2 space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 entrar entrar-1">
+              <Card className="lg:col-span-2 space-y-4">
                 <CardTitulo>Detalhes</CardTitulo>
-                <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs">
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-xs">
                   <Item k="Cliente">
                     <Link href={`/clientes/${projeto.cliente_id}`} className="flex items-center gap-2 text-brand-400 hover:text-brand-300">
                       <Avatar nome={clienteNome} tamanho={7} /> {clienteNome}

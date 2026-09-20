@@ -79,16 +79,16 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
         <BotaoPrimario href={`/projetos?novo=1&cliente=${cliente.id}`}>Novo projeto</BotaoPrimario>
       </Header>
 
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-        <div className="grid grid-cols-4 gap-4 entrar">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-5">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 entrar">
           <KpiCard label="Valor total" value={fmt(valorTotal)} sub={`${ativos.length} projeto(s)`} />
           <KpiCard label="Recebido" value={fmt(recebido)} accent="text-emerald-400" sub={`${(pagamentos ?? []).filter((p) => p.status === "pago").length} pagamento(s)`} />
           <KpiCard label="Em atraso" value={fmt(atrasado)} accent={atrasado > 0 ? "text-red-400" : undefined} sub={atrasado > 0 ? "cobrar" : "nada em atraso"} />
           <KpiCard label="Interações" value={String((interacoes ?? []).length)} sub={interacoes?.[0] ? `última ${fmtData(interacoes[0].data)}` : "nenhuma ainda"} />
         </div>
 
-        <div className="grid grid-cols-3 gap-4 entrar entrar-1">
-          <Card className="col-span-1 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 entrar entrar-1">
+          <Card className="space-y-4">
             <div className="flex items-center gap-3">
               <Avatar nome={cliente.empresa ?? cliente.nome} tamanho={11} />
               <div className="min-w-0">
@@ -131,7 +131,7 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
             </form>
           </Card>
 
-          <div className="col-span-2 bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden">
+          <div className="lg:col-span-2 bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#311C45]">
               <CardTitulo sub={`${(projetos ?? []).length} no total`}>Projetos</CardTitulo>
               <BotaoGhost href={`/projetos?novo=1&cliente=${cliente.id}`}>+ Projeto</BotaoGhost>
@@ -139,7 +139,8 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
             {(projetos ?? []).length === 0 ? (
               <p className="px-5 py-8 text-center text-xs text-[#968F88]">Nenhum projeto ainda.</p>
             ) : (
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[560px] text-sm">
                 <thead>
                   <tr className="border-b border-[#311C45]">
                     <Th>Projeto</Th>
@@ -169,6 +170,7 @@ export default async function ClientePage({ params }: { params: Promise<{ id: st
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </div>
         </div>

@@ -20,6 +20,7 @@ const principal: Item[] = [
   { href: "/projetos", label: "Projetos", Icone: FolderIcon },
   { href: "/tarefas", label: "Tarefas", Icone: CheckIcon },
   { href: "/financeiro", label: "Financeiro", Icone: ChartIcon },
+  { href: "/relatorios", label: "Relatórios", Icone: ReportIcon },
   { href: "/emails", label: "E-mails", Icone: MailIcon, emBreve: true },
 ];
 
@@ -152,6 +153,13 @@ function ChartIcon() {
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
       <rect x="1.5" y="1.5" width="12" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.3" />
       <path d="M4 10l2.5-3 2.5 2 2.5-4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function ReportIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+      <path d="M2 13V7M5.75 13V3M9.5 13V9M13.25 13V5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
     </svg>
   );
 }

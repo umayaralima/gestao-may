@@ -350,3 +350,9 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   página do projeto: aprovado sem etapas → "ver etapas"; etapas começaram → "Em desenvolvimento"; todas feitas → "Em revisão".
   Editor das etapas padrão em Configurações → Listas (`etapas-modelo.tsx`). Dashboard tem card "Produção" (projetos em andamento
   com progresso, próxima etapa e atrasadas). Renomear tipo de serviço/categoria propaga pra `etapas_modelo`.
+- Relatórios (`/relatorios`, Reports.tsx do Make): visões Visão geral / Receita / Funil / Produção (Produção no lugar de "Equipe";
+  "Clientes sem contato" no lugar de "Risco de churn"; "por tipo de serviço" no lugar de "por segmento"). `?ver=` e `?periodo=`
+  (3m/6m/12m/tudo) na URL; cálculo todo em `relatorios/page.tsx` (server), contrato de dados em `relatorios/tipos.ts` — constantes
+  usadas pelo server NÃO podem viver no arquivo "use client". Funil = leads criados no período que passaram por cada etapa;
+  ciclo = criado_em → atualizado_em dos ganhos; prazo médio = data_inicio → última etapa concluída. "Exportar PDF" = window.print().
+- Seed limpo em 2026-09-20 (`supabase/limpar-seed.sql`); a May também apagou o BuilDesk. Base zerada, configurações preservadas.

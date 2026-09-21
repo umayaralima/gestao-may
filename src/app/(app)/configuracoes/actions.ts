@@ -39,6 +39,7 @@ export async function renomearTipoProjeto(id: string, formData: FormData) {
   // Projetos e leads guardam o nome em texto: propaga o rename.
   await supabase.from("projetos").update({ tipo: nome.data }).eq("tipo", atual.nome);
   await supabase.from("leads").update({ servico_interesse: nome.data }).eq("servico_interesse", atual.nome);
+  await supabase.from("etapas_modelo").update({ tipo_projeto: nome.data }).eq("tipo_projeto", atual.nome);
   revalidar();
 }
 
@@ -170,7 +171,10 @@ export async function atualizarCategoriaTarefa(id: string, formData: FormData) {
 
   const { error } = await supabase.from("categorias_tarefa").update(parsed.data).eq("id", id);
   if (error) return;
-  if (atual.nome !== parsed.data.nome) await supabase.from("tarefas").update({ categoria: parsed.data.nome }).eq("categoria", atual.nome);
+  if (atual.nome !== parsed.data.nome) {
+    await supabase.from("tarefas").update({ categoria: parsed.data.nome }).eq("categoria", atual.nome);
+    await supabase.from("etapas_modelo").update({ categoria: parsed.data.nome }).eq("categoria", atual.nome);
+  }
   revalidarTarefas();
 }
 
@@ -178,4 +182,45 @@ export async function excluirCategoriaTarefa(id: string) {
   const supabase = await createClient();
   await supabase.from("categorias_tarefa").delete().eq("id", id);
   revalidarTarefas();
+}
+
+/* ---------- Etapas padrão por tipo de serviço (etapas_modelo) ---------- */
+
+const etapaModeloSchema = z.object({
+  tipo_projeto: z.string().trim().min(1, "Escolha o tipo de serviço."),
+  nome: z.string().trim().min(2, "Dê um nome pra etapa.").max(120),
+  categoria: z.string().trim().min(1).max(80).default("Outro"),
+  dias_apos_inicio: z.coerce.number().int().min(0).max(365).default(0),
+});
+
+function revalidarEtapasModelo() {
+  revalidatePath("/configuracoes");
+  revalidatePath("/projetos", "layout");
+}
+
+export async function criarEtapaModelo(_prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = etapaModeloSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { erro: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { data: ultima } = await supabase.from("etapas_modelo").select("ordem").eq("tipo_projeto", parsed.data.tipo_projeto).order("ordem", { ascending: false }).limit(1).maybeSingle<{ ordem: number }>();
+  const { error } = await supabase.from("etapas_modelo").insert({ ...parsed.data, ordem: (ultima?.ordem ?? 0) + 1 });
+  if (error) return { erro: error.code === "PGRST205" ? "Rode a migração 008_etapas_modelo.sql no Supabase." : "Não foi possível salvar." };
+
+  revalidarEtapasModelo();
+  return { ok: true };
+}
+
+export async function atualizarEtapaModelo(id: string, formData: FormData) {
+  const parsed = etapaModeloSchema.omit({ tipo_projeto: true }).extend({ ordem: z.coerce.number().int().min(0).max(999) }).safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return;
+  const supabase = await createClient();
+  await supabase.from("etapas_modelo").update(parsed.data).eq("id", id);
+  revalidarEtapasModelo();
+}
+
+export async function excluirEtapaModelo(id: string) {
+  const supabase = await createClient();
+  await supabase.from("etapas_modelo").delete().eq("id", id);
+  revalidarEtapasModelo();
 }

@@ -344,3 +344,9 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
 - `/clientes/[id]` tem abas `?aba=geral|relacionamento|financeiro`: geral = cadastro + projetos com progresso das etapas + próximas
   tarefas; relacionamento = PainelRelacionamento (follow-up/interações); financeiro = parcelas de todos os projetos.
 - Próximo (camada 2): `etapas_modelo` por tipo de serviço → gerar tarefas de produção ao aprovar o projeto; aba Etapas no projeto.
+- Camada 2 (migração 008): `etapas_modelo` (tipo_projeto, nome, categoria, dias_apos_inicio, ordem) + `tarefas.ordem`.
+  `gerarEtapasDoModelo(projetoId)` cria as tarefas (prazo = data_inicio + dias) só se o projeto não tem etapas; aba **Etapas** em
+  `/projetos/[id]?aba=etapas` (`etapas-projeto.tsx`: progresso, checklist ordenado, gerar, etapa avulsa). Banners de sugestão na
+  página do projeto: aprovado sem etapas → "ver etapas"; etapas começaram → "Em desenvolvimento"; todas feitas → "Em revisão".
+  Editor das etapas padrão em Configurações → Listas (`etapas-modelo.tsx`). Dashboard tem card "Produção" (projetos em andamento
+  com progresso, próxima etapa e atrasadas). Renomear tipo de serviço/categoria propaga pra `etapas_modelo`.

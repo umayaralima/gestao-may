@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import { FORMA_PAGAMENTO_LABEL, FORMAS_PAGAMENTO, GRUPO_CATEGORIA_LABEL, GRUPOS_CATEGORIA } from "@/lib/constantes";
-import type { CategoriaTarefa, Configuracoes as Config, TipoProjeto } from "@/lib/types";
+import type { CategoriaTarefa, Configuracoes as Config, EtapaModelo, TipoProjeto } from "@/lib/types";
 import {
   alterarSenha,
   atualizarCategoriaTarefa,
@@ -14,6 +14,7 @@ import {
   type FormState,
   type SecaoConfig,
 } from "./actions";
+import { EtapasModeloEditor } from "./etapas-modelo";
 import { NovaCategoriaForm } from "./nova-categoria-form";
 import { NovoTipoForm } from "./novo-tipo-form";
 
@@ -39,10 +40,11 @@ type Props = {
   usoTipos: Record<string, number>;
   categorias: CategoriaTarefa[];
   usoCategorias: Record<string, number>;
+  etapasModelo: EtapaModelo[];
   etapas: string[];
 };
 
-export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCategorias, etapas }: Props) {
+export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCategorias, etapasModelo, etapas }: Props) {
   const [aba, setAba] = useState<Aba>("perfil");
   const [toast, setToast] = useState<string | null>(null);
 
@@ -275,6 +277,13 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
               <div className="px-6 py-4">
                 <NovaCategoriaForm />
               </div>
+            </Section>
+
+            <Section
+              title="Etapas padrão por serviço"
+              sub="Ao aprovar um projeto, essas etapas viram tarefas com prazo = data de início + dias. Ordem define a sequência; mudar aqui não altera projetos já gerados."
+            >
+              <EtapasModeloEditor tipos={tipos} etapas={etapasModelo} categorias={categorias} />
             </Section>
           </div>
         )}

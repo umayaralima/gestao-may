@@ -127,6 +127,8 @@ export type Tarefa = {
   prioridade: Prioridade;
   vencimento: string | null;
   concluida_em: string | null;
+  /** posição como etapa do projeto (null = tarefa avulsa) */
+  ordem: number | null;
   criado_em: string;
 };
 
@@ -152,5 +154,14 @@ export type CategoriaTarefa = {
   nome: string;
   grupo: GrupoCategoria;
   icone: string;
+  ordem: number;
+};
+
+export type EtapaModelo = {
+  id: string;
+  tipo_projeto: string;
+  nome: string;
+  categoria: string;
+  dias_apos_inicio: number;
   ordem: number;
 };

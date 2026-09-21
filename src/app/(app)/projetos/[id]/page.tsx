@@ -7,17 +7,18 @@ import { STATUS_PROJETO, STATUS_PROJETO_LABEL } from "@/lib/constantes";
 import { diffDias, fmt, fmtData, hojeISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { Briefing, CategoriaTarefa, Contrato, Pagamento, Projeto, Tarefa } from "@/lib/types";
-import { aprovarProjeto, criarContrato, excluirProjeto, mudarStatusProjeto, salvarBriefing } from "../actions";
+import { aprovarProjeto, criarContrato, excluirProjeto, mudarStatusProjeto, mudarStatusSugerido, salvarBriefing } from "../actions";
 import { tomStatus } from "../status-tom";
 import { BriefingForm } from "./briefing-form";
 import { Contratos } from "./contratos";
 import { EditarProjetoBotao } from "./editar-botao";
+import { EtapasProjeto } from "./etapas-projeto";
 import { PagamentosProjeto } from "./pagamentos-projeto";
-import { TarefasProjeto } from "./tarefas-projeto";
 
 type ProjetoJoin = Projeto & { clientes: { id: string; nome: string; empresa: string | null } | null };
 const ABAS = [
   { id: "geral", label: "Visão geral" },
+  { id: "etapas", label: "Etapas" },
   { id: "briefing", label: "Briefing" },
   { id: "contrato", label: "Contrato" },
   { id: "pagamentos", label: "Pagamentos" },
@@ -57,6 +58,14 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const diasPrazo = projeto.prazo_entrega ? diffDias(hoje, projeto.prazo_entrega) : null;
   const emAndamento = !["entregue", "concluido", "cancelado"].includes(projeto.status);
 
+  const etapas = tarefas ?? [];
+  const etapasFeitas = etapas.filter((t) => t.concluida_em).length;
+  const etapasAtrasadas = etapas.filter((t) => !t.concluida_em && t.vencimento && t.vencimento < hoje).length;
+  // Sugestões (não forçam): aprovado sem etapas → gerar; etapas todas feitas → Em revisão / Entregue
+  const sugerirEtapas = projeto.status === "aprovado" && etapas.length === 0 && !!projeto.tipo;
+  const sugerirRevisao = etapas.length > 0 && etapasFeitas === etapas.length && ["aprovado", "em_desenvolvimento"].includes(projeto.status);
+  const sugerirDesenvolvimento = projeto.status === "aprovado" && etapasFeitas > 0 && etapasFeitas < etapas.length;
+
   const mudarStatus = mudarStatusProjeto.bind(null, projeto.id);
   const salvarBriefingDoProjeto = salvarBriefing.bind(null, projeto.id);
   const criarContratoDoProjeto = criarContrato.bind(null, projeto.id);
@@ -88,7 +97,12 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
       {/* Abas */}
       <div className="flex items-center gap-1 px-4 md:px-6 border-b border-[#311C45] shrink-0 overflow-x-auto">
         {ABAS.map((a) => {
-          const marcador = (a.id === "briefing" && briefing) || (a.id === "contrato" && temAssinado) ? "ok" : a.id === "pagamentos" && atrasados.length ? "alerta" : null;
+          const marcador =
+            (a.id === "briefing" && briefing) || (a.id === "contrato" && temAssinado) || (a.id === "etapas" && etapas.length > 0 && etapasFeitas === etapas.length)
+              ? "ok"
+              : (a.id === "pagamentos" && atrasados.length) || (a.id === "etapas" && etapasAtrasadas)
+                ? "alerta"
+                : null;
           return (
             <Link
               key={a.id}
@@ -115,6 +129,40 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
             <Link href={`/projetos/${projeto.id}?aba=pagamentos`} className="text-xs text-red-400 hover:text-red-300 font-medium">
               Ver parcelas →
             </Link>
+          </div>
+        )}
+        {sugerirEtapas && (
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-brand-400/30 bg-brand-400/10 px-5 py-3 entrar">
+            <p className="text-xs text-[#DDDBD9]">
+              Projeto aprovado. Quer criar as etapas padrão de <strong className="text-brand-300">{projeto.tipo}</strong> pra começar a produção?
+            </p>
+            <Link href={`/projetos/${projeto.id}?aba=etapas`} className="px-3 py-1.5 bg-brand-400 hover:bg-brand-300 text-white text-xs font-semibold rounded-lg transition-colors whitespace-nowrap">
+              Ver etapas
+            </Link>
+          </div>
+        )}
+        {sugerirDesenvolvimento && (
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-brand-400/30 bg-brand-400/10 px-5 py-3 entrar">
+            <p className="text-xs text-[#DDDBD9]">
+              Produção começou ({etapasFeitas}/{etapas.length} etapas). Mudar o projeto pra <strong className="text-brand-300">Em desenvolvimento</strong>?
+            </p>
+            <form action={mudarStatusSugerido.bind(null, projeto.id, "em_desenvolvimento")}>
+              <button type="submit" className="px-3 py-1.5 bg-brand-400 hover:bg-brand-300 text-white text-xs font-semibold rounded-lg transition-colors whitespace-nowrap">
+                Sim, mudar
+              </button>
+            </form>
+          </div>
+        )}
+        {sugerirRevisao && (
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 entrar">
+            <p className="text-xs text-[#DDDBD9]">
+              Todas as etapas concluídas. Mudar o projeto pra <strong className="text-emerald-300">Em revisão</strong>?
+            </p>
+            <form action={mudarStatusSugerido.bind(null, projeto.id, "em_revisao")}>
+              <button type="submit" className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-semibold rounded-lg transition-colors whitespace-nowrap">
+                Sim, mudar
+              </button>
+            </form>
           </div>
         )}
         {sugerirAprovado && (
@@ -188,11 +236,11 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
                       acao={temAssinado ? "Assinado" : listaContratos.some((c) => c.status === "enviado") ? "Aguardando assinatura" : listaContratos.length ? "Rascunho" : "Criar"}
                     />
                     <Passo
-                      ok={(tarefas ?? []).length > 0 && (tarefas ?? []).every((t) => t.concluida_em)}
-                      alerta={(tarefas ?? []).some((t) => !t.concluida_em && t.vencimento && t.vencimento < hojeISO())}
-                      label="Tarefas"
-                      href={`/tarefas?nova=1&projeto=${projeto.id}`}
-                      acao={(tarefas ?? []).length ? `${(tarefas ?? []).filter((t) => t.concluida_em).length}/${(tarefas ?? []).length} feitas` : "Criar"}
+                      ok={etapas.length > 0 && etapasFeitas === etapas.length}
+                      alerta={etapasAtrasadas > 0}
+                      label="Etapas"
+                      href={`/projetos/${projeto.id}?aba=etapas`}
+                      acao={etapas.length ? `${etapasFeitas}/${etapas.length} feitas${etapasAtrasadas ? ` · ${etapasAtrasadas} atrasada(s)` : ""}` : "Gerar"}
                     />
                     <Passo ok={lista.length > 0 && atrasados.length === 0} alerta={atrasados.length > 0} label="Pagamentos" href={`/projetos/${projeto.id}?aba=pagamentos`} acao={lista.length ? `${lista.filter((p) => p.status === "pago").length}/${lista.length} pagos` : "Cadastrar parcelas"} />
                   </div>
@@ -204,15 +252,13 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
                 </form>
               </div>
             </div>
-
-            <Card className="entrar entrar-2">
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <CardTitulo sub="Etapas de produção e pendências deste projeto. Aparecem também na agenda de Tarefas.">Tarefas do projeto</CardTitulo>
-                <BotaoGhost href={`/tarefas?nova=1&projeto=${projeto.id}`}>+ Tarefa</BotaoGhost>
-              </div>
-              <TarefasProjeto tarefas={tarefas ?? []} categorias={categorias ?? []} />
-            </Card>
           </>
+        )}
+
+        {aba === "etapas" && (
+          <div className="entrar">
+            <EtapasProjeto projetoId={projeto.id} tipo={projeto.tipo} tarefas={etapas} categorias={categorias ?? []} />
+          </div>
         )}
 
         {aba === "briefing" && (

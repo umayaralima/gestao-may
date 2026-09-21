@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Avatar, BotaoLinha, BotaoPrimario, Busca, Header, KpiCard, Td, Th, Tr } from "@/components/ui/primitivos";
 import { cn } from "@/lib/cn";
-import { CANAL_INTERACAO_LABEL, ETAPA_LEAD_COR, ETAPA_LEAD_LABEL, ETAPAS_PIPELINE, type EtapaLead } from "@/lib/constantes";
-import { fmt, fmtK, fmtRelativo, fmtData, hojeISO, mesAnoExtenso, mesCurto, primeiroEUltimoDiaDoMes, somarDias } from "@/lib/format";
+import { CANAL_INTERACAO_LABEL, ETAPA_LEAD_COR, ETAPA_LEAD_LABEL, ETAPAS_PIPELINE, STATUS_PROJETO_LABEL, type EtapaLead } from "@/lib/constantes";
+import { diffDias, fmt, fmtK, fmtRelativo, fmtData, hojeISO, mesAnoExtenso, mesCurto, primeiroEUltimoDiaDoMes, somarDias } from "@/lib/format";
 import { getConfiguracoes } from "@/lib/configuracoes";
 import { createClient } from "@/lib/supabase/server";
 import type { Cliente, Interacao, Lead } from "@/lib/types";
@@ -10,7 +10,8 @@ import { AtividadeSemanal, PipelineDonut, ReceitaMensal, type DiaAtividade, type
 import { BadgeStatusCliente } from "./clientes/badge-cliente";
 
 type Pago = { valor: number; data_pagamento: string };
-type ProjetoResumo = { id: string; cliente_id: string; status: string; valor_total: number | null };
+type ProjetoResumo = { id: string; cliente_id: string; nome: string; status: string; valor_total: number | null; prazo_entrega: string | null };
+type EtapaResumo = { projeto_id: string; vencimento: string | null; concluida_em: string | null; titulo: string; ordem: number | null };
 type InteracaoComDono = Interacao & { leads: { nome: string } | null; clientes: { nome: string } | null };
 
 export default async function DashboardPage() {
@@ -21,11 +22,11 @@ export default async function DashboardPage() {
   const mesAnterior = primeiroEUltimoDiaDoMes(new Date(agora.getFullYear(), agora.getMonth() - 1, 1));
   const inicio12m = primeiroEUltimoDiaDoMes(new Date(agora.getFullYear(), agora.getMonth() - 11, 1)).inicio;
 
-  const [pagos, clientes, leads, projetos, interacoes, followups, tarefasHoje, config] = await Promise.all([
+  const [pagos, clientes, leads, projetos, interacoes, followups, tarefasHoje, config, etapas] = await Promise.all([
     supabase.from("pagamentos").select("valor, data_pagamento").not("data_pagamento", "is", null).gte("data_pagamento", inicio12m).returns<Pago[]>(),
     supabase.from("clientes").select("*").order("criado_em", { ascending: false }).returns<Cliente[]>(),
     supabase.from("leads").select("*").returns<Lead[]>(),
-    supabase.from("projetos").select("id, cliente_id, status, valor_total").returns<ProjetoResumo[]>(),
+    supabase.from("projetos").select("id, cliente_id, nome, status, valor_total, prazo_entrega").returns<ProjetoResumo[]>(),
     supabase
       .from("interacoes")
       .select("*, leads(nome), clientes(nome)")
@@ -36,12 +37,32 @@ export default async function DashboardPage() {
     supabase.from("leads").select("id", { count: "exact", head: true }).lte("proximo_followup", hoje).in("etapa", ["novo", "em_contato", "proposta_enviada", "negociando"]),
     supabase.from("tarefas").select("id", { count: "exact", head: true }).lte("vencimento", hoje).is("concluida_em", null),
     getConfiguracoes(),
+    supabase.from("tarefas").select("projeto_id, vencimento, concluida_em, titulo, ordem").not("projeto_id", "is", null).returns<EtapaResumo[]>(),
   ]);
 
   const listaPagos = pagos.data ?? [];
   const listaClientes = clientes.data ?? [];
   const listaLeads = leads.data ?? [];
   const listaProjetos = projetos.data ?? [];
+  const listaEtapas = etapas.data ?? [];
+  // Produção: projetos em andamento com progresso das etapas
+  const producao = listaProjetos
+    .filter((p) => ["aprovado", "em_desenvolvimento", "em_revisao"].includes(p.status))
+    .map((p) => {
+      const ts = listaEtapas.filter((t) => t.projeto_id === p.id);
+      const feitas = ts.filter((t) => t.concluida_em).length;
+      const abertas = ts.filter((t) => !t.concluida_em).sort((a, b) => (a.ordem ?? 9999) - (b.ordem ?? 9999) || (a.vencimento ?? "9999").localeCompare(b.vencimento ?? "9999"));
+      return {
+        ...p,
+        clienteNome: (clientes.data ?? []).find((c) => c.id === p.cliente_id)?.empresa ?? (clientes.data ?? []).find((c) => c.id === p.cliente_id)?.nome ?? "—",
+        total: ts.length,
+        feitas,
+        pct: ts.length ? Math.round((feitas / ts.length) * 100) : 0,
+        atrasadas: abertas.filter((t) => t.vencimento && t.vencimento < hoje).length,
+        proxima: abertas[0] ?? null,
+      };
+    })
+    .sort((a, b) => b.atrasadas - a.atrasadas || (a.prazo_entrega ?? "9999").localeCompare(b.prazo_entrega ?? "9999"));
   const listaInteracoes = interacoes.data ?? [];
 
   // ---- KPIs ----
@@ -178,6 +199,64 @@ export default async function DashboardPage() {
         </div>
 
         <div className="bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden entrar entrar-3">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#311C45]">
+            <div>
+              <p className="text-sm font-semibold text-[#F5F5F4]">Produção</p>
+              <p className="text-xs text-[#968F88]">
+                {producao.length} projeto(s) em andamento
+                {producao.some((p) => p.atrasadas) && <span className="text-red-400"> · {producao.reduce((s, p) => s + p.atrasadas, 0)} etapa(s) atrasada(s)</span>}
+              </p>
+            </div>
+            <Link href="/projetos" className="px-3 py-1.5 text-xs text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+              Ver projetos
+            </Link>
+          </div>
+          {producao.length === 0 ? (
+            <p className="px-5 py-8 text-center text-xs text-[#968F88]">Nenhum projeto em produção agora.</p>
+          ) : (
+            <ul className="divide-y divide-[#311C45]/60">
+              {producao.map((p) => {
+                const dias = p.prazo_entrega ? diffDias(hoje, p.prazo_entrega) : null;
+                return (
+                  <li key={p.id} className="px-5 py-3.5 grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)_auto] gap-x-6 gap-y-2 items-center">
+                    <div className="min-w-0">
+                      <Link href={`/projetos/${p.id}?aba=etapas`} className="text-xs font-medium text-[#DDDBD9] hover:text-brand-400 transition-colors truncate block">
+                        {p.nome}
+                      </Link>
+                      <p className="text-[10px] text-[#968F88] truncate">
+                        {p.clienteNome} · {STATUS_PROJETO_LABEL[p.status as keyof typeof STATUS_PROJETO_LABEL] ?? p.status}
+                      </p>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-1 bg-[#311C45] rounded-full overflow-hidden">
+                          <div className={cn("h-full rounded-full", p.atrasadas ? "bg-red-400" : "bg-brand-400")} style={{ width: `${p.pct}%` }} />
+                        </div>
+                        <span className="text-[10px] font-mono text-[#968F88] whitespace-nowrap">{p.total ? `${p.feitas}/${p.total}` : "sem etapas"}</span>
+                      </div>
+                      {p.proxima && (
+                        <p className="text-[10px] text-[#968F88] truncate mt-1">
+                          Próxima: <span className={cn(p.proxima.vencimento && p.proxima.vencimento < hoje ? "text-red-400" : "text-[#C5C2BE]")}>{p.proxima.titulo}</span>
+                          {p.proxima.vencimento && <span className="font-mono"> · {fmtData(p.proxima.vencimento, false)}</span>}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right whitespace-nowrap">
+                      {p.atrasadas > 0 && <p className="text-[10px] font-medium text-red-400">{p.atrasadas} atrasada(s)</p>}
+                      {p.prazo_entrega && (
+                        <p className={cn("text-[10px] font-mono", dias !== null && dias < 0 ? "text-red-400" : dias !== null && dias <= 7 ? "text-amber-400" : "text-[#968F88]")}>
+                          entrega {fmtData(p.prazo_entrega, false)}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        <div className="bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden entrar entrar-4">
           <div className="flex items-center justify-between px-5 py-4 border-b border-[#311C45]">
             <div>
               <p className="text-sm font-semibold text-[#F5F5F4]">Clientes recentes</p>

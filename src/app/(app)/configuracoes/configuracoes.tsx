@@ -2,9 +2,19 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
-import { FORMA_PAGAMENTO_LABEL, FORMAS_PAGAMENTO } from "@/lib/constantes";
-import type { Configuracoes as Config, TipoProjeto } from "@/lib/types";
-import { alterarSenha, excluirTipoProjeto, renomearTipoProjeto, salvarConfiguracoes, type FormState, type SecaoConfig } from "./actions";
+import { FORMA_PAGAMENTO_LABEL, FORMAS_PAGAMENTO, GRUPO_CATEGORIA_LABEL, GRUPOS_CATEGORIA } from "@/lib/constantes";
+import type { CategoriaTarefa, Configuracoes as Config, TipoProjeto } from "@/lib/types";
+import {
+  alterarSenha,
+  atualizarCategoriaTarefa,
+  excluirCategoriaTarefa,
+  excluirTipoProjeto,
+  renomearTipoProjeto,
+  salvarConfiguracoes,
+  type FormState,
+  type SecaoConfig,
+} from "./actions";
+import { NovaCategoriaForm } from "./nova-categoria-form";
 import { NovoTipoForm } from "./novo-tipo-form";
 
 /*
@@ -18,14 +28,21 @@ const ABAS = [
   { id: "empresa", label: "Empresa", Icone: BuildingIcon },
   { id: "pipeline", label: "Pipeline", Icone: FunnelIcon },
   { id: "financeiro", label: "Financeiro", Icone: MoneyIcon },
-  { id: "servicos", label: "Serviços", Icone: TagIcon },
+  { id: "listas", label: "Listas", Icone: TagIcon },
   { id: "seguranca", label: "Segurança", Icone: LockIcon },
 ] as const;
 type Aba = (typeof ABAS)[number]["id"];
 
-type Props = { config: Config; tipos: TipoProjeto[]; usoTipos: Record<string, number>; etapas: string[] };
+type Props = {
+  config: Config;
+  tipos: TipoProjeto[];
+  usoTipos: Record<string, number>;
+  categorias: CategoriaTarefa[];
+  usoCategorias: Record<string, number>;
+  etapas: string[];
+};
 
-export function ConfiguracoesView({ config, tipos, usoTipos, etapas }: Props) {
+export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCategorias, etapas }: Props) {
   const [aba, setAba] = useState<Aba>("perfil");
   const [toast, setToast] = useState<string | null>(null);
 
@@ -181,9 +198,9 @@ export function ConfiguracoesView({ config, tipos, usoTipos, etapas }: Props) {
           </FormSecao>
         )}
 
-        {aba === "servicos" && (
+        {aba === "listas" && (
           <div className="space-y-5 entrar">
-            <Titulo titulo="Serviços" sub="Tipos de projeto que aparecem nos formulários" />
+            <Titulo titulo="Listas" sub="Tipos de serviço e categorias de tarefa usados nos formulários" />
             <Section
               title="Tipos de serviço"
               sub="Aparecem no “Tipo de serviço” do projeto e no “Serviço de interesse” do pipeline. Renomear atualiza quem já usa; excluir não apaga nada."
@@ -215,6 +232,48 @@ export function ConfiguracoesView({ config, tipos, usoTipos, etapas }: Props) {
               })}
               <div className="px-6 py-4">
                 <NovoTipoForm />
+              </div>
+            </Section>
+
+            <Section
+              title="Categorias de tarefa"
+              sub="Comercial = agenda do CRM; Produção = etapas do projeto depois do contrato. Renomear atualiza as tarefas que já usam; excluir não apaga tarefa nenhuma."
+            >
+              {GRUPOS_CATEGORIA.map((g) => {
+                const doGrupo = categorias.filter((c) => c.grupo === g);
+                if (doGrupo.length === 0) return null;
+                return (
+                  <div key={g}>
+                    <p className="px-6 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-[#968F88]">{GRUPO_CATEGORIA_LABEL[g]}</p>
+                    {doGrupo.map((c) => (
+                      <div key={c.id} className="flex items-center gap-3 px-6 py-2">
+                        <form action={atualizarCategoriaTarefa.bind(null, c.id)} className="flex flex-1 items-center gap-2 min-w-0">
+                          <input name="icone" defaultValue={c.icone} maxLength={8} className={cn(campoLinha, "w-10 text-center shrink-0")} title="Emoji" />
+                          <input name="nome" defaultValue={c.nome} maxLength={80} className={cn(campoLinha, "w-full")} />
+                          <select name="grupo" defaultValue={c.grupo} className={cn(campoLinha, "w-28 shrink-0 cursor-pointer hidden sm:block")}>
+                            {GRUPOS_CATEGORIA.map((gg) => (
+                              <option key={gg} value={gg}>
+                                {GRUPO_CATEGORIA_LABEL[gg]}
+                              </option>
+                            ))}
+                          </select>
+                          <button type="submit" className="px-2.5 py-1 text-[11px] text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+                            Salvar
+                          </button>
+                        </form>
+                        <span className="hidden sm:block w-20 text-right text-[10px] font-mono text-[#968F88]">{usoCategorias[c.nome] ? `${usoCategorias[c.nome]} em uso` : ""}</span>
+                        <form action={excluirCategoriaTarefa.bind(null, c.id)}>
+                          <button type="submit" className="text-[#5A496A] hover:text-red-400 transition-colors text-xs">
+                            Remover
+                          </button>
+                        </form>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+              <div className="px-6 py-4">
+                <NovaCategoriaForm />
               </div>
             </Section>
           </div>
@@ -314,6 +373,10 @@ function Label({ label, description }: { label: string; description?: string }) 
     </div>
   );
 }
+
+/** Input "de linha" das listas: transparente, borda só no hover/foco. */
+const campoLinha =
+  "rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm text-[#DDDBD9] hover:border-[#311C45] focus:border-brand-400/60 focus:bg-[#150C1D] focus:outline-none transition-colors";
 
 const controleCls =
   "bg-[#1B0F26] border border-[#311C45] rounded-lg px-3 py-2 text-sm text-[#DDDBD9] placeholder:text-[#5A496A] outline-none focus:border-brand-400/60 focus:ring-1 focus:ring-brand-400/20 transition-all";

@@ -128,3 +128,54 @@ export async function alterarSenha(_prev: FormState, formData: FormData): Promis
   if (error) return { erro: error.message.includes("different") ? "A nova senha precisa ser diferente da atual." : "Não foi possível alterar a senha." };
   return { ok: true };
 }
+
+/* ---------- Categorias de tarefa (tabela categorias_tarefa; a tarefa guarda o nome) ---------- */
+
+const GRUPOS = ["comercial", "producao", "outro"] as const;
+
+function revalidarTarefas() {
+  revalidatePath("/configuracoes");
+  revalidatePath("/tarefas");
+  revalidatePath("/projetos", "layout");
+}
+
+export async function criarCategoriaTarefa(_prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = z
+    .object({
+      nome: z.string().trim().min(2, "Informe o nome da categoria.").max(80),
+      grupo: z.enum(GRUPOS).default("producao"),
+      icone: z.string().trim().max(8).transform((v) => v || "•"),
+    })
+    .safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { erro: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { data: ultimo } = await supabase.from("categorias_tarefa").select("ordem").eq("grupo", parsed.data.grupo).order("ordem", { ascending: false }).limit(1).maybeSingle<{ ordem: number }>();
+  const { error } = await supabase.from("categorias_tarefa").insert({ ...parsed.data, ordem: (ultimo?.ordem ?? 0) + 1 });
+  if (error) return { erro: error.code === "23505" ? "Já existe uma categoria com esse nome." : "Não foi possível salvar." };
+
+  revalidarTarefas();
+  return { ok: true };
+}
+
+export async function atualizarCategoriaTarefa(id: string, formData: FormData) {
+  const parsed = z
+    .object({ nome: z.string().trim().min(2).max(80), grupo: z.enum(GRUPOS), icone: z.string().trim().max(8).transform((v) => v || "•") })
+    .safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return;
+
+  const supabase = await createClient();
+  const { data: atual } = await supabase.from("categorias_tarefa").select("nome").eq("id", id).single<{ nome: string }>();
+  if (!atual) return;
+
+  const { error } = await supabase.from("categorias_tarefa").update(parsed.data).eq("id", id);
+  if (error) return;
+  if (atual.nome !== parsed.data.nome) await supabase.from("tarefas").update({ categoria: parsed.data.nome }).eq("categoria", atual.nome);
+  revalidarTarefas();
+}
+
+export async function excluirCategoriaTarefa(id: string) {
+  const supabase = await createClient();
+  await supabase.from("categorias_tarefa").delete().eq("id", id);
+  revalidarTarefas();
+}

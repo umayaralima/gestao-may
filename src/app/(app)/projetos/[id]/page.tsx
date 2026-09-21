@@ -1,18 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SelectInline } from "@/components/ui/select-inline";
-import { Avatar, Card, CardTitulo, Header, KpiCard, Pill } from "@/components/ui/primitivos";
+import { Avatar, BotaoGhost, Card, CardTitulo, Header, KpiCard, Pill } from "@/components/ui/primitivos";
 import { cn } from "@/lib/cn";
 import { STATUS_PROJETO, STATUS_PROJETO_LABEL } from "@/lib/constantes";
 import { diffDias, fmt, fmtData, hojeISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
-import type { Briefing, Contrato, Pagamento, Projeto } from "@/lib/types";
+import type { Briefing, CategoriaTarefa, Contrato, Pagamento, Projeto, Tarefa } from "@/lib/types";
 import { aprovarProjeto, criarContrato, excluirProjeto, mudarStatusProjeto, salvarBriefing } from "../actions";
 import { tomStatus } from "../status-tom";
 import { BriefingForm } from "./briefing-form";
 import { Contratos } from "./contratos";
 import { EditarProjetoBotao } from "./editar-botao";
 import { PagamentosProjeto } from "./pagamentos-projeto";
+import { TarefasProjeto } from "./tarefas-projeto";
 
 type ProjetoJoin = Projeto & { clientes: { id: string; nome: string; empresa: string | null } | null };
 const ABAS = [
@@ -29,13 +30,15 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const aba: Aba = ABAS.some((a) => a.id === abaParam) ? (abaParam as Aba) : "geral";
   const supabase = await createClient();
 
-  const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }] = await Promise.all([
+  const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }, { data: tarefas }, { data: categorias }] = await Promise.all([
     supabase.from("projetos").select("*, clientes(id, nome, empresa)").eq("id", id).single<ProjetoJoin>(),
     supabase.from("pagamentos_view").select("*").eq("projeto_id", id).order("vencimento").returns<Pagamento[]>(),
     supabase.from("briefings").select("*").eq("projeto_id", id).maybeSingle<Briefing>(),
     supabase.from("contratos").select("*").eq("projeto_id", id).order("criado_em", { ascending: false }).returns<Contrato[]>(),
     supabase.from("clientes").select("id, nome, empresa").order("nome"),
     supabase.from("tipos_projeto").select("nome").order("ordem").order("nome"),
+    supabase.from("tarefas").select("*").eq("projeto_id", id).order("vencimento", { ascending: true, nullsFirst: false }).order("criado_em").returns<Tarefa[]>(),
+    supabase.from("categorias_tarefa").select("*").order("ordem").returns<CategoriaTarefa[]>(),
   ]);
   if (!projeto) notFound();
 
@@ -184,6 +187,13 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
                       href={`/projetos/${projeto.id}?aba=contrato`}
                       acao={temAssinado ? "Assinado" : listaContratos.some((c) => c.status === "enviado") ? "Aguardando assinatura" : listaContratos.length ? "Rascunho" : "Criar"}
                     />
+                    <Passo
+                      ok={(tarefas ?? []).length > 0 && (tarefas ?? []).every((t) => t.concluida_em)}
+                      alerta={(tarefas ?? []).some((t) => !t.concluida_em && t.vencimento && t.vencimento < hojeISO())}
+                      label="Tarefas"
+                      href={`/tarefas?nova=1&projeto=${projeto.id}`}
+                      acao={(tarefas ?? []).length ? `${(tarefas ?? []).filter((t) => t.concluida_em).length}/${(tarefas ?? []).length} feitas` : "Criar"}
+                    />
                     <Passo ok={lista.length > 0 && atrasados.length === 0} alerta={atrasados.length > 0} label="Pagamentos" href={`/projetos/${projeto.id}?aba=pagamentos`} acao={lista.length ? `${lista.filter((p) => p.status === "pago").length}/${lista.length} pagos` : "Cadastrar parcelas"} />
                   </div>
                 </Card>
@@ -194,6 +204,14 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
                 </form>
               </div>
             </div>
+
+            <Card className="entrar entrar-2">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <CardTitulo sub="Etapas de produção e pendências deste projeto. Aparecem também na agenda de Tarefas.">Tarefas do projeto</CardTitulo>
+                <BotaoGhost href={`/tarefas?nova=1&projeto=${projeto.id}`}>+ Tarefa</BotaoGhost>
+              </div>
+              <TarefasProjeto tarefas={tarefas ?? []} categorias={categorias ?? []} />
+            </Card>
           </>
         )}
 

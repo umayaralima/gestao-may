@@ -89,26 +89,10 @@ export type Prioridade = (typeof PRIORIDADES)[number];
 export const PRIORIDADE_LABEL: Record<Prioridade, string> = { alta: "Alta", media: "Média", baixa: "Baixa" };
 export const PRIORIDADE_COR: Record<Prioridade, string> = { alta: "#F87171", media: "#FBBF24", baixa: "#968F88" };
 
-export const CATEGORIAS_TAREFA = ["ligacao", "email", "reuniao", "proposta", "follow_up", "contrato", "outro"] as const;
-export type CategoriaTarefa = (typeof CATEGORIAS_TAREFA)[number];
-export const CATEGORIA_TAREFA_LABEL: Record<CategoriaTarefa, string> = {
-  ligacao: "Ligação",
-  email: "E-mail",
-  reuniao: "Reunião",
-  proposta: "Proposta",
-  follow_up: "Follow-up",
-  contrato: "Contrato",
-  outro: "Outro",
-};
-export const CATEGORIA_TAREFA_ICONE: Record<CategoriaTarefa, string> = {
-  ligacao: "📞",
-  email: "✉️",
-  reuniao: "📅",
-  proposta: "📄",
-  follow_up: "🔔",
-  contrato: "📝",
-  outro: "•",
-};
+/* Categorias de tarefa vivem na tabela categorias_tarefa (Configurações → Listas). Grupos: */
+export const GRUPOS_CATEGORIA = ["comercial", "producao", "outro"] as const;
+export type GrupoCategoria = (typeof GRUPOS_CATEGORIA)[number];
+export const GRUPO_CATEGORIA_LABEL: Record<GrupoCategoria, string> = { comercial: "Comercial", producao: "Produção", outro: "Outro" };
 
 /** Colunas do Pipeline (protótipo mostra Fechado como 5ª coluna). Perdido fica fora do kanban. */
 export const ETAPAS_PIPELINE: EtapaLead[] = ["novo", "em_contato", "proposta_enviada", "negociando", "ganho"];

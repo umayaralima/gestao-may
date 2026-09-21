@@ -3,7 +3,8 @@
 import { useActionState, useEffect, useState } from "react";
 import { BotaoCancelar, BotaoConfirmar, Escolha, Modal } from "@/components/ui/modal";
 import { Campo, Input, MensagemErro, Select, Textarea } from "@/components/ui/primitivos";
-import { CATEGORIA_TAREFA_LABEL, CATEGORIAS_TAREFA, PRIORIDADE_COR, PRIORIDADE_LABEL, PRIORIDADES, type Prioridade } from "@/lib/constantes";
+import { GRUPO_CATEGORIA_LABEL, GRUPOS_CATEGORIA, PRIORIDADE_COR, PRIORIDADE_LABEL, PRIORIDADES, type Prioridade } from "@/lib/constantes";
+import type { CategoriaTarefa } from "@/lib/types";
 import type { Tarefa } from "@/lib/types";
 import type { FormState } from "./actions";
 import type { Vinculo } from "./tarefas";
@@ -11,6 +12,7 @@ import type { Vinculo } from "./tarefas";
 type Props = {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
   vinculos: Vinculo[];
+  categorias: CategoriaTarefa[];
   tarefa?: Tarefa;
   vinculoInicial?: string;
   dataInicial?: string;
@@ -18,7 +20,7 @@ type Props = {
 };
 
 /** NewTaskModal do protótipo. */
-export function TarefaFormModal({ action, vinculos, tarefa, vinculoInicial, dataInicial, onClose }: Props) {
+export function TarefaFormModal({ action, vinculos, categorias, tarefa, vinculoInicial, dataInicial, onClose }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
   const [prioridade, setPrioridade] = useState<Prioridade>(tarefa?.prioridade ?? "media");
 
@@ -26,8 +28,9 @@ export function TarefaFormModal({ action, vinculos, tarefa, vinculoInicial, data
     if (state.ok) onClose();
   }, [state.ok, onClose]);
 
-  const vinculoAtual = tarefa?.cliente_id ? `cliente:${tarefa.cliente_id}` : tarefa?.lead_id ? `lead:${tarefa.lead_id}` : (vinculoInicial ?? "");
-  const grupos = ["Clientes", "Pipeline"] as const;
+  const vinculoAtual = tarefa?.projeto_id ? `projeto:${tarefa.projeto_id}` : tarefa?.cliente_id ? `cliente:${tarefa.cliente_id}` : tarefa?.lead_id ? `lead:${tarefa.lead_id}` : (vinculoInicial ?? "");
+  const grupos = ["Projetos", "Clientes", "Pipeline"] as const;
+  const categoriaPadrao = tarefa?.categoria ?? categorias.find((c) => c.grupo === "producao")?.nome ?? categorias[0]?.nome ?? "Outro";
 
   return (
     <Modal titulo={tarefa ? "Editar tarefa" : "Nova tarefa"} onClose={onClose}>
@@ -40,7 +43,7 @@ export function TarefaFormModal({ action, vinculos, tarefa, vinculoInicial, data
           <Textarea id="descricao" name="descricao" rows={2} placeholder="Detalhes opcionais…" defaultValue={tarefa?.descricao ?? ""} />
         </Campo>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Campo label="Cliente / negócio" htmlFor="vinculo">
+          <Campo label="Projeto / cliente / negócio" htmlFor="vinculo">
             <Select id="vinculo" name="vinculo" defaultValue={vinculoAtual}>
               <option value="">Nenhum</option>
               {grupos.map((g) => (
@@ -57,11 +60,17 @@ export function TarefaFormModal({ action, vinculos, tarefa, vinculoInicial, data
             </Select>
           </Campo>
           <Campo label="Categoria" htmlFor="categoria">
-            <Select id="categoria" name="categoria" defaultValue={tarefa?.categoria ?? "ligacao"}>
-              {CATEGORIAS_TAREFA.map((c) => (
-                <option key={c} value={c}>
-                  {CATEGORIA_TAREFA_LABEL[c]}
-                </option>
+            <Select id="categoria" name="categoria" defaultValue={categoriaPadrao}>
+              {GRUPOS_CATEGORIA.map((g) => (
+                <optgroup key={g} label={GRUPO_CATEGORIA_LABEL[g]}>
+                  {categorias
+                    .filter((c) => c.grupo === g)
+                    .map((c) => (
+                      <option key={c.id} value={c.nome}>
+                        {c.icone} {c.nome}
+                      </option>
+                    ))}
+                </optgroup>
               ))}
             </Select>
           </Campo>

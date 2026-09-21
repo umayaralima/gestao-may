@@ -1,4 +1,4 @@
-import type { CategoriaTarefa, EtapaLead, FormaPagamento, Prioridade, StatusProjeto, TipoPagamento } from "./constantes";
+import type { EtapaLead, GrupoCategoria, FormaPagamento, Prioridade, StatusProjeto, TipoPagamento } from "./constantes";
 
 export type Cliente = {
   id: string;
@@ -115,7 +115,9 @@ export type Tarefa = {
   descricao: string | null;
   cliente_id: string | null;
   lead_id: string | null;
-  categoria: CategoriaTarefa;
+  projeto_id: string | null;
+  /** nome da categoria (tabela categorias_tarefa) */
+  categoria: string;
   prioridade: Prioridade;
   vencimento: string | null;
   concluida_em: string | null;
@@ -137,4 +139,12 @@ export type Configuracoes = {
   forma_pagamento_preferida: FormaPagamento;
   chave_pix: string | null;
   atualizado_em: string;
+};
+
+export type CategoriaTarefa = {
+  id: string;
+  nome: string;
+  grupo: GrupoCategoria;
+  icone: string;
+  ordem: number;
 };

@@ -2,22 +2,31 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState, useTransition } from "react";
+import { createContext, useCallback, useContext, useState, useTransition } from "react";
 import { BotaoPrimario, Header, Subbar, Vazio } from "@/components/ui/primitivos";
 import { cn } from "@/lib/cn";
-import { CATEGORIA_TAREFA_ICONE, CATEGORIA_TAREFA_LABEL, PRIORIDADE_COR, PRIORIDADE_LABEL } from "@/lib/constantes";
+import { PRIORIDADE_COR, PRIORIDADE_LABEL } from "@/lib/constantes";
 import { diffDias, fmtData, hojeISO, rotuloDia, somarDias, toISODate } from "@/lib/format";
-import type { Tarefa } from "@/lib/types";
+import type { CategoriaTarefa, Tarefa } from "@/lib/types";
 import { alternarTarefa, atualizarTarefa, criarTarefa, excluirTarefa } from "./actions";
 import { TarefaFormModal } from "./tarefa-form";
 
-export type TarefaComVinculo = Tarefa & { vinculoNome: string | null; vinculoTipo: "cliente" | "lead" | null };
-export type Vinculo = { valor: string; label: string; grupo: "Clientes" | "Pipeline" };
+export type TarefaComVinculo = Tarefa & { vinculoNome: string | null; vinculoTipo: "cliente" | "lead" | "projeto" | null };
+export type Vinculo = { valor: string; label: string; grupo: "Projetos" | "Clientes" | "Pipeline" };
+
+/** Ícones das categorias pelo nome (tabela categorias_tarefa); "•" se a categoria foi apagada. */
+const IconesCtx = createContext<Record<string, string>>({});
+function useIcone() {
+  const icones = useContext(IconesCtx);
+  return (categoria: string) => icones[categoria] ?? "•";
+}
+const linkVinculo = (t: TarefaComVinculo) => (t.vinculoTipo === "projeto" ? `/projetos/${t.projeto_id}` : t.vinculoTipo === "lead" ? `/pipeline/${t.lead_id}` : `/clientes/${t.cliente_id}`);
 type Visao = "dia" | "semana" | "mes";
 
 type Props = {
   tarefas: TarefaComVinculo[];
   vinculos: Vinculo[];
+  categorias: CategoriaTarefa[];
   visao: Visao;
   dataBase?: string;
   abrirNova?: boolean;
@@ -30,7 +39,7 @@ type Props = {
  * Tela Tarefas do protótipo + visões Semana e Mês (pedido da May).
  * Dia = agrupado (Hoje / Amanhã / Próximos dias / Mais adiante / Concluídas), como no Make.
  */
-export function Tarefas({ tarefas, vinculos, visao, dataBase, abrirNova, vinculoInicial, busca, filtros }: Props) {
+export function Tarefas({ tarefas, vinculos, categorias, visao, dataBase, abrirNova, vinculoInicial, busca, filtros }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -46,6 +55,7 @@ export function Tarefas({ tarefas, vinculos, visao, dataBase, abrirNova, vinculo
       const n = new URLSearchParams(params.toString());
       n.delete("nova");
       n.delete("cliente");
+      n.delete("projeto");
       router.replace(`${pathname}${n.toString() ? `?${n}` : ""}`);
     }
   }, [abrirNova, params, pathname, router]);
@@ -64,9 +74,9 @@ export function Tarefas({ tarefas, vinculos, visao, dataBase, abrirNova, vinculo
   const progresso = total ? Math.round((concluidas.length / total) * 100) : 0;
 
   return (
-    <>
-      {nova && <TarefaFormModal action={criarTarefa} vinculos={vinculos} vinculoInicial={vinculoInicial} dataInicial={nova.data} onClose={fecharNova} />}
-      {editando && <TarefaFormModal action={atualizarTarefa.bind(null, editando.id)} vinculos={vinculos} tarefa={editando} onClose={() => setEditando(null)} />}
+    <IconesCtx value={Object.fromEntries(categorias.map((c) => [c.nome, c.icone]))}>
+      {nova && <TarefaFormModal action={criarTarefa} vinculos={vinculos} categorias={categorias} vinculoInicial={vinculoInicial} dataInicial={nova.data} onClose={fecharNova} />}
+      {editando && <TarefaFormModal action={atualizarTarefa.bind(null, editando.id)} vinculos={vinculos} categorias={categorias} tarefa={editando} onClose={() => setEditando(null)} />}
 
       <div className="flex flex-col h-full">
         <Header
@@ -123,7 +133,7 @@ export function Tarefas({ tarefas, vinculos, visao, dataBase, abrirNova, vinculo
           {visao === "mes" && <VisaoMes tarefas={tarefas} base={base} onEditar={setEditando} onNova={(d) => setNova({ data: d })} />}
         </div>
       </div>
-    </>
+    </IconesCtx>
   );
 }
 
@@ -189,6 +199,7 @@ function VisaoDia({ pendentes, concluidas, onEditar }: { pendentes: TarefaComVin
 }
 
 function CartaoTarefa({ tarefa: t, onEditar }: { tarefa: TarefaComVinculo; onEditar: () => void }) {
+  const icone = useIcone();
   const [pending, startTransition] = useTransition();
   const feita = !!t.concluida_em;
   const hoje = hojeISO();
@@ -238,14 +249,14 @@ function CartaoTarefa({ tarefa: t, onEditar }: { tarefa: TarefaComVinculo; onEdi
         {t.descricao && !feita && <p className="text-[11px] text-[#968F88] leading-relaxed mb-2 line-clamp-2">{t.descricao}</p>}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="flex items-center gap-1 text-[10px] text-[#968F88]">
-            <span>{CATEGORIA_TAREFA_ICONE[t.categoria]}</span>
-            {CATEGORIA_TAREFA_LABEL[t.categoria]}
+            <span>{icone(t.categoria)}</span>
+            {t.categoria}
           </span>
           {t.vinculoNome && (
             <>
               <span className="text-[#5A496A]">·</span>
               <Link
-                href={t.vinculoTipo === "lead" ? `/pipeline/${t.lead_id}` : `/clientes/${t.cliente_id}`}
+                href={linkVinculo(t)}
                 className="flex items-center gap-1 text-[10px] text-[#968F88] hover:text-brand-400"
               >
                 <span className="w-3.5 h-3.5 rounded-sm flex items-center justify-center text-[7px] font-bold bg-brand-400/25 text-brand-300">{t.vinculoNome[0]}</span>
@@ -370,6 +381,7 @@ function VisaoSemana({ tarefas, base, onEditar, onNova }: { tarefas: TarefaComVi
 }
 
 function MiniTarefa({ tarefa: t, onEditar }: { tarefa: TarefaComVinculo; onEditar: () => void }) {
+  const icone = useIcone();
   const [pending, startTransition] = useTransition();
   const feita = !!t.concluida_em;
   const corP = PRIORIDADE_COR[t.prioridade];
@@ -390,7 +402,7 @@ function MiniTarefa({ tarefa: t, onEditar }: { tarefa: TarefaComVinculo; onEdita
         <p className={cn("text-[11px] font-medium leading-snug line-clamp-2", feita ? "line-through text-[#968F88]" : "text-[#DDDBD9]")}>{t.titulo}</p>
         <p className="mt-1 flex items-center gap-1.5 text-[9px] text-[#968F88] truncate">
           <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: corP }} />
-          {CATEGORIA_TAREFA_ICONE[t.categoria]} {t.vinculoNome ?? CATEGORIA_TAREFA_LABEL[t.categoria]}
+          {icone(t.categoria)} {t.vinculoNome ?? t.categoria}
         </p>
       </button>
     </div>

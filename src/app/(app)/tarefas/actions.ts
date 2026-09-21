@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { CATEGORIAS_TAREFA, PRIORIDADES } from "@/lib/constantes";
+import { PRIORIDADES } from "@/lib/constantes";
 
 export type FormState = { erro?: string; ok?: boolean };
 
@@ -12,22 +12,26 @@ const vazioParaNull = (v: unknown) => (typeof v === "string" && v.trim() === "" 
 const tarefaSchema = z.object({
   titulo: z.string().trim().min(2, "Dê um título pra tarefa."),
   descricao: z.preprocess(vazioParaNull, z.string().trim().nullable()),
-  // "cliente:<uuid>" | "lead:<uuid>" | ""
+  // "cliente:<uuid>" | "lead:<uuid>" | "projeto:<uuid>" | ""
   vinculo: z.string().optional(),
-  categoria: z.enum(CATEGORIAS_TAREFA).default("outro"),
+  categoria: z.string().trim().min(1).max(80).default("Outro"),
   prioridade: z.enum(PRIORIDADES).default("media"),
   vencimento: z.preprocess(vazioParaNull, z.string().date("Data inválida.").nullable()),
 });
 
 function separarVinculo(v?: string) {
-  if (!v) return { cliente_id: null, lead_id: null };
+  const nada = { cliente_id: null, lead_id: null, projeto_id: null };
+  if (!v) return nada;
   const [tipo, id] = v.split(":");
-  if (!id) return { cliente_id: null, lead_id: null };
-  return tipo === "lead" ? { cliente_id: null, lead_id: id } : { cliente_id: id, lead_id: null };
+  if (!id) return nada;
+  if (tipo === "lead") return { ...nada, lead_id: id };
+  if (tipo === "projeto") return { ...nada, projeto_id: id };
+  return { ...nada, cliente_id: id };
 }
 
 function revalidar() {
   revalidatePath("/tarefas");
+  revalidatePath("/projetos", "layout");
   revalidatePath("/");
 }
 

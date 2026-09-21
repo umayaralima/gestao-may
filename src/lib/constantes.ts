@@ -50,6 +50,8 @@ export const FORMA_PAGAMENTO_LABEL: Record<(typeof FORMAS_PAGAMENTO)[number], st
 };
 
 export const STATUS_CLIENTE = ["ativo", "inativo"] as const;
+export const CONTATOS_PREFERIDOS = ["whatsapp", "email", "instagram"] as const;
+export const CONTATO_PREFERIDO_LABEL: Record<(typeof CONTATOS_PREFERIDOS)[number], string> = { whatsapp: "WhatsApp", email: "E-mail", instagram: "Instagram" };
 
 export const ORIGENS_CLIENTE = ["indicacao", "instagram", "site", "linkedin", "outro"] as const;
 export const ORIGEM_CLIENTE_LABEL: Record<(typeof ORIGENS_CLIENTE)[number], string> = {

@@ -1,5 +1,6 @@
 import { FiltroMenu } from "@/components/ui/filtro-menu";
 import { Busca, Subbar } from "@/components/ui/primitivos";
+import { FASE_CLIENTE_COR, FASE_CLIENTE_LABEL, FASES_CLIENTE, faseCliente } from "@/lib/fase-cliente";
 import { fmt } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { Cliente, Contrato, Interacao, Projeto } from "@/lib/types";
@@ -7,8 +8,8 @@ import { ClientesTabela, type ClienteLinha } from "./clientes-tabela";
 
 type ContratoComProjeto = Contrato & { projetos: { cliente_id: string; nome: string } | null };
 
-export default async function ClientesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; novo?: string }> }) {
-  const { q = "", status = "", novo } = await searchParams;
+export default async function ClientesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; fase?: string; novo?: string }> }) {
+  const { q = "", status = "", fase = "", novo } = await searchParams;
   const supabase = await createClient();
 
   const [{ data: clientes }, { data: projetos }, { data: interacoes }, { data: contratos }] = await Promise.all([
@@ -28,6 +29,7 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
       const its = (interacoes ?? []).filter((i) => i.cliente_id === c.id);
       return {
         cliente: c,
+        fase: faseCliente(ps),
         valor: ativos.reduce((s, p) => s + Number(p.valor_total ?? 0), 0),
         negocios: ativos.length,
         ultimoContato: its[0]?.data ?? null,
@@ -37,30 +39,35 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
       };
     });
 
-  const totalCarteira = linhas.reduce((s, l) => s + l.valor, 0);
+  const filtradas = linhas.filter((l) => !fase || l.fase === fase);
+  const totalCarteira = filtradas.reduce((s, l) => s + l.valor, 0);
+  const emAndamento = filtradas.filter((l) => l.fase === "em_andamento").length;
+  const concluidos = filtradas.filter((l) => l.fase === "concluido").length;
   const ativos = linhas.filter((l) => l.cliente.status === "ativo").length;
 
   return (
     <ClientesTabela
-      linhas={linhas}
+      linhas={filtradas}
       abrirNovo={novo === "1"}
       sub={
         <>
-          {linhas.length} registros · {ativos} ativos · <span className="font-mono">{fmt(totalCarteira)}</span> em carteira
+          {filtradas.length} registros · {emAndamento} em andamento · {concluidos} concluídos · <span className="font-mono">{fmt(totalCarteira)}</span> em carteira
         </>
       }
       busca={<Busca key="busca" placeholder="Buscar cliente, contato ou e-mail…" defaultValue={q} className="sm:w-64" />}
       subbar={
         <Subbar key="subbar">
+          <FiltroMenu param="fase" rotulo="Fase" opcoes={[{ valor: "", label: "Todas as fases" }, ...FASES_CLIENTE.map((f) => ({ valor: f, label: FASE_CLIENTE_LABEL[f], cor: FASE_CLIENTE_COR[f] }))]} />
           <FiltroMenu
             param="status"
+            rotulo="Status"
             opcoes={[
               { valor: "", label: "Todos" },
               { valor: "ativo", label: "Ativo", cor: "#34D399" },
               { valor: "inativo", label: "Inativo", cor: "#968F88" },
             ]}
           />
-          <span className="text-[11px] font-mono text-[#968F88]">{linhas.length} registros</span>
+          <span className="text-[11px] font-mono text-[#968F88]">{filtradas.length} registros</span>
         </Subbar>
       }
     />

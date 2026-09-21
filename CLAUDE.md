@@ -329,3 +329,18 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   `meta_mensal` → barra no card "Receita do mês" do Dashboard; `dias_negocio_parado` → ⚠ no card do Pipeline;
   `dias_aviso_vencimento` → pílula "Vence em Nd" no Financeiro; `forma_pagamento_preferida` → padrão dos modais de lançamento/pago.
 - `cn()` não usa tailwind-merge: pra sobrescrever largura de um primitivo, passe prop (ex.: `largura=` no Input de Configurações).
+
+## Produção pós-fechamento (2026-09-20)
+
+- Decisão da May: um sistema só, com duas zonas — Pipeline/Clientes (comercial) e Projetos (produção); Tarefas e Financeiro
+  atravessam as duas. Nada de sistema separado de CRM.
+- Tarefas (migração 006): `tarefas.projeto_id` (vínculo "Projetos" no formulário, antes de Clientes/Pipeline) e tabela
+  `categorias_tarefa` (nome único, grupo comercial/producao/outro, ícone, ordem). `tarefas.categoria` guarda o NOME (como
+  `projetos.tipo`); renomear propaga. Editável em Configurações → Listas. Constantes CATEGORIAS_TAREFA foram removidas.
+- Página do projeto: card "Tarefas do projeto" (progresso + checkbox) e passo "Tarefas" no Andamento; `/tarefas?nova=1&projeto=<id>`.
+- Clientes (migração 007): campos `documento`, `endereco`, `instagram`, `site`, `contato_preferido`, `acessos`. Modal `lg` em 3 blocos.
+- Fase do cliente calculada em `src/lib/fase-cliente.ts` (em_andamento / entregue / concluido / sem_projeto), pilula no header,
+  coluna "Fase" e filtro na lista. "Concluído" = banco de clientes finalizados. `status` ativo/inativo continua manual (arquivar).
+- `/clientes/[id]` tem abas `?aba=geral|relacionamento|financeiro`: geral = cadastro + projetos com progresso das etapas + próximas
+  tarefas; relacionamento = PainelRelacionamento (follow-up/interações); financeiro = parcelas de todos os projetos.
+- Próximo (camada 2): `etapas_modelo` por tipo de serviço → gerar tarefas de produção ao aprovar o projeto; aba Etapas no projeto.

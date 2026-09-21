@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { ORIGENS_CLIENTE, STATUS_CLIENTE } from "@/lib/constantes";
+import { CONTATOS_PREFERIDOS, ORIGENS_CLIENTE, STATUS_CLIENTE } from "@/lib/constantes";
 
 export type FormState = { erro?: string; ok?: boolean };
 
@@ -19,6 +19,12 @@ const clienteSchema = z.object({
   origem: z.preprocess(vazioParaNull, z.enum(ORIGENS_CLIENTE).nullable()),
   status: z.enum(STATUS_CLIENTE).default("ativo"),
   observacoes: z.preprocess(vazioParaNull, z.string().trim().nullable()),
+  documento: z.preprocess(vazioParaNull, z.string().trim().max(30).nullable()),
+  endereco: z.preprocess(vazioParaNull, z.string().trim().max(300).nullable()),
+  instagram: z.preprocess(vazioParaNull, z.string().trim().max(80).transform((v) => (v ? v.replace(/^@/, "") : v)).nullable()),
+  site: z.preprocess(vazioParaNull, z.string().trim().max(200).nullable()),
+  contato_preferido: z.preprocess(vazioParaNull, z.enum(CONTATOS_PREFERIDOS).nullable()),
+  acessos: z.preprocess(vazioParaNull, z.string().trim().nullable()),
 });
 
 function parse(formData: FormData) {

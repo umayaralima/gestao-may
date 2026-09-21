@@ -10,6 +10,12 @@ export type Cliente = {
   origem: string | null;
   status: "ativo" | "inativo";
   observacoes: string | null;
+  documento: string | null;
+  endereco: string | null;
+  instagram: string | null;
+  site: string | null;
+  contato_preferido: "whatsapp" | "email" | "instagram" | null;
+  acessos: string | null;
   lead_id: string | null;
   proximo_followup: string | null;
   nota_followup: string | null;

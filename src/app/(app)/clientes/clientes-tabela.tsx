@@ -9,11 +9,13 @@ import { CANAL_INTERACAO_LABEL, ORIGEM_CLIENTE_LABEL, STATUS_PROJETO_LABEL } fro
 import { fmt, fmtData } from "@/lib/format";
 import type { Cliente, Contrato, Interacao, Projeto } from "@/lib/types";
 import { criarCliente, excluirClientes } from "./actions";
+import { FASE_CLIENTE_LABEL, FASE_CLIENTE_TOM, type FaseCliente } from "@/lib/fase-cliente";
 import { BadgeStatusCliente } from "./badge-cliente";
 import { ClienteFormModal } from "./cliente-form";
 
 export type ClienteLinha = {
   cliente: Cliente;
+  fase: FaseCliente;
   valor: number;
   negocios: number;
   ultimoContato: string | null;
@@ -96,7 +98,7 @@ export function ClientesTabela({ linhas, abrirNovo, sub, busca, subbar }: Props)
                       className="w-3.5 h-3.5 rounded border-[#5A496A] accent-brand-400 cursor-pointer"
                     />
                   </th>
-                  {["Cliente", "Contato", "Status", "Valor", "Proj.", "Últ. contato", ""].map((h) => (
+                  {["Cliente", "Contato", "Fase", "Valor", "Proj.", "Últ. contato", ""].map((h) => (
                     <Th key={h} className="px-3">
                       {h}
                     </Th>
@@ -138,7 +140,10 @@ export function ClientesTabela({ linhas, abrirNovo, sub, busca, subbar }: Props)
                         <p className="text-[10px] text-[#968F88] font-mono">{c.email ?? c.whatsapp ?? ""}</p>
                       </td>
                       <td className="px-3 py-3.5">
-                        <BadgeStatusCliente status={c.status} />
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Pill tom={FASE_CLIENTE_TOM[l.fase]}>{FASE_CLIENTE_LABEL[l.fase]}</Pill>
+                          {c.status === "inativo" && <BadgeStatusCliente status={c.status} />}
+                        </div>
                       </td>
                       <td className="px-3 py-3.5 text-xs font-mono text-[#DDDBD9]">{fmt(l.valor)}</td>
                       <td className="px-3 py-3.5 text-xs font-mono text-[#968F88] text-center">{l.negocios}</td>
@@ -192,7 +197,10 @@ function PainelDetalhe({ linha, onClose }: { linha: ClienteLinha; onClose: () =>
           <Avatar nome={c.empresa ?? c.nome} tamanho={11} />
           <div className="min-w-0">
             <p className="text-sm font-semibold text-[#F5F5F4] truncate">{c.empresa ?? c.nome}</p>
-            <BadgeStatusCliente status={c.status} />
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Pill tom={FASE_CLIENTE_TOM[linha.fase]}>{FASE_CLIENTE_LABEL[linha.fase]}</Pill>
+              {c.status === "inativo" && <BadgeStatusCliente status={c.status} />}
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3">

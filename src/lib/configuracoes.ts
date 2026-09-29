@@ -16,6 +16,9 @@ export const CONFIG_PADRAO: Configuracoes = {
   dias_negocio_parado: 10,
   forma_pagamento_preferida: "pix",
   chave_pix: null,
+  resumo_diario: true,
+  resumo_email: null,
+  agenda_token: "",
   atualizado_em: "",
 };
 

@@ -356,3 +356,21 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   usadas pelo server NÃO podem viver no arquivo "use client". Funil = leads criados no período que passaram por cada etapa;
   ciclo = criado_em → atualizado_em dos ganhos; prazo médio = data_inicio → última etapa concluída. "Exportar PDF" = window.print().
 - Seed limpo em 2026-09-20 (`supabase/limpar-seed.sql`); a May também apagou o BuilDesk. Base zerada, configurações preservadas.
+
+## Fase 3 — integração 1: resumo diário + agenda (2026-09-29)
+
+- Ordem combinada das integrações: (1) resumo diário por e-mail + feed iCal; (2) proposta/contrato em PDF → Autentique;
+  (3) InfinitePay (link de cobrança); (4) formulário do site + ManyChat → Pipeline; (5) e-mails via IMAP (tela E-mails);
+  (6) NF, WhatsApp oficial e Instagram completo só quando o volume justificar (dependem de aprovação de terceiros).
+- Migração 009: `configuracoes.resumo_diario/resumo_email/agenda_token` + tabela `envios_resumo` (um registro por dia, unique).
+- **Chave de serviço**: cron e feed iCal rodam sem sessão, então usam `SUPABASE_SERVICE_ROLE_KEY` via `src/lib/supabase/admin.ts`
+  (env só de servidor na Vercel, nunca NEXT_PUBLIC_, nunca commitada). A regra "a sb_secret_ nunca vai no projeto" continua
+  valendo pro código e pro chat; sem ela a alternativa seria abrir leitura anônima no RLS, o que é pior.
+- `src/lib/resumo-diario.ts` monta o resumo (tarefas de hoje, atrasadas, follow-ups, cobranças até 7 dias, entregas até 7 dias) e
+  gera o HTML; `src/lib/enviar-resumo.ts` decide se envia (respeita o toggle e o "já enviei hoje") e registra em `envios_resumo`.
+  Envio pelo Resend via fetch (sem SDK): `RESEND_API_KEY`, `RESEND_FROM`.
+- `vercel.json`: cron `0 10 * * *` (7h de Brasília) em `/api/cron/resumo-diario`, protegido por `CRON_SECRET` (Bearer).
+- Feed iCal em `/api/agenda/[token]` (token = `configuracoes.agenda_token`, trocável na UI): tarefas com prazo + entregas de
+  projeto como eventos de dia inteiro; concluídas entram como TRANSPARENT. `src/proxy.ts` deixou de interceptar `/api`.
+- Configurações → aba **Notificações**: liga/desliga o resumo, e-mail de destino, "Enviar agora", último envio e o link do
+  calendário (copiar / assinar no Google / gerar novo link).

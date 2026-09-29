@@ -224,3 +224,42 @@ export async function excluirEtapaModelo(id: string) {
   await supabase.from("etapas_modelo").delete().eq("id", id);
   revalidarEtapasModelo();
 }
+
+/* ---------- Notificações (resumo diário + feed da agenda) ---------- */
+
+export async function salvarNotificacoes(_prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = z
+    .object({
+      resumo_diario: z.preprocess((v) => v === "on" || v === "true", z.boolean()),
+      resumo_email: z.union([z.literal(""), z.string().trim().email("E-mail inválido.")]).transform((v) => (v === "" ? null : v)),
+    })
+    .safeParse({ resumo_diario: formData.get("resumo_diario") ?? "false", resumo_email: formData.get("resumo_email") ?? "" });
+  if (!parsed.success) return { erro: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("configuracoes").update({ ...parsed.data, atualizado_em: new Date().toISOString() }).eq("id", 1);
+  if (error) return { erro: error.code === "42703" ? "Rode a migração 009_notificacoes.sql no Supabase." : "Não foi possível salvar." };
+
+  revalidatePath("/configuracoes");
+  return { ok: true };
+}
+
+/** Manda o resumo agora (ignora o "já enviei hoje" e o desligamento), pra testar o e-mail. */
+export async function enviarResumoAgora(): Promise<FormState> {
+  const { enviarResumoDiario } = await import("@/lib/enviar-resumo");
+  try {
+    const r = await enviarResumoDiario({ forcar: true });
+    if (r.erro) return { erro: r.erro };
+    revalidatePath("/configuracoes");
+    return { ok: true };
+  } catch (e) {
+    return { erro: e instanceof Error ? e.message : "Falha ao enviar." };
+  }
+}
+
+/** Gera um novo link do calendário (o antigo para de funcionar). */
+export async function trocarTokenAgenda() {
+  const supabase = await createClient();
+  await supabase.from("configuracoes").update({ agenda_token: crypto.randomUUID() }).eq("id", 1);
+  revalidatePath("/configuracoes");
+}

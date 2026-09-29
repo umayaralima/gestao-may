@@ -146,6 +146,9 @@ export type Configuracoes = {
   dias_negocio_parado: number;
   forma_pagamento_preferida: FormaPagamento;
   chave_pix: string | null;
+  resumo_diario: boolean;
+  resumo_email: string | null;
+  agenda_token: string;
   atualizado_em: string;
 };
 

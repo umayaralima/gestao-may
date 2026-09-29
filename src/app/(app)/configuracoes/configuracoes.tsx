@@ -15,6 +15,7 @@ import {
   type SecaoConfig,
 } from "./actions";
 import { EtapasModeloEditor } from "./etapas-modelo";
+import { Notificacoes, type UltimoEnvio } from "./notificacoes";
 import { NovaCategoriaForm } from "./nova-categoria-form";
 import { NovoTipoForm } from "./novo-tipo-form";
 
@@ -27,6 +28,7 @@ import { NovoTipoForm } from "./novo-tipo-form";
 const ABAS = [
   { id: "perfil", label: "Perfil", Icone: PersonIcon },
   { id: "empresa", label: "Empresa", Icone: BuildingIcon },
+  { id: "notificacoes", label: "Notificações", Icone: BellIcon },
   { id: "pipeline", label: "Pipeline", Icone: FunnelIcon },
   { id: "financeiro", label: "Financeiro", Icone: MoneyIcon },
   { id: "listas", label: "Listas", Icone: TagIcon },
@@ -42,9 +44,12 @@ type Props = {
   usoCategorias: Record<string, number>;
   etapasModelo: EtapaModelo[];
   etapas: string[];
+  emailLogin: string;
+  linkAgenda: string | null;
+  ultimoEnvio: UltimoEnvio;
 };
 
-export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCategorias, etapasModelo, etapas }: Props) {
+export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCategorias, etapasModelo, etapas, emailLogin, linkAgenda, ultimoEnvio }: Props) {
   const [aba, setAba] = useState<Aba>("perfil");
   const [toast, setToast] = useState<string | null>(null);
 
@@ -137,6 +142,17 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
               </Row>
             </Section>
           </FormSecao>
+        )}
+
+        {aba === "notificacoes" && (
+          <Notificacoes
+            ativo={config.resumo_diario}
+            email={config.resumo_email ?? config.email_contato}
+            emailLogin={emailLogin}
+            linkAgenda={linkAgenda}
+            ultimoEnvio={ultimoEnvio}
+            onSalvo={setToast}
+          />
         )}
 
         {aba === "pipeline" && (
@@ -446,6 +462,14 @@ function MoneyIcon() {
       <rect x="1.5" y="3.5" width="12" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
       <circle cx="7.5" cy="7.5" r="2" stroke="currentColor" strokeWidth="1.3" />
       <path d="M1.5 6h2M11.5 6h2M1.5 9h2M11.5 9h2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  );
+}
+function BellIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+      <path d="M7.5 1.5a4.5 4.5 0 0 0-4.5 4.5v2.5L1.5 10.5h12L12 8.5V6a4.5 4.5 0 0 0-4.5-4.5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M6 10.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
     </svg>
   );
 }

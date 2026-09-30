@@ -24,6 +24,7 @@ export function Contratos({
   valorProjeto,
   pagamentoPrevisto,
   clienteNome,
+  clienteEmail,
 }: {
   contratos: Contrato[];
   criar: (prev: FormState, fd: FormData) => Promise<FormState>;
@@ -33,6 +34,7 @@ export function Contratos({
   valorProjeto: number | null;
   pagamentoPrevisto: string;
   clienteNome: string;
+  clienteEmail: string | null;
 }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -40,7 +42,7 @@ export function Contratos({
         {contratos.length === 0 ? (
           <Vazio icone="📝" titulo="Nenhum contrato ainda" sub="Gere o contrato preenchido pelo sistema ou cadastre um link externo ao lado." />
         ) : (
-          contratos.map((c) => <CartaoContrato key={c.id} c={c} projetoId={projetoId} clienteNome={clienteNome} />)
+          contratos.map((c) => <CartaoContrato key={c.id} c={c} projetoId={projetoId} clienteNome={clienteNome} clienteEmail={clienteEmail} />)
         )}
       </div>
       <div className="space-y-3">
@@ -57,7 +59,7 @@ export function Contratos({
   );
 }
 
-function CartaoContrato({ c, projetoId, clienteNome }: { c: Contrato; projetoId: string; clienteNome: string }) {
+function CartaoContrato({ c, projetoId, clienteNome, clienteEmail }: { c: Contrato; projetoId: string; clienteNome: string; clienteEmail: string | null }) {
   const [pending, startTransition] = useTransition();
   const idx = ETAPAS.findIndex((e) => e.id === c.status);
   const run = (fn: () => Promise<void>) => startTransition(fn);
@@ -117,7 +119,7 @@ function CartaoContrato({ c, projetoId, clienteNome }: { c: Contrato; projetoId:
         )}
       </form>
 
-      <DocumentoContrato contrato={c} projetoId={projetoId} clienteNome={clienteNome} />
+      <DocumentoContrato contrato={c} projetoId={projetoId} clienteNome={clienteNome} clienteEmail={clienteEmail} />
 
       <div className="flex flex-wrap items-center gap-2 border-t border-[#311C45] pt-4">
         {c.status === "rascunho" && (

@@ -17,7 +17,7 @@ import { EditarProjetoBotao } from "./editar-botao";
 import { EtapasProjeto } from "./etapas-projeto";
 import { PagamentosProjeto } from "./pagamentos-projeto";
 
-type ProjetoJoin = Projeto & { clientes: { id: string; nome: string; empresa: string | null } | null };
+type ProjetoJoin = Projeto & { clientes: { id: string; nome: string; empresa: string | null; email: string | null } | null };
 const ABAS = [
   { id: "geral", label: "Visão geral" },
   { id: "etapas", label: "Etapas" },
@@ -34,7 +34,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const supabase = await createClient();
 
   const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }, { data: tarefas }, { data: categorias }, config] = await Promise.all([
-    supabase.from("projetos").select("*, clientes(id, nome, empresa)").eq("id", id).single<ProjetoJoin>(),
+    supabase.from("projetos").select("*, clientes(id, nome, empresa, email)").eq("id", id).single<ProjetoJoin>(),
     supabase.from("pagamentos_view").select("*").eq("projeto_id", id).order("vencimento").returns<Pagamento[]>(),
     supabase.from("briefings").select("*").eq("projeto_id", id).maybeSingle<Briefing>(),
     supabase.from("contratos").select("*").eq("projeto_id", id).order("criado_em", { ascending: false }).returns<Contrato[]>(),
@@ -284,6 +284,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
               valorProjeto={projeto.valor_total !== null ? Number(projeto.valor_total) : null}
               pagamentoPrevisto={pagamentoPrevisto}
               clienteNome={clienteNome}
+              clienteEmail={projeto.clientes?.email ?? null}
             />
           </div>
         )}

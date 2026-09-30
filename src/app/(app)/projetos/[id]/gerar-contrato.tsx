@@ -5,9 +5,9 @@ import { BotaoCancelar, BotaoConfirmar, Escolha, Modal } from "@/components/ui/m
 import { BotaoGhost, BotaoPrimario, Campo, Input, MensagemErro, Textarea } from "@/components/ui/primitivos";
 import { cn } from "@/lib/cn";
 import { baixarBlob, gerarPdfContrato } from "@/lib/contrato-pdf";
-import { fmt } from "@/lib/format";
+import { fmt, fmtData } from "@/lib/format";
 import type { Contrato, ModeloContrato, Pagamento } from "@/lib/types";
-import { gerarContrato, salvarDocumentoContrato, type FormState } from "../actions";
+import { atualizarStatusAssinatura, enviarParaAssinatura, gerarContrato, salvarDocumentoContrato, type FormState } from "../actions";
 
 /*
  * Botão "Gerar contrato" (aba Contrato do projeto) + visualização do documento gerado.
@@ -206,13 +206,34 @@ function Marcador({ ativo, onChange, label }: { ativo: boolean; onChange: (v: bo
   );
 }
 
-/* ---------- Documento gerado: ver, editar e baixar ---------- */
+/* ---------- Documento gerado: ver, editar, baixar e assinar ---------- */
 
-export function DocumentoContrato({ contrato, projetoId, clienteNome }: { contrato: Contrato; projetoId: string; clienteNome: string }) {
+type AssinanteAutentique = {
+  name: string | null;
+  email: string | null;
+  signed: { created_at: string } | null;
+  rejected: { created_at: string } | null;
+  link: { short_link: string } | null;
+};
+
+export function DocumentoContrato({
+  contrato,
+  projetoId,
+  clienteNome,
+  clienteEmail,
+}: {
+  contrato: Contrato;
+  projetoId: string;
+  clienteNome: string;
+  clienteEmail: string | null;
+}) {
   const [editando, setEditando] = useState(false);
   const [texto, setTexto] = useState(contrato.documento ?? "");
   const [baixando, setBaixando] = useState(false);
   const [salvando, salvar] = useTransition();
+  const [enviando, setEnviando] = useState(false);
+  const [atualizando, atualizar] = useTransition();
+  const [erro, setErro] = useState<string | null>(null);
 
   if (!contrato.documento) return null;
   const nomeArquivo = `Contrato ${contrato.numero ?? ""} - ${clienteNome}.pdf`.replace(/\s+/g, " ").trim();
@@ -227,19 +248,96 @@ export function DocumentoContrato({ contrato, projetoId, clienteNome }: { contra
     }
   };
 
+  // O PDF é gerado aqui no navegador e vai em base64 pra action, que faz o upload no Autentique.
+  const enviarAssinatura = async () => {
+    if (!clienteEmail) {
+      setErro("O cliente precisa de e-mail no cadastro pra receber o convite de assinatura.");
+      return;
+    }
+    if (!confirm(`Enviar pra assinatura de ${clienteEmail}? O Autentique manda o convite por e-mail.`)) return;
+    setEnviando(true);
+    setErro(null);
+    try {
+      const blob = await gerarPdfContrato(texto, nomeArquivo);
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const leitor = new FileReader();
+        leitor.onload = () => resolve(String(leitor.result).split(",")[1] ?? "");
+        leitor.onerror = () => reject(new Error("Falha ao ler o PDF."));
+        leitor.readAsDataURL(blob);
+      });
+      const r = await enviarParaAssinatura(contrato.id, projetoId, base64, nomeArquivo);
+      setErro(r.erro ?? null);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Falha ao enviar.");
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const assinantes = ((contrato.autentique_dados as { signatures?: AssinanteAutentique[] } | null)?.signatures ?? []) as AssinanteAutentique[];
+
   return (
     <div className="border-t border-[#311C45] pt-4 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88]">Documento gerado</p>
-        <div className="flex items-center gap-2">
-          {contrato.status === "rascunho" && (
+        <div className="flex flex-wrap items-center gap-2">
+          {contrato.status === "rascunho" && !contrato.autentique_id && (
             <BotaoGhost onClick={() => setEditando((v) => !v)}>{editando ? "Ver formatado" : "Editar texto"}</BotaoGhost>
           )}
           <BotaoGhost onClick={baixar} className={cn(baixando && "opacity-50")}>
             {baixando ? "Gerando PDF…" : "Baixar PDF"}
           </BotaoGhost>
+          {!contrato.autentique_id ? (
+            <button
+              type="button"
+              onClick={enviarAssinatura}
+              disabled={enviando}
+              className="px-3 py-2 bg-brand-400 hover:bg-brand-300 disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors whitespace-nowrap"
+            >
+              {enviando ? "Enviando…" : "Enviar pra assinatura"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => atualizar(async () => setErro((await atualizarStatusAssinatura(contrato.id, projetoId)).erro ?? null))}
+              disabled={atualizando}
+              className="px-3 py-2 text-xs text-brand-400 border border-brand-400/30 hover:bg-brand-400/10 disabled:opacity-40 rounded-lg transition-colors whitespace-nowrap"
+            >
+              {atualizando ? "Consultando…" : "Atualizar status"}
+            </button>
+          )}
         </div>
       </div>
+
+      {erro && <p className="text-[11px] text-red-400">{erro}</p>}
+
+      {assinantes.length > 0 && (
+        <div className="rounded-lg border border-[#311C45] bg-[#1B0F26] px-4 py-3 space-y-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88]">Assinaturas no Autentique</p>
+          {assinantes.map((a, i) => (
+            <div key={i} className="flex flex-wrap items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs text-[#DDDBD9] truncate">{a.name ?? a.email}</p>
+                {a.name && a.email && <p className="text-[10px] text-[#968F88] truncate">{a.email}</p>}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {a.signed ? (
+                  <span className="text-[10px] text-emerald-400">assinou em {fmtData(a.signed.created_at.slice(0, 10))}</span>
+                ) : a.rejected ? (
+                  <span className="text-[10px] text-red-400">recusou</span>
+                ) : (
+                  <span className="text-[10px] text-amber-400">aguardando</span>
+                )}
+                {a.link?.short_link && !a.signed && (
+                  <a href={a.link.short_link} target="_blank" rel="noreferrer" className="text-[10px] text-brand-400 hover:text-brand-300">
+                    link ↗
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {editando ? (
         <form

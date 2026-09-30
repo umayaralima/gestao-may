@@ -87,6 +87,8 @@ export type Contrato = {
   documento: string | null;
   dados: Record<string, unknown>;
   valor: number | null;
+  autentique_id: string | null;
+  autentique_dados: Record<string, unknown>;
   criado_em: string;
 };
 

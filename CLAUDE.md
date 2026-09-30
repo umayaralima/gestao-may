@@ -398,3 +398,17 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
 - UI: aba Contrato do projeto → card "Contrato do sistema" com **Gerar contrato** (modal: pagamento, hospedagem A/B, textos,
   licenças, representante, portfólio, testemunhas, Anexo editável) e, no contrato gerado, prévia + "Editar texto" + "Baixar PDF".
 - Pendente do 2A: editor dos modelos em Configurações (hoje só via SQL). Depois vem 2B: Autentique.
+
+## Fase 3 — integração 2B: Autentique (2026-09-30)
+
+- Migração 011: `contratos.autentique_id`, `autentique_dados` (jsonb com o último retorno) e `atualizado_em`.
+- `src/lib/autentique.ts`: GraphQL v2 em `https://api.autentique.com.br/v2/graphql` (sobrescrevível por `AUTENTIQUE_API_URL`),
+  header `Authorization: Bearer $AUTENTIQUE_TOKEN`. `criarDocumentoAutentique` usa multipart (operations/map/file) conforme a
+  spec de upload do GraphQL; `consultarDocumentoAutentique` lê `signatures { signed rejected viewed link { short_link } }`.
+- Fluxo: o PDF é gerado no navegador (jsPDF) → base64 → server action `enviarParaAssinatura` → upload no Autentique →
+  salva id, link do signatário, status `enviado` e data. Signatários: cliente (e-mail do cadastro) e a contratada, ambos SIGN.
+  Limite de 5 MB no plano gratuito; `next.config.ts` subiu o bodySizeLimit das server actions pra 6mb.
+- Retorno automático: webhook em `/api/webhooks/autentique` (evento `document.finished` etc.), validado por HMAC-SHA256 no header
+  `x-autentique-signature` com `AUTENTIQUE_WEBHOOK_SECRET`; quando todos assinam, contrato vira `assinado` com data e o banner
+  de "aprovar projeto" aparece sozinho. Botão "Atualizar status" faz a mesma coisa sob demanda (fallback se o webhook falhar).
+- UI: no contrato gerado, botões "Enviar pra assinatura" / "Atualizar status" e a lista de assinantes com situação e link.

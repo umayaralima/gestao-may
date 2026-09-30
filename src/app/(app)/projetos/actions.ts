@@ -8,7 +8,8 @@ import { STATUS_PROJETO } from "@/lib/constantes";
 import { hojeISO } from "@/lib/format";
 import { proximoNumero, renderizarContrato, type DadosContrato } from "@/lib/contrato";
 import { getConfiguracoes } from "@/lib/configuracoes";
-import type { Cliente, ModeloContrato, Pagamento, Projeto } from "@/lib/types";
+import type { Cliente, Contrato, ModeloContrato, Pagamento, Projeto } from "@/lib/types";
+import { consultarDocumentoAutentique, criarDocumentoAutentique, situacao } from "@/lib/autentique";
 
 export type FormState = { erro?: string; ok?: boolean };
 
@@ -300,4 +301,87 @@ export async function salvarDocumentoContrato(id: string, projetoId: string, for
   const supabase = await createClient();
   await supabase.from("contratos").update({ documento: texto.data }).eq("id", id).eq("status", "rascunho");
   revalidar(projetoId);
+}
+
+/* ---------- Assinatura eletrônica (Autentique) ---------- */
+
+/**
+ * Envia o contrato pra assinatura: o PDF é gerado no navegador e chega aqui em base64.
+ * Assinam o cliente e a contratada, ambos por e-mail.
+ */
+export async function enviarParaAssinatura(contratoId: string, projetoId: string, pdfBase64: string, nomeArquivo: string): Promise<FormState> {
+  const supabase = await createClient();
+  const [{ data: contrato }, config] = await Promise.all([
+    supabase.from("contratos").select("*, projetos(nome, cliente_id, clientes(nome, empresa, email))").eq("id", contratoId).single<
+      Contrato & { projetos: { nome: string; cliente_id: string; clientes: { nome: string; empresa: string | null; email: string | null } | null } | null }
+    >(),
+    getConfiguracoes(),
+  ]);
+  if (!contrato) return { erro: "Contrato não encontrado." };
+  if (contrato.autentique_id) return { erro: "Este contrato já foi enviado pra assinatura." };
+
+  const cliente = contrato.projetos?.clientes;
+  if (!cliente?.email) return { erro: "O cliente não tem e-mail no cadastro — é por ele que o Autentique envia o convite." };
+  const meuEmail = config.email_contratual ?? config.email_contato;
+  if (!meuEmail) return { erro: "Preencha o e-mail do contrato em Configurações → Contratos." };
+
+  const pdf = Buffer.from(pdfBase64.replace(/^data:application\/pdf;base64,/, ""), "base64");
+  if (pdf.length < 1000) return { erro: "PDF inválido. Gere o documento de novo." };
+  if (pdf.length > 5 * 1024 * 1024) return { erro: "O PDF passou de 5 MB, limite do plano gratuito do Autentique." };
+
+  try {
+    const doc = await criarDocumentoAutentique({
+      nome: nomeArquivo.replace(/\.pdf$/i, ""),
+      pdf,
+      mensagem: `Contrato ${contrato.numero ?? ""} · ${contrato.projetos?.nome ?? ""}`.trim(),
+      signatarios: [
+        { email: cliente.email, name: cliente.empresa ?? cliente.nome, action: "SIGN" },
+        { email: meuEmail, name: config.razao_social ?? config.nome ?? undefined, action: "SIGN" },
+      ],
+    });
+
+    const s = situacao(doc);
+    await supabase
+      .from("contratos")
+      .update({
+        autentique_id: doc.id,
+        autentique_dados: doc,
+        link_documento: s.linkCliente ?? contrato.link_documento,
+        status: "enviado",
+        data_envio: hojeISO(),
+        atualizado_em: new Date().toISOString(),
+      })
+      .eq("id", contratoId);
+
+    revalidar(projetoId);
+    return { ok: true };
+  } catch (e) {
+    return { erro: e instanceof Error ? e.message : "Não foi possível enviar pro Autentique." };
+  }
+}
+
+/** Consulta o Autentique e atualiza o status do contrato (assinado / recusado). */
+export async function atualizarStatusAssinatura(contratoId: string, projetoId: string): Promise<FormState> {
+  const supabase = await createClient();
+  const { data: contrato } = await supabase.from("contratos").select("id, autentique_id, status").eq("id", contratoId).single<{ id: string; autentique_id: string | null; status: string }>();
+  if (!contrato?.autentique_id) return { erro: "Este contrato não está no Autentique." };
+
+  try {
+    const doc = await consultarDocumentoAutentique(contrato.autentique_id);
+    const s = situacao(doc);
+    await supabase
+      .from("contratos")
+      .update({
+        autentique_dados: doc,
+        status: s.concluido ? "assinado" : contrato.status === "rascunho" ? "enviado" : contrato.status,
+        data_assinatura: s.concluido ? (s.ultimaAssinatura ?? new Date().toISOString()).slice(0, 10) : null,
+        atualizado_em: new Date().toISOString(),
+      })
+      .eq("id", contratoId);
+
+    revalidar(projetoId);
+    return { ok: true };
+  } catch (e) {
+    return { erro: e instanceof Error ? e.message : "Não foi possível consultar o Autentique." };
+  }
 }

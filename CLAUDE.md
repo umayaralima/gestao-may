@@ -412,3 +412,4 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   `x-autentique-signature` com `AUTENTIQUE_WEBHOOK_SECRET`; quando todos assinam, contrato vira `assinado` com data e o banner
   de "aprovar projeto" aparece sozinho. Botão "Atualizar status" faz a mesma coisa sob demanda (fallback se o webhook falhar).
 - UI: no contrato gerado, botões "Enviar pra assinatura" / "Atualizar status" e a lista de assinantes com situação e link.
+- Testado em produção em 2026-09-30: "Testar conexão" verde e um contrato enviado/assinado de ponta a ponta num cliente de teste.

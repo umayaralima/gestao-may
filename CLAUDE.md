@@ -413,3 +413,15 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   de "aprovar projeto" aparece sozinho. Botão "Atualizar status" faz a mesma coisa sob demanda (fallback se o webhook falhar).
 - UI: no contrato gerado, botões "Enviar pra assinatura" / "Atualizar status" e a lista de assinantes com situação e link.
 - Testado em produção em 2026-09-30: "Testar conexão" verde e um contrato enviado/assinado de ponta a ponta num cliente de teste.
+
+## Fase 3 — integração 3: InfinitePay (2026-09-30)
+
+- Migração 012: `configuracoes.infinitepay_handle` (InfiniteTag, sem o $) e, em `pagamentos`, `link_pagamento`, `link_slug`,
+  `link_criado_em`, `transaction_nsu`, `recibo_url`.
+- `src/lib/infinitepay.ts`: `POST https://api.checkout.infinitepay.io/links` (handle, items em CENTAVOS, order_nsu, webhook_url,
+  redirect_url, customer) e `POST /payment_check`. **A API não usa token nem assina o webhook** — por isso o `order_nsu` é o uuid
+  do pagamento, a URL do webhook leva `?s=$INFINITEPAY_WEBHOOK_SECRET` e o webhook SEMPRE confirma em `payment_check` antes de
+  dar baixa. Responder 400 faz a InfinitePay reenviar depois (usado quando a confirmação ainda não propagou).
+- UI: coluna "Cobrança" no Financeiro com gerar link, copiar, mandar no WhatsApp (mensagem pronta), conferir pagamento e remover
+  link; parcela paga por lá mostra "Ver recibo". Baixa automática pelo webhook, com o botão de conferir como plano B.
+- Campo do InfiniteTag em Configurações → Financeiro.

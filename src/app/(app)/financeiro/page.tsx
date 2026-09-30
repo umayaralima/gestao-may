@@ -5,14 +5,14 @@ import { createClient } from "@/lib/supabase/server";
 import type { Pagamento } from "@/lib/types";
 import { Financeiro, type PagamentoLinha, type ProjetoOpcao } from "./financeiro";
 
-type PagamentoJoin = Pagamento & { projetos: { id: string; nome: string; data_inicio: string | null; clientes: { id: string; nome: string; empresa: string | null } | null } | null };
+type PagamentoJoin = Pagamento & { projetos: { id: string; nome: string; data_inicio: string | null; clientes: { id: string; nome: string; empresa: string | null; whatsapp: string | null } | null } | null };
 
 export default async function FinanceiroPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; novo?: string; projeto?: string }> }) {
   const { q = "", status = "", novo, projeto } = await searchParams;
   const supabase = await createClient();
 
   const [{ data: pagamentos }, { data: projetos }, config] = await Promise.all([
-    supabase.from("pagamentos_view").select("*, projetos(id, nome, data_inicio, clientes(id, nome, empresa))").order("vencimento", { ascending: false }).returns<PagamentoJoin[]>(),
+    supabase.from("pagamentos_view").select("*, projetos(id, nome, data_inicio, clientes(id, nome, empresa, whatsapp))").order("vencimento", { ascending: false }).returns<PagamentoJoin[]>(),
     supabase.from("projetos").select("id, nome, data_inicio, clientes(nome, empresa)").neq("status", "cancelado").order("criado_em", { ascending: false }),
     getConfiguracoes(),
   ]);
@@ -24,6 +24,7 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: P
       projetoNome: p.projetos?.nome ?? "—",
       clienteNome: p.projetos?.clientes?.empresa ?? p.projetos?.clientes?.nome ?? "—",
       clienteId: p.projetos?.clientes?.id ?? null,
+      clienteWhatsapp: p.projetos?.clientes?.whatsapp ?? null,
     }))
     .filter((p) => !status || p.status === status)
     .filter((p) => !termo || p.projetoNome.toLowerCase().includes(termo) || p.clienteNome.toLowerCase().includes(termo));
@@ -42,6 +43,7 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: P
       projetoInicial={projeto}
       formaPreferida={config.forma_pagamento_preferida}
       diasAviso={config.dias_aviso_vencimento}
+      temHandle={!!config.infinitepay_handle}
       busca={<Busca key="busca" placeholder="Buscar cliente ou projeto…" defaultValue={q} className="sm:w-52" />}
       filtro={
         <FiltroMenu key="filtro"

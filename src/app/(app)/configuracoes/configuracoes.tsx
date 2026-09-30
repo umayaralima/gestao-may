@@ -215,6 +215,10 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
                 <Label label="Chave Pix" />
                 <Input name="chave_pix" defaultValue={config.chave_pix ?? ""} placeholder="CPF, e-mail ou telefone" />
               </Row>
+              <Row>
+                <Label label="InfiniteTag" description="Seu usuário da InfinitePay, sem o $. Habilita o botão de gerar link de cobrança no Financeiro." />
+                <Input name="infinitepay_handle" defaultValue={config.infinitepay_handle ?? ""} placeholder="mayaralima" />
+              </Row>
             </Section>
           </FormSecao>
         )}

@@ -47,6 +47,10 @@ export type Pagamento = {
   vencimento: string;
   forma_pagamento: string | null;
   data_pagamento: string | null;
+  link_pagamento: string | null;
+  link_slug: string | null;
+  transaction_nsu: string | null;
+  recibo_url: string | null;
   criado_em: string;
   /** Vem da view `pagamentos_view`. */
   status: StatusPagamento;
@@ -158,6 +162,7 @@ export type Configuracoes = {
   cidade_foro: string | null;
   email_contratual: string | null;
   contrato_corpo: string | null;
+  infinitepay_handle: string | null;
   resumo_diario: boolean;
   resumo_email: string | null;
   agenda_token: string;

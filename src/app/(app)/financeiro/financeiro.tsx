@@ -10,8 +10,9 @@ import { FORMA_PAGAMENTO_LABEL, FORMAS_PAGAMENTO, TIPO_PAGAMENTO, TIPO_PAGAMENTO
 import { diffDias, fmt, fmtData, hojeISO, mesAnoExtenso } from "@/lib/format";
 import type { Pagamento } from "@/lib/types";
 import { criarPagamento, desfazerPagamento, excluirPagamento, marcarComoPago, type FormState } from "./actions";
+import { BotoesCobranca } from "./cobranca";
 
-export type PagamentoLinha = Pagamento & { projetoNome: string; clienteNome: string; clienteId: string | null };
+export type PagamentoLinha = Pagamento & { projetoNome: string; clienteNome: string; clienteId: string | null; clienteWhatsapp: string | null };
 export type ProjetoOpcao = { id: string; label: string; data_inicio: string | null };
 
 type Props = {
@@ -25,12 +26,14 @@ type Props = {
   /** Configurações → Financeiro */
   formaPreferida: string;
   diasAviso: number;
+  /** InfiniteTag configurado: habilita os botões de cobrança */
+  temHandle: boolean;
 };
 
 const ICONE_FORMA: Record<string, string> = { pix: "⚡", transferencia: "🏦", boleto: "📄", cartao: "💳", outro: "💰" };
 
 /** Tela Financeiro do protótipo: KPIs, barra tricolor, filtro hambúrguer, tabela, modal "Marcar pago". */
-export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial, busca, filtro, formaPreferida, diasAviso }: Props) {
+export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial, busca, filtro, formaPreferida, diasAviso, temHandle }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [novo, setNovo] = useState(!!abrirNovo);
@@ -98,14 +101,14 @@ export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial,
           <table className="w-full min-w-[720px] text-sm">
             <thead className="sticky top-0 bg-[#150C1D] z-10">
               <tr className="border-b border-[#311C45]">
-                {["Cliente", "Projeto", "Tipo", "Vencimento", "Pagamento", "Valor", "Status", ""].map((h) => (
+                {["Cliente", "Projeto", "Tipo", "Vencimento", "Pagamento", "Valor", "Status", "Cobrança", ""].map((h) => (
                   <Th key={h}>{h}</Th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {linhas.map((p) => (
-                <LinhaPagamento key={p.id} p={p} diasAviso={diasAviso} onPagar={() => setPagando(p)} />
+                <LinhaPagamento key={p.id} p={p} diasAviso={diasAviso} temHandle={temHandle} onPagar={() => setPagando(p)} />
               ))}
             </tbody>
           </table>
@@ -116,7 +119,7 @@ export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial,
   );
 }
 
-function LinhaPagamento({ p, diasAviso, onPagar }: { p: PagamentoLinha; diasAviso: number; onPagar: () => void }) {
+function LinhaPagamento({ p, diasAviso, temHandle, onPagar }: { p: PagamentoLinha; diasAviso: number; temHandle: boolean; onPagar: () => void }) {
   const [pending, startTransition] = useTransition();
   const vencido = p.status === "atrasado";
   const pago = p.status === "pago";
@@ -165,6 +168,25 @@ function LinhaPagamento({ p, diasAviso, onPagar }: { p: PagamentoLinha; diasAvis
           <Pill tom="warning">{diasAteVencer === 0 ? "Vence hoje" : `Vence em ${diasAteVencer}d`}</Pill>
         ) : (
           <Pill tom="warning">Pendente</Pill>
+        )}
+      </td>
+      <td className="px-5 py-3.5">
+        {!pago && (
+          <BotoesCobranca
+            pagamentoId={p.id}
+            projetoId={p.projeto_id}
+            link={p.link_pagamento}
+            temHandle={temHandle}
+            whatsapp={p.clienteWhatsapp}
+            clienteNome={p.clienteNome}
+            descricao={p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "pagamento"}
+            valorFormatado={fmt(p.valor)}
+          />
+        )}
+        {pago && p.recibo_url && (
+          <a href={p.recibo_url} target="_blank" rel="noreferrer" className="text-[11px] text-brand-400 hover:text-brand-300 whitespace-nowrap">
+            Ver recibo ↗
+          </a>
         )}
       </td>
       <td className="px-5 py-3.5">

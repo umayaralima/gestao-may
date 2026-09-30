@@ -3,8 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { FORMAS_PAGAMENTO, TIPO_PAGAMENTO } from "@/lib/constantes";
+import { FORMAS_PAGAMENTO, TIPO_PAGAMENTO, TIPO_PAGAMENTO_LABEL } from "@/lib/constantes";
 import { hojeISO } from "@/lib/format";
+import { getConfiguracoes } from "@/lib/configuracoes";
+import { baseUrl } from "@/lib/enviar-resumo";
+import { conferirPagamento, criarLinkCobranca } from "@/lib/infinitepay";
 
 export type FormState = { erro?: string; ok?: boolean };
 
@@ -60,5 +63,91 @@ export async function desfazerPagamento(id: string, projetoId: string) {
 export async function excluirPagamento(id: string, projetoId: string) {
   const supabase = await createClient();
   await supabase.from("pagamentos").delete().eq("id", id);
+  revalidar(projetoId);
+}
+
+/* ---------- Link de cobrança (InfinitePay) ---------- */
+
+/**
+ * Gera o link de pagamento da parcela. O `order_nsu` é o id do pagamento (uuid), o que torna
+ * o webhook difícil de forjar; mesmo assim o webhook confere em payment_check antes de dar baixa.
+ */
+export async function gerarLinkCobranca(pagamentoId: string, projetoId: string): Promise<FormState> {
+  const supabase = await createClient();
+  const [{ data: pagamento }, config] = await Promise.all([
+    supabase
+      .from("pagamentos")
+      .select("id, valor, tipo, vencimento, data_pagamento, link_pagamento, projetos(nome, clientes(nome, empresa, email, whatsapp))")
+      .eq("id", pagamentoId)
+      .single<{
+        id: string;
+        valor: number;
+        tipo: string | null;
+        vencimento: string;
+        data_pagamento: string | null;
+        link_pagamento: string | null;
+        projetos: { nome: string; clientes: { nome: string; empresa: string | null; email: string | null; whatsapp: string | null } | null } | null;
+      }>(),
+    getConfiguracoes(),
+  ]);
+  if (!pagamento) return { erro: "Parcela não encontrada." };
+  if (pagamento.data_pagamento) return { erro: "Esta parcela já está paga." };
+  if (pagamento.link_pagamento) return { erro: "Esta parcela já tem link." };
+  if (!config.infinitepay_handle) return { erro: "Informe seu InfiniteTag em Configurações → Financeiro." };
+
+  const cliente = pagamento.projetos?.clientes;
+  const descricao = `${pagamento.tipo ? TIPO_PAGAMENTO_LABEL[pagamento.tipo as keyof typeof TIPO_PAGAMENTO_LABEL] : "Pagamento"} · ${pagamento.projetos?.nome ?? "projeto"}`;
+  const base = baseUrl();
+  const segredo = process.env.INFINITEPAY_WEBHOOK_SECRET;
+
+  try {
+    const { url, slug } = await criarLinkCobranca({
+      handle: config.infinitepay_handle,
+      valor: Number(pagamento.valor),
+      descricao,
+      orderNsu: pagamento.id,
+      webhookUrl: segredo ? `${base}/api/webhooks/infinitepay?s=${encodeURIComponent(segredo)}` : undefined,
+      redirectUrl: base,
+      cliente: cliente ? { name: cliente.empresa ?? cliente.nome, email: cliente.email, phone_number: cliente.whatsapp } : undefined,
+    });
+
+    await supabase.from("pagamentos").update({ link_pagamento: url, link_slug: slug, link_criado_em: new Date().toISOString() }).eq("id", pagamentoId);
+    revalidar(projetoId);
+    return { ok: true };
+  } catch (e) {
+    return { erro: e instanceof Error ? e.message : "Não foi possível gerar o link." };
+  }
+}
+
+/** Confere na InfinitePay se a parcela já foi paga e dá baixa. */
+export async function conferirCobranca(pagamentoId: string, projetoId: string): Promise<FormState> {
+  const supabase = await createClient();
+  const [{ data: pagamento }, config] = await Promise.all([
+    supabase.from("pagamentos").select("id, link_slug, transaction_nsu, data_pagamento").eq("id", pagamentoId).single<{ id: string; link_slug: string | null; transaction_nsu: string | null; data_pagamento: string | null }>(),
+    getConfiguracoes(),
+  ]);
+  if (!pagamento) return { erro: "Parcela não encontrada." };
+  if (pagamento.data_pagamento) return { ok: true };
+  if (!config.infinitepay_handle) return { erro: "Informe seu InfiniteTag em Configurações → Financeiro." };
+
+  try {
+    const r = await conferirPagamento({ handle: config.infinitepay_handle, orderNsu: pagamento.id, transactionNsu: pagamento.transaction_nsu, slug: pagamento.link_slug });
+    if (!r.paid) return { erro: "A InfinitePay ainda não registrou o pagamento desta cobrança." };
+
+    await supabase
+      .from("pagamentos")
+      .update({ data_pagamento: hojeISO(), forma_pagamento: "cartao", transaction_nsu: r.transactionNsu, recibo_url: r.reciboUrl })
+      .eq("id", pagamentoId);
+    revalidar(projetoId);
+    return { ok: true };
+  } catch (e) {
+    return { erro: e instanceof Error ? e.message : "Não foi possível consultar a InfinitePay." };
+  }
+}
+
+/** Remove o link (ex.: valor mudou e é preciso gerar outro). */
+export async function removerLinkCobranca(pagamentoId: string, projetoId: string) {
+  const supabase = await createClient();
+  await supabase.from("pagamentos").update({ link_pagamento: null, link_slug: null, link_criado_em: null }).eq("id", pagamentoId);
   revalidar(projetoId);
 }

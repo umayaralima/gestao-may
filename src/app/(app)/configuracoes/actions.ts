@@ -83,6 +83,11 @@ const esquemas = {
     dias_aviso_vencimento: inteiro(0, 90),
     forma_pagamento_preferida: z.enum(["pix", "boleto", "cartao", "transferencia", "outro"]),
     chave_pix: texto(120),
+    infinitepay_handle: z
+      .string()
+      .trim()
+      .max(60)
+      .transform((v) => (v === "" ? null : v.replace(/^\$/, ""))),
   }),
 } as const;
 

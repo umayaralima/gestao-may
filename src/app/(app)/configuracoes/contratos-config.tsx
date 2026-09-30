@@ -5,7 +5,7 @@ import { BotaoConfirmar } from "@/components/ui/modal";
 import { Campo, Input, MensagemErro, Select, Textarea } from "@/components/ui/primitivos";
 import { cn } from "@/lib/cn";
 import type { Configuracoes as Config, ModeloContrato, TipoProjeto } from "@/lib/types";
-import { criarModeloContrato, excluirModeloContrato, salvarDadosContrato, salvarModeloContrato, type FormState } from "./actions";
+import { criarModeloContrato, excluirModeloContrato, salvarDadosContrato, salvarModeloContrato, testarAutentique, type FormState } from "./actions";
 
 /*
  * Aba Contratos: dados da contratada, corpo comum (cláusulas 1–16) e um modelo por tipo de serviço.
@@ -47,6 +47,12 @@ export function ContratosConfig({
 
       <DadosEcorpo config={config} onSalvo={onSalvo} />
 
+      <Secao titulo="Assinatura eletrônica" sub="O contrato é enviado pro Autentique direto da aba Contrato do projeto. O token fica nas variáveis de ambiente da Vercel (AUTENTIQUE_TOKEN).">
+        <div className="px-6 py-4">
+          <TesteAutentique />
+        </div>
+      </Secao>
+
       <Secao titulo="Modelos por tipo de serviço" sub="Cada tipo tem seu título, objeto (cláusula 1.1), prazo e Anexo I. Mudanças aqui não alteram contratos já gerados.">
         {modelos.length === 0 && <p className="px-6 py-6 text-xs text-[#968F88]">Nenhum modelo ainda. Rode a migração 010 ou crie um abaixo.</p>}
         {modelos.map((m) => (
@@ -56,6 +62,30 @@ export function ContratosConfig({
           <NovoModelo tipos={semModelo} modelos={modelos} />
         </div>
       </Secao>
+    </div>
+  );
+}
+
+function TesteAutentique() {
+  const [testando, testar] = useTransition();
+  const [resultado, setResultado] = useState<{ erro?: string; conta?: string; documentos?: string } | null>(null);
+
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+      <button
+        type="button"
+        disabled={testando}
+        onClick={() => testar(async () => setResultado(await testarAutentique()))}
+        className="px-3 py-2 text-xs text-brand-400 border border-brand-400/30 hover:bg-brand-400/10 disabled:opacity-40 rounded-lg transition-colors whitespace-nowrap self-start"
+      >
+        {testando ? "Testando…" : "Testar conexão"}
+      </button>
+      {resultado?.erro && <p className="text-[11px] text-red-400">{resultado.erro}</p>}
+      {resultado?.conta && (
+        <p className="text-[11px] text-emerald-400">
+          Conectado: {resultado.conta} · {resultado.documentos}
+        </p>
+      )}
     </div>
   );
 }

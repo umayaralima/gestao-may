@@ -347,3 +347,17 @@ export async function excluirModeloContrato(id: string) {
   await supabase.from("modelos_contrato").delete().eq("id", id);
   revalidarContratos();
 }
+
+/** Testa o token do Autentique: devolve nome da conta e documentos restantes no plano. */
+export async function testarAutentique(): Promise<{ erro?: string; conta?: string; documentos?: string }> {
+  try {
+    const { contaAutentique } = await import("@/lib/autentique");
+    const me = await contaAutentique();
+    return {
+      conta: `${me.name} (${me.email})`,
+      documentos: me.subscription?.has_premium_features ? "plano pago" : me.subscription?.documents != null ? `${me.subscription.documents} documento(s) no plano` : "plano gratuito",
+    };
+  } catch (e) {
+    return { erro: e instanceof Error ? e.message : "Não foi possível falar com o Autentique." };
+  }
+}

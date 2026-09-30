@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import { FORMA_PAGAMENTO_LABEL, FORMAS_PAGAMENTO, GRUPO_CATEGORIA_LABEL, GRUPOS_CATEGORIA } from "@/lib/constantes";
-import type { CategoriaTarefa, Configuracoes as Config, EtapaModelo, TipoProjeto } from "@/lib/types";
+import type { CategoriaTarefa, Configuracoes as Config, EtapaModelo, ModeloContrato, TipoProjeto } from "@/lib/types";
 import {
   alterarSenha,
   atualizarCategoriaTarefa,
@@ -14,6 +14,7 @@ import {
   type FormState,
   type SecaoConfig,
 } from "./actions";
+import { ContratosConfig } from "./contratos-config";
 import { EtapasModeloEditor } from "./etapas-modelo";
 import { Notificacoes, type UltimoEnvio } from "./notificacoes";
 import { NovaCategoriaForm } from "./nova-categoria-form";
@@ -31,6 +32,7 @@ const ABAS = [
   { id: "notificacoes", label: "Notificações", Icone: BellIcon },
   { id: "pipeline", label: "Pipeline", Icone: FunnelIcon },
   { id: "financeiro", label: "Financeiro", Icone: MoneyIcon },
+  { id: "contratos", label: "Contratos", Icone: DocIcon },
   { id: "listas", label: "Listas", Icone: TagIcon },
   { id: "seguranca", label: "Segurança", Icone: LockIcon },
 ] as const;
@@ -47,9 +49,10 @@ type Props = {
   emailLogin: string;
   linkAgenda: string | null;
   ultimoEnvio: UltimoEnvio;
+  modelosContrato: ModeloContrato[];
 };
 
-export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCategorias, etapasModelo, etapas, emailLogin, linkAgenda, ultimoEnvio }: Props) {
+export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCategorias, etapasModelo, etapas, emailLogin, linkAgenda, ultimoEnvio, modelosContrato }: Props) {
   const [aba, setAba] = useState<Aba>("perfil");
   const [toast, setToast] = useState<string | null>(null);
 
@@ -215,6 +218,8 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
             </Section>
           </FormSecao>
         )}
+
+        {aba === "contratos" && <ContratosConfig config={config} modelos={modelosContrato} tipos={tipos} onSalvo={setToast} />}
 
         {aba === "listas" && (
           <div className="space-y-5 entrar">
@@ -470,6 +475,14 @@ function BellIcon() {
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
       <path d="M7.5 1.5a4.5 4.5 0 0 0-4.5 4.5v2.5L1.5 10.5h12L12 8.5V6a4.5 4.5 0 0 0-4.5-4.5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
       <path d="M6 10.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  );
+}
+function DocIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+      <path d="M3 1.5h5.5L12 5v8.5H3V1.5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M8.5 1.5V5H12M5 8h5M5 10.5h3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
     </svg>
   );
 }

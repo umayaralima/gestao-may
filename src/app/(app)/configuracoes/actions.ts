@@ -263,3 +263,87 @@ export async function trocarTokenAgenda() {
   await supabase.from("configuracoes").update({ agenda_token: crypto.randomUUID() }).eq("id", 1);
   revalidatePath("/configuracoes");
 }
+
+/* ---------- Contratos: dados da contratada, corpo e modelos por tipo ---------- */
+
+function revalidarContratos() {
+  revalidatePath("/configuracoes");
+  revalidatePath("/projetos", "layout");
+}
+
+export async function salvarDadosContrato(_prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = z
+    .object({
+      razao_social: texto(160),
+      cnpj: texto(20),
+      endereco_empresa: texto(300),
+      cidade_foro: texto(80),
+      email_contratual: z.union([z.literal(""), z.string().trim().email("E-mail inválido.")]).transform((v) => (v === "" ? null : v)),
+      contrato_corpo: z.string().trim().min(100, "O corpo do contrato está curto demais.").max(120000),
+    })
+    .safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { erro: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("configuracoes").update({ ...parsed.data, atualizado_em: new Date().toISOString() }).eq("id", 1);
+  if (error) return { erro: error.code === "42703" ? "Rode a migração 010_contratos.sql no Supabase." : "Não foi possível salvar." };
+
+  revalidarContratos();
+  return { ok: true };
+}
+
+const modeloSchema = z.object({
+  titulo: z.string().trim().min(5, "Informe o título do contrato.").max(160),
+  objeto: z.string().trim().min(20, "Descreva o objeto (cláusula 1.1).").max(2000),
+  prazo_dias: z.coerce.number().int().min(1).max(365),
+  prazo_extenso: z.string().trim().min(5, "Ex.: 15 (quinze) dias úteis.").max(80),
+  anexo: z.string().trim().min(50, "O Anexo I está curto demais.").max(40000),
+});
+
+export async function salvarModeloContrato(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = modeloSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { erro: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("modelos_contrato").update(parsed.data).eq("id", id);
+  if (error) return { erro: "Não foi possível salvar." };
+
+  revalidarContratos();
+  return { ok: true };
+}
+
+/** Cria o modelo de um tipo de serviço, copiando o Anexo de outro tipo quando indicado. */
+export async function criarModeloContrato(_prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = z
+    .object({
+      tipo_projeto: z.string().trim().min(2, "Escolha o tipo de serviço."),
+      copiar_de: z.string().trim().optional(),
+    })
+    .safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { erro: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const base = parsed.data.copiar_de
+    ? (await supabase.from("modelos_contrato").select("*").eq("tipo_projeto", parsed.data.copiar_de).maybeSingle<{ titulo: string; objeto: string; prazo_dias: number; prazo_extenso: string; anexo: string }>()).data
+    : null;
+
+  const nome = parsed.data.tipo_projeto;
+  const { error } = await supabase.from("modelos_contrato").insert({
+    tipo_projeto: nome,
+    titulo: base?.titulo ?? `DESENVOLVIMENTO DE ${nome.toUpperCase()}`,
+    objeto: base?.objeto ?? `O presente contrato tem por objeto a prestação de serviços de ${nome.toLowerCase()}, conforme escopo técnico detalhado no Anexo I, parte integrante deste contrato.`,
+    prazo_dias: base?.prazo_dias ?? 30,
+    prazo_extenso: base?.prazo_extenso ?? "30 (trinta) dias úteis",
+    anexo: base?.anexo ?? `## ANEXO I\n### ESCOPO DO PROJETO\n\n**Projeto:** {{projeto_nome}}\n**Tipo:** ${nome}\n**Valor total:** {{valor}} ({{valor_extenso}})\n**Prazo de desenvolvimento:** {{prazo_extenso}}, conforme Cláusula 4.\n### 1. O QUE ESTÁ INCLUSO\n- \n### 2. TEXTOS DO SITE\n☐ Fornecidos pelo CONTRATANTE.\n☐ Redação (copy) pela CONTRATADA, com base no briefing, dentro das rodadas de revisão da Cláusula 5.\n### 3. LICENÇAS INCLUÍDAS PELA CONTRATADA\n☐ Nenhuma. Todas as licenças premium são de responsabilidade do CONTRATANTE.\n☐ [NOME DA LICENÇA], pelo período de [PERÍODO], conforme Cláusula 9.2.\n### 4. MATERIAL A SER FORNECIDO PELO CONTRATANTE\n- Formulário de briefing preenchido.\n### 5. O QUE NÃO ESTÁ INCLUSO\n- `,
+  });
+  if (error) return { erro: error.code === "23505" ? "Esse tipo já tem modelo." : "Não foi possível criar." };
+
+  revalidarContratos();
+  return { ok: true };
+}
+
+export async function excluirModeloContrato(id: string) {
+  const supabase = await createClient();
+  await supabase.from("modelos_contrato").delete().eq("id", id);
+  revalidarContratos();
+}

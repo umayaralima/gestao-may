@@ -2,12 +2,12 @@ import { getConfiguracoes } from "@/lib/configuracoes";
 import { baseUrl } from "@/lib/enviar-resumo";
 import { ETAPA_LEAD_LABEL, ETAPAS_PIPELINE } from "@/lib/constantes";
 import { createClient } from "@/lib/supabase/server";
-import type { CategoriaTarefa, EtapaModelo, TipoProjeto } from "@/lib/types";
+import type { CategoriaTarefa, EtapaModelo, ModeloContrato, TipoProjeto } from "@/lib/types";
 import { ConfiguracoesView } from "./configuracoes";
 
 export default async function ConfiguracoesPage() {
   const supabase = await createClient();
-  const [config, { data: tipos }, { data: emUso }, { data: leadsUso }, { data: categorias }, { data: tarefasUso }, { data: etapasModelo }, { data: ultimoEnvio }, { data: auth }] = await Promise.all([
+  const [config, { data: tipos }, { data: emUso }, { data: leadsUso }, { data: categorias }, { data: tarefasUso }, { data: etapasModelo }, { data: ultimoEnvio }, { data: auth }, { data: modelosContrato }] = await Promise.all([
     getConfiguracoes(),
     supabase.from("tipos_projeto").select("*").order("ordem").order("nome").returns<TipoProjeto[]>(),
     supabase.from("projetos").select("tipo").not("tipo", "is", null).returns<Array<{ tipo: string }>>(),
@@ -17,6 +17,7 @@ export default async function ConfiguracoesPage() {
     supabase.from("etapas_modelo").select("*").order("tipo_projeto").order("ordem").returns<EtapaModelo[]>(),
     supabase.from("envios_resumo").select("dia, destino, itens, erro").order("dia", { ascending: false }).limit(1).maybeSingle<{ dia: string; destino: string; itens: number; erro: string | null }>(),
     supabase.auth.getUser(),
+    supabase.from("modelos_contrato").select("*").order("tipo_projeto").returns<ModeloContrato[]>(),
   ]);
 
   const usoCategorias: Record<string, number> = {};
@@ -28,5 +29,5 @@ export default async function ConfiguracoesPage() {
 
   const linkAgenda = config.agenda_token ? `${baseUrl()}/api/agenda/${config.agenda_token}` : null;
 
-  return <ConfiguracoesView config={config} tipos={tipos ?? []} usoTipos={usoTipos} categorias={categorias ?? []} usoCategorias={usoCategorias} etapasModelo={etapasModelo ?? []} emailLogin={auth.user?.email ?? ""} linkAgenda={linkAgenda} ultimoEnvio={ultimoEnvio ?? null} etapas={ETAPAS_PIPELINE.map((e) => ETAPA_LEAD_LABEL[e])} />;
+  return <ConfiguracoesView config={config} tipos={tipos ?? []} usoTipos={usoTipos} categorias={categorias ?? []} usoCategorias={usoCategorias} etapasModelo={etapasModelo ?? []} emailLogin={auth.user?.email ?? ""} linkAgenda={linkAgenda} ultimoEnvio={ultimoEnvio ?? null} modelosContrato={modelosContrato ?? []} etapas={ETAPAS_PIPELINE.map((e) => ETAPA_LEAD_LABEL[e])} />;
 }

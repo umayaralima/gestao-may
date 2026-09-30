@@ -6,7 +6,9 @@ import { cn } from "@/lib/cn";
 import { STATUS_PROJETO, STATUS_PROJETO_LABEL } from "@/lib/constantes";
 import { diffDias, fmt, fmtData, hojeISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
-import type { Briefing, CategoriaTarefa, Contrato, Pagamento, Projeto, Tarefa } from "@/lib/types";
+import { getConfiguracoes } from "@/lib/configuracoes";
+import { blocoPagamento } from "@/lib/contrato";
+import type { Briefing, CategoriaTarefa, Contrato, ModeloContrato, Pagamento, Projeto, Tarefa } from "@/lib/types";
 import { aprovarProjeto, criarContrato, excluirProjeto, mudarStatusProjeto, mudarStatusSugerido, salvarBriefing } from "../actions";
 import { tomStatus } from "../status-tom";
 import { BriefingForm } from "./briefing-form";
@@ -31,7 +33,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const aba: Aba = ABAS.some((a) => a.id === abaParam) ? (abaParam as Aba) : "geral";
   const supabase = await createClient();
 
-  const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }, { data: tarefas }, { data: categorias }] = await Promise.all([
+  const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }, { data: tarefas }, { data: categorias }, config] = await Promise.all([
     supabase.from("projetos").select("*, clientes(id, nome, empresa)").eq("id", id).single<ProjetoJoin>(),
     supabase.from("pagamentos_view").select("*").eq("projeto_id", id).order("vencimento").returns<Pagamento[]>(),
     supabase.from("briefings").select("*").eq("projeto_id", id).maybeSingle<Briefing>(),
@@ -40,6 +42,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
     supabase.from("tipos_projeto").select("nome").order("ordem").order("nome"),
     supabase.from("tarefas").select("*").eq("projeto_id", id).order("vencimento", { ascending: true, nullsFirst: false }).order("criado_em").returns<Tarefa[]>(),
     supabase.from("categorias_tarefa").select("*").order("ordem").returns<CategoriaTarefa[]>(),
+    getConfiguracoes(),
   ]);
   if (!projeto) notFound();
 
@@ -51,6 +54,10 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const naoParcelado = projeto.valor_total !== null ? Number(projeto.valor_total) - totalPago - totalPendente - totalAtrasado : null;
 
   const listaContratos = contratos ?? [];
+  const { data: modeloContrato } = projeto.tipo
+    ? await supabase.from("modelos_contrato").select("*").eq("tipo_projeto", projeto.tipo).maybeSingle<ModeloContrato>()
+    : { data: null };
+  const pagamentoPrevisto = blocoPagamento(lista, projeto.valor_total !== null ? Number(projeto.valor_total) : null, config.chave_pix);
   const temAssinado = listaContratos.some((c) => c.status === "assinado");
   const sugerirAprovado = temAssinado && ["briefing", "orcamento_enviado"].includes(projeto.status);
 
@@ -268,7 +275,16 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
         )}
         {aba === "contrato" && (
           <div className="entrar">
-            <Contratos contratos={listaContratos} criar={criarContratoDoProjeto} />
+            <Contratos
+              contratos={listaContratos}
+              criar={criarContratoDoProjeto}
+              projetoId={projeto.id}
+              modelo={modeloContrato}
+              pagamentos={lista}
+              valorProjeto={projeto.valor_total !== null ? Number(projeto.valor_total) : null}
+              pagamentoPrevisto={pagamentoPrevisto}
+              clienteNome={clienteNome}
+            />
           </div>
         )}
         {aba === "pagamentos" && (

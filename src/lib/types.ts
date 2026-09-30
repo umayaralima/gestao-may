@@ -82,6 +82,11 @@ export type Contrato = {
   link_documento: string | null;
   data_envio: string | null;
   data_assinatura: string | null;
+  numero: string | null;
+  /** markdown congelado na geração; null = contrato só com link externo */
+  documento: string | null;
+  dados: Record<string, unknown>;
+  valor: number | null;
   criado_em: string;
 };
 
@@ -146,6 +151,11 @@ export type Configuracoes = {
   dias_negocio_parado: number;
   forma_pagamento_preferida: FormaPagamento;
   chave_pix: string | null;
+  razao_social: string | null;
+  endereco_empresa: string | null;
+  cidade_foro: string | null;
+  email_contratual: string | null;
+  contrato_corpo: string | null;
   resumo_diario: boolean;
   resumo_email: string | null;
   agenda_token: string;
@@ -167,4 +177,15 @@ export type EtapaModelo = {
   categoria: string;
   dias_apos_inicio: number;
   ordem: number;
+};
+
+export type ModeloContrato = {
+  id: string;
+  tipo_projeto: string;
+  titulo: string;
+  objeto: string;
+  prazo_dias: number;
+  prazo_extenso: string;
+  anexo: string;
+  criado_em: string;
 };

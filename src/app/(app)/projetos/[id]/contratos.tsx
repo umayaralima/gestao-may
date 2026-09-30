@@ -4,9 +4,10 @@ import { useActionState, useEffect, useRef, useTransition } from "react";
 import { BotaoConfirmar } from "@/components/ui/modal";
 import { Campo, Card, Input, MensagemErro, Vazio } from "@/components/ui/primitivos";
 import { cn } from "@/lib/cn";
-import { fmtData } from "@/lib/format";
-import type { Contrato } from "@/lib/types";
+import { fmt, fmtData } from "@/lib/format";
+import type { Contrato, ModeloContrato, Pagamento } from "@/lib/types";
 import { atualizarLinkContrato, excluirContrato, marcarAssinado, marcarEnviado, voltarParaRascunho, type FormState } from "../actions";
+import { DocumentoContrato, GerarContratoBotao } from "./gerar-contrato";
 
 const ETAPAS: Array<{ id: Contrato["status"]; label: string }> = [
   { id: "rascunho", label: "Rascunho" },
@@ -14,24 +15,61 @@ const ETAPAS: Array<{ id: Contrato["status"]; label: string }> = [
   { id: "assinado", label: "Assinado" },
 ];
 
-export function Contratos({ contratos, criar }: { contratos: Contrato[]; criar: (prev: FormState, fd: FormData) => Promise<FormState> }) {
+export function Contratos({
+  contratos,
+  criar,
+  projetoId,
+  modelo,
+  pagamentos,
+  valorProjeto,
+  pagamentoPrevisto,
+  clienteNome,
+}: {
+  contratos: Contrato[];
+  criar: (prev: FormState, fd: FormData) => Promise<FormState>;
+  projetoId: string;
+  modelo: ModeloContrato | null;
+  pagamentos: Pagamento[];
+  valorProjeto: number | null;
+  pagamentoPrevisto: string;
+  clienteNome: string;
+}) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div className="lg:col-span-2 space-y-3">
-        {contratos.length === 0 ? <Vazio icone="📝" titulo="Nenhum contrato ainda" sub="Crie o primeiro ao lado. O documento fica no Autentique, Docs ou onde preferir." /> : contratos.map((c) => <CartaoContrato key={c.id} c={c} />)}
+        {contratos.length === 0 ? (
+          <Vazio icone="📝" titulo="Nenhum contrato ainda" sub="Gere o contrato preenchido pelo sistema ou cadastre um link externo ao lado." />
+        ) : (
+          contratos.map((c) => <CartaoContrato key={c.id} c={c} projetoId={projetoId} clienteNome={clienteNome} />)
+        )}
       </div>
-      <NovoContrato criar={criar} />
+      <div className="space-y-3">
+        <Card className="space-y-3">
+          <div>
+            <p className="text-sm font-semibold text-[#F5F5F4]">Contrato do sistema</p>
+            <p className="text-xs text-[#968F88] mt-0.5">Preenche seus dados, os do cliente, valor por extenso e as parcelas. Depois é só baixar o PDF.</p>
+          </div>
+          <GerarContratoBotao projetoId={projetoId} modelo={modelo} pagamentos={pagamentos} valorProjeto={valorProjeto} pagamentoPrevisto={pagamentoPrevisto} />
+        </Card>
+        <NovoContrato criar={criar} />
+      </div>
     </div>
   );
 }
 
-function CartaoContrato({ c }: { c: Contrato }) {
+function CartaoContrato({ c, projetoId, clienteNome }: { c: Contrato; projetoId: string; clienteNome: string }) {
   const [pending, startTransition] = useTransition();
   const idx = ETAPAS.findIndex((e) => e.id === c.status);
   const run = (fn: () => Promise<void>) => startTransition(fn);
 
   return (
     <Card className={cn("space-y-4", pending && "opacity-50")}>
+      {c.numero && (
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-semibold text-[#DDDBD9]">Contrato nº {c.numero}</p>
+          {c.valor !== null && <span className="text-[11px] font-mono text-[#968F88]">{fmt(c.valor)}</span>}
+        </div>
+      )}
       <ol className="flex items-center gap-2">
         {ETAPAS.map((e, i) => (
           <li key={e.id} className="flex items-center gap-2">
@@ -78,6 +116,8 @@ function CartaoContrato({ c }: { c: Contrato }) {
           </a>
         )}
       </form>
+
+      <DocumentoContrato contrato={c} projetoId={projetoId} clienteNome={clienteNome} />
 
       <div className="flex flex-wrap items-center gap-2 border-t border-[#311C45] pt-4">
         {c.status === "rascunho" && (

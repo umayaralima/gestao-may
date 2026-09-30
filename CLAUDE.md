@@ -379,3 +379,22 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   (SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, RESEND_FROM, CRON_SECRET, NEXT_PUBLIC_SITE_URL). "Enviar agora" testado, e-mail chegou.
   Conferência rápida sem login: `/api/agenda/<uuid falso>` deve dar 404 (não 503) e `/api/cron/resumo-diario` sem header deve dar
   401 (não 500) — se vier 503/500, falta env no servidor.
+
+## Fase 3 — integração 2A: contrato gerado pelo sistema (2026-09-30)
+
+- Modelos vieram dos .docx da May (`May/modelos de contratos/`): o corpo (cláusulas 1–16) é idêntico nos três, só mudam título,
+  objeto (1.1) e o Anexo I. Por isso: corpo único em `configuracoes.contrato_corpo` + `modelos_contrato` por tipo de serviço
+  (titulo, objeto, prazo_dias, prazo_extenso, anexo). Migração 010 importou Landing Page, Institucional e E-commerce;
+  faltam Página de Vendas e Sistema (a May ainda vai escrever).
+- Dados da contratada em `configuracoes`: razao_social, cnpj, endereco_empresa (com CEP 81170-110), cidade_foro, email_contratual.
+- `src/lib/contrato.ts`: `renderizarContrato()` troca as {{variaveis}}, `porExtenso()` (regra do "e" antes do último grupo quando
+  < 100 ou múltiplo de 100), `blocoPagamento()` monta a cláusula 6.2 a partir das parcelas reais do projeto (tipo, valor, %,
+  vencimento, forma) — a May avisou que a forma de pagamento muda a cada projeto, então nada de opção fixa.
+  No contrato usar `formatBRL`/`formatDate` (R$ 5.200,00 e 05/10/2026), não o `fmt`/`fmtData` das telas.
+- O texto final é congelado em `contratos.documento` (markdown simples: `#`, `##`, `###`, `- `, `**`, `____`), com `numero`
+  (001/2026 sequencial por ano), `dados` (jsonb com as opções) e `valor`. Mudar o modelo depois não altera contrato já gerado.
+- PDF gerado no navegador com jsPDF (`src/lib/contrato-pdf.ts`), fonte Times, A4, paginação — evita fontes/binários em serverless
+  e o mesmo Blob vai servir pro upload no Autentique (2B).
+- UI: aba Contrato do projeto → card "Contrato do sistema" com **Gerar contrato** (modal: pagamento, hospedagem A/B, textos,
+  licenças, representante, portfólio, testemunhas, Anexo editável) e, no contrato gerado, prévia + "Editar texto" + "Baixar PDF".
+- Pendente do 2A: editor dos modelos em Configurações (hoje só via SQL). Depois vem 2B: Autentique.

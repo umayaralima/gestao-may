@@ -6,6 +6,9 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { STATUS_PROJETO } from "@/lib/constantes";
 import { hojeISO } from "@/lib/format";
+import { proximoNumero, renderizarContrato, type DadosContrato } from "@/lib/contrato";
+import { getConfiguracoes } from "@/lib/configuracoes";
+import type { Cliente, ModeloContrato, Pagamento, Projeto } from "@/lib/types";
 
 export type FormState = { erro?: string; ok?: boolean };
 
@@ -226,5 +229,75 @@ export async function criarEtapa(projetoId: string, _prev: FormState, formData: 
 export async function mudarStatusSugerido(projetoId: string, status: "em_desenvolvimento" | "em_revisao" | "entregue") {
   const supabase = await createClient();
   await supabase.from("projetos").update({ status }).eq("id", projetoId);
+  revalidar(projetoId);
+}
+
+/* ---------- Contrato gerado pelo sistema ---------- */
+
+
+const dadosContratoSchema = z.object({
+  hospedagem: z.enum(["contratada", "contratante"]).default("contratante"),
+  hospedagem_valor: z.string().trim().max(20).optional(),
+  hospedagem_dia: z.string().trim().max(2).optional(),
+  hospedagem_backup: z.string().trim().max(40).optional(),
+  textos: z.enum(["cliente", "contratada"]).default("cliente"),
+  licencas: z.string().trim().max(120).optional(),
+  licencas_periodo: z.string().trim().max(60).optional(),
+  portfolio: z.preprocess((v) => v === "on" || v === "true" || v === true, z.boolean()),
+  testemunhas: z.preprocess((v) => v === "on" || v === "true" || v === true, z.boolean()),
+  representante: z.string().trim().max(160).optional(),
+  pagamento_texto: z.string().trim().max(4000).optional(),
+  anexo: z.string().trim().max(20000).optional(),
+});
+
+/**
+ * Gera o contrato do projeto: junta corpo + anexo do tipo de serviço, troca as variáveis pelos
+ * dados reais e congela o texto em `contratos.documento`. Não envia nada pra fora.
+ */
+export async function gerarContrato(projetoId: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = dadosContratoSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { erro: parsed.error.issues[0].message };
+  const dados = parsed.data as DadosContrato;
+
+  const supabase = await createClient();
+  const [{ data: projeto }, config] = await Promise.all([
+    supabase.from("projetos").select("*, clientes(*)").eq("id", projetoId).single<Projeto & { clientes: Cliente | null }>(),
+    getConfiguracoes(),
+  ]);
+  if (!projeto?.clientes) return { erro: "Projeto ou cliente não encontrado." };
+  if (!projeto.tipo) return { erro: "Defina o tipo de serviço do projeto antes de gerar o contrato." };
+  if (!config.contrato_corpo) return { erro: "Rode a migração 010_contratos.sql no Supabase." };
+
+  const [{ data: modelo }, { data: pagamentos }, { data: numeros }] = await Promise.all([
+    supabase.from("modelos_contrato").select("*").eq("tipo_projeto", projeto.tipo).maybeSingle<ModeloContrato>(),
+    supabase.from("pagamentos_view").select("*").eq("projeto_id", projetoId).order("vencimento").returns<Pagamento[]>(),
+    supabase.from("contratos").select("numero").not("numero", "is", null).returns<Array<{ numero: string }>>(),
+  ]);
+  if (!modelo) return { erro: `Nenhum modelo de contrato pra "${projeto.tipo}". Cadastre em Configurações → Contratos.` };
+
+  const hoje = hojeISO();
+  const numero = proximoNumero((numeros ?? []).map((n) => n.numero), Number(hoje.slice(0, 4)));
+  const documento = renderizarContrato({ config, cliente: projeto.clientes, projeto, modelo, pagamentos: pagamentos ?? [], numero, dados, hoje });
+
+  const { error } = await supabase.from("contratos").insert({
+    projeto_id: projetoId,
+    status: "rascunho",
+    numero,
+    documento,
+    dados,
+    valor: projeto.valor_total,
+  });
+  if (error) return { erro: "Não foi possível salvar o contrato." };
+
+  revalidar(projetoId, projeto.cliente_id);
+  return { ok: true };
+}
+
+/** Salva edições feitas no texto do contrato (antes de enviar pra assinatura). */
+export async function salvarDocumentoContrato(id: string, projetoId: string, formData: FormData) {
+  const texto = z.string().trim().min(50).max(120000).safeParse(formData.get("documento"));
+  if (!texto.success) return;
+  const supabase = await createClient();
+  await supabase.from("contratos").update({ documento: texto.data }).eq("id", id).eq("status", "rascunho");
   revalidar(projetoId);
 }

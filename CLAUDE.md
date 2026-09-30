@@ -374,3 +374,8 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   projeto como eventos de dia inteiro; concluídas entram como TRANSPARENT. `src/proxy.ts` deixou de interceptar `/api`.
 - Configurações → aba **Notificações**: liga/desliga o resumo, e-mail de destino, "Enviar agora", último envio e o link do
   calendário (copiar / assinar no Google / gerar novo link).
+- Em produção desde 2026-09-30: domínio `mayaralima.com.br` verificado no Resend (registros no subdomínio `send.` pela
+  Hostinger, sem mexer no MX principal), `RESEND_FROM=Mayara Lima <sistema@mayaralima.com.br>`; envs na Vercel
+  (SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, RESEND_FROM, CRON_SECRET, NEXT_PUBLIC_SITE_URL). "Enviar agora" testado, e-mail chegou.
+  Conferência rápida sem login: `/api/agenda/<uuid falso>` deve dar 404 (não 503) e `/api/cron/resumo-diario` sem header deve dar
+  401 (não 500) — se vier 503/500, falta env no servidor.

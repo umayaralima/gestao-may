@@ -22,6 +22,7 @@ export const CONFIG_PADRAO: Configuracoes = {
   email_contratual: null,
   contrato_corpo: null,
   infinitepay_handle: null,
+  leads_token: "",
   resumo_diario: true,
   resumo_email: null,
   agenda_token: "",

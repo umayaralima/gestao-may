@@ -109,6 +109,8 @@ export type Lead = {
   etapa: EtapaLead;
   prioridade: Prioridade;
   motivo_perda: string | null;
+  entrada: string | null;
+  mensagem: string | null;
   proximo_followup: string | null;
   nota_followup: string | null;
   observacoes: string | null;
@@ -163,6 +165,7 @@ export type Configuracoes = {
   email_contratual: string | null;
   contrato_corpo: string | null;
   infinitepay_handle: string | null;
+  leads_token: string;
   resumo_diario: boolean;
   resumo_email: string | null;
   agenda_token: string;

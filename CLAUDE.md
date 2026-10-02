@@ -425,3 +425,17 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
 - UI: coluna "Cobrança" no Financeiro com gerar link, copiar, mandar no WhatsApp (mensagem pronta), conferir pagamento e remover
   link; parcela paga por lá mostra "Ver recibo". Baixa automática pelo webhook, com o botão de conferir como plano B.
 - Campo do InfiniteTag em Configurações → Financeiro.
+
+## Permuta + entrada de leads (2026-10-02)
+
+- A May pediu pra adiar a InfinitePay (código já está pronto, falta a migração 012 e o handle) e priorizar o CRM:
+  precisa atrair cliente rápido. O único cliente ativo hoje é de permuta.
+- Migração 013: `permuta` entra em FORMAS_PAGAMENTO (o check de `configuracoes.forma_pagamento_preferida` foi refeito);
+  `leads.entrada` ('formulario' | 'manychat' | 'manual') e `leads.mensagem`; `configuracoes.leads_token` (uuid, trocável na UI);
+  tabela `entradas_lead` (log das chamadas da API pública, pra depurar integração sem abrir log da Vercel).
+- `POST /api/leads` é a entrada pública: aceita JSON ou form-urlencoded, token em `?token=`, header `x-api-key` ou no corpo.
+  Mapeia nomes de campo comuns (nome/name, whatsapp/telefone/phone, mensagem/message…), tem honeypot, e exige nome + um contato.
+  Lead cai em `novo` com prioridade alta e follow-up pra hoje; se já existe lead aberto com o mesmo e-mail/WhatsApp, registra
+  interação e atualiza o follow-up em vez de duplicar o funil. Sempre avisa por e-mail (Resend) com link pro pipeline.
+- Configurações → aba **Integrações**: endereço pronto pra copiar, instruções do Elementor (ação Webhook) e do ManyChat
+  (External Request), botão de gerar novo endereço e lista das últimas chamadas recebidas.

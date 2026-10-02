@@ -30,7 +30,7 @@ type Props = {
   temHandle: boolean;
 };
 
-const ICONE_FORMA: Record<string, string> = { pix: "⚡", transferencia: "🏦", boleto: "📄", cartao: "💳", outro: "💰" };
+const ICONE_FORMA: Record<string, string> = { pix: "⚡", transferencia: "🏦", boleto: "📄", cartao: "💳", permuta: "🤝", outro: "💰" };
 
 /** Tela Financeiro do protótipo: KPIs, barra tricolor, filtro hambúrguer, tabela, modal "Marcar pago". */
 export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial, busca, filtro, formaPreferida, diasAviso, temHandle }: Props) {

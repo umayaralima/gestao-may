@@ -81,7 +81,7 @@ const esquemas = {
       .transform((v) => (v === "" ? null : Number(v.replace(/\./g, "").replace(",", "."))))
       .refine((v) => v === null || (Number.isFinite(v) && v >= 0), "Valor inválido."),
     dias_aviso_vencimento: inteiro(0, 90),
-    forma_pagamento_preferida: z.enum(["pix", "boleto", "cartao", "transferencia", "outro"]),
+    forma_pagamento_preferida: z.enum(["pix", "boleto", "cartao", "transferencia", "permuta", "outro"]),
     chave_pix: texto(120),
     infinitepay_handle: z
       .string()
@@ -365,4 +365,11 @@ export async function testarAutentique(): Promise<{ erro?: string; conta?: strin
   } catch (e) {
     return { erro: e instanceof Error ? e.message : "Não foi possível falar com o Autentique." };
   }
+}
+
+/** Gera um novo endereço da API de leads (o antigo para de funcionar). */
+export async function trocarTokenLeads() {
+  const supabase = await createClient();
+  await supabase.from("configuracoes").update({ leads_token: crypto.randomUUID() }).eq("id", 1);
+  revalidatePath("/configuracoes");
 }

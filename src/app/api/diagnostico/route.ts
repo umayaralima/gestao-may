@@ -32,6 +32,11 @@ export async function GET(request: NextRequest) {
   await supabase.from("pagamentos_view").select("*, projetos(nome, clientes(nome))").limit(20);
   const msConsultaPesada = Date.now() - tPesada;
 
+  // ping HTTP puro no host do Supabase: separa a latência de rede do custo da consulta
+  const tPing = Date.now();
+  await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/`, { headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "" } }).catch(() => null);
+  const msPing = Date.now() - tPing;
+
   const media = Math.round(tempos.reduce((s, n) => s + n, 0) / tempos.length);
 
   return NextResponse.json({
@@ -41,6 +46,7 @@ export async function GET(request: NextRequest) {
     ms_consultas_simples: tempos,
     ms_media_por_consulta: media,
     ms_consulta_com_joins: msConsultaPesada,
+    ms_ping_rede: msPing,
     diagnostico:
       media > 120
         ? "Banco distante da função: cada ida e volta custa caro. Alinhar as regiões resolve."

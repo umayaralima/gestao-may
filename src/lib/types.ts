@@ -166,6 +166,8 @@ export type Configuracoes = {
   contrato_corpo: string | null;
   infinitepay_handle: string | null;
   leads_token: string;
+  proposta_corpo: string | null;
+  proposta_validade: number;
   resumo_diario: boolean;
   resumo_email: string | null;
   agenda_token: string;
@@ -198,4 +200,27 @@ export type ModeloContrato = {
   prazo_extenso: string;
   anexo: string;
   criado_em: string;
+};
+
+export type Proposta = {
+  id: string;
+  numero: string | null;
+  lead_id: string | null;
+  cliente_id: string | null;
+  tipo_projeto: string | null;
+  titulo: string;
+  documento: string | null;
+  dados: Record<string, unknown>;
+  valor: number | null;
+  prazo_extenso: string | null;
+  validade: string | null;
+  status: "rascunho" | "enviada" | "aceita" | "recusada" | "expirada";
+  token: string;
+  enviada_em: string | null;
+  vista_em: string | null;
+  respondida_em: string | null;
+  resposta_cliente: string | null;
+  projeto_id: string | null;
+  criado_em: string;
+  atualizado_em: string;
 };

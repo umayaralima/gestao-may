@@ -17,6 +17,7 @@ const principal: Item[] = [
   { href: "/", label: "Dashboard", Icone: GridIcon },
   { href: "/clientes", label: "Clientes", Icone: UsersIcon },
   { href: "/pipeline", label: "Pipeline", Icone: FunnelIcon },
+  { href: "/propostas", label: "Propostas", Icone: PropostaIcon },
   { href: "/projetos", label: "Projetos", Icone: FolderIcon },
   { href: "/tarefas", label: "Tarefas", Icone: CheckIcon },
   { href: "/financeiro", label: "Financeiro", Icone: ChartIcon },
@@ -130,6 +131,15 @@ function FunnelIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
       <path d="M1.5 2.5h12L9 8v5L6 11.5V8L1.5 2.5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function PropostaIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+      <path d="M3 1.5h5.5L12 5v8.5H3V1.5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M8.5 1.5V5H12" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M5.5 9.5l1.5 1.5 2.5-3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

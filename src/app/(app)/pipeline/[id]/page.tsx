@@ -5,7 +5,10 @@ import { Avatar, BotaoPrimario, Card, Header, Input, KpiCard, Pill } from "@/com
 import { ETAPA_LEAD_LABEL, ETAPAS_LEAD, ORIGEM_CLIENTE_LABEL, PRIORIDADE_LABEL } from "@/lib/constantes";
 import { diffDias, fmt, fmtData, hojeISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
-import type { Interacao, Lead } from "@/lib/types";
+import type { Interacao, Lead, ModeloContrato, Proposta } from "@/lib/types";
+import { getConfiguracoes } from "@/lib/configuracoes";
+import { baseUrl } from "@/lib/enviar-resumo";
+import { CartaoProposta, NovaPropostaBotao } from "../../propostas/proposta-ui";
 import { adiarFollowup, concluirFollowup, excluirInteracao, registrarInteracao, salvarFollowup, type Dono } from "../../crm/actions";
 import { PainelRelacionamento } from "../../crm/painel-relacionamento";
 import { converterEmCliente, excluirLead, mudarEtapaLead, salvarMotivoPerda } from "../actions";
@@ -15,11 +18,14 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: lead }, { data: interacoes }, { data: clienteConvertido }, { data: tipos }] = await Promise.all([
+  const [{ data: lead }, { data: interacoes }, { data: clienteConvertido }, { data: tipos }, { data: propostas }, { data: modelos }, config] = await Promise.all([
     supabase.from("leads").select("*").eq("id", id).single<Lead>(),
     supabase.from("interacoes").select("*").eq("lead_id", id).order("data", { ascending: false }).order("criado_em", { ascending: false }).returns<Interacao[]>(),
     supabase.from("clientes").select("id, nome, empresa").eq("lead_id", id).maybeSingle<{ id: string; nome: string; empresa: string | null }>(),
     supabase.from("tipos_projeto").select("nome").order("ordem").order("nome"),
+    supabase.from("propostas").select("*").eq("lead_id", id).order("criado_em", { ascending: false }).returns<Proposta[]>(),
+    supabase.from("modelos_contrato").select("tipo_projeto, prazo_extenso").returns<Array<Pick<ModeloContrato, "tipo_projeto" | "prazo_extenso">>>(),
+    getConfiguracoes(),
   ]);
   if (!lead) notFound();
 
@@ -51,6 +57,18 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         }
       >
         <SelectInline name="etapa" label="Etapa" value={lead.etapa} opcoes={ETAPAS_LEAD.map((e) => ({ valor: e, label: ETAPA_LEAD_LABEL[e] }))} action={mudarEtapa} />
+        {lead.etapa !== "perdido" && (
+          <NovaPropostaBotao
+            dono={{ lead: lead.id }}
+            tipos={(tipos ?? []).map((t) => ({ nome: t.nome, prazo: (modelos ?? []).find((m) => m.tipo_projeto === t.nome)?.prazo_extenso ?? null }))}
+            sugestao={{
+              titulo: lead.servico_interesse ? `${lead.servico_interesse} — ${lead.empresa ?? lead.nome}` : `Projeto — ${lead.empresa ?? lead.nome}`,
+              valor: lead.valor_estimado !== null ? Number(lead.valor_estimado) : null,
+              tipo: lead.servico_interesse,
+            }}
+            validadePadrao={config.proposta_validade}
+          />
+        )}
         <EditarLeadBotao lead={lead} tipos={(tipos ?? []).map((t) => t.nome)} />
         {!clienteConvertido && lead.etapa !== "perdido" && (
           <form action={converter}>
@@ -157,6 +175,15 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           </Card>
 
           <div className="lg:col-span-2">
+            {(propostas ?? []).length > 0 && (
+              <div className="space-y-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88]">Propostas</p>
+                {(propostas ?? []).map((pr) => (
+                  <CartaoProposta key={pr.id} p={pr} baseUrlPublico={baseUrl()} />
+                ))}
+              </div>
+            )}
+
             <PainelRelacionamento dono={dono} followup={{ data: lead.proximo_followup, nota: lead.nota_followup }} interacoes={interacoes ?? []} acoes={acoes} />
           </div>
         </div>

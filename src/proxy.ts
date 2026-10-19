@@ -5,6 +5,7 @@ export async function proxy(request: NextRequest) {
   return await updateSession(request);
 }
 
+// "p/" é a proposta pública (cliente sem login); "api" tem autenticação própria.
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: ["/((?!api|p/|_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };

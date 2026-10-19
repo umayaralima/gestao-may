@@ -439,3 +439,22 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   interação e atualiza o follow-up em vez de duplicar o funil. Sempre avisa por e-mail (Resend) com link pro pipeline.
 - Configurações → aba **Integrações**: endereço pronto pra copiar, instruções do Elementor (ação Webhook) e do ManyChat
   (External Request), botão de gerar novo endereço e lista das últimas chamadas recebidas.
+
+## Propostas (2026-10-19)
+
+- Pedido da May: incluir envio/criação de proposta e seguir fechando as lacunas pro sistema ficar completo.
+  Mapa das lacunas levantado: proposta (feito), tabela de preços, portal do cliente, upload no briefing, registro de aprovações,
+  despesas, cobranças recorrentes, pedido de depoimento, tarefas de garantia, modelos de mensagem, busca global, exportar CSV.
+  Ordem acordada: proposta → despesas → portal do cliente → recorrências → modelos de mensagem.
+- Migração 014: `configuracoes.proposta_corpo` (markdown com {{variaveis}}) e `proposta_validade` (dias); tabela `propostas`
+  (numero P-001/2026, lead_id OU cliente_id, tipo_projeto, titulo, documento congelado, dados jsonb, valor, prazo_extenso,
+  validade, status rascunho/enviada/aceita/recusada/expirada, token uuid, enviada_em, vista_em, respondida_em, resposta_cliente).
+- `src/lib/proposta.ts`: `renderizarProposta()` no mesmo padrão do contrato; `escopoDoModelo()` extrai "O QUE ESTÁ INCLUSO",
+  "MATERIAL" e "NÃO ESTÁ INCLUSO" do Anexo I do `modelos_contrato` — o que foi proposto é o que vai pro contrato;
+  `CONDICOES` (50/50, entrada+2x, entrada+3x, à vista, cartão) montam a cláusula de pagamento a partir do valor.
+- Página pública **/p/[token]** (fora do grupo `(app)`; `src/proxy.ts` agora ignora `api` e `p/`): cliente lê, aceita ou pede
+  ajuste com observação. Aceite move o lead pra `negociando`, marca follow-up, registra interação e avisa a May por e-mail.
+  Rascunho não abre por link; vencida mostra aviso; `vista_em` registra a primeira abertura (aparece como "Aberta pelo cliente").
+- Telas: botão **Nova proposta** no header do lead (prazo e escopo vêm do tipo de serviço), cartão da proposta na página do lead
+  e tela **/propostas** com KPIs (aguardando, aceitas, taxa de aceite, quantas foram abertas) e filtro por situação.
+  PDF reaproveita `gerarPdfContrato`.

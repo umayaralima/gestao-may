@@ -23,6 +23,32 @@ export function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
 }
 
+/*
+ * Normaliza o formato de cada ferramenta:
+ * - Elementor manda form_fields[nome]; WPForms/Fluent mandam fields[nome] ou data[nome];
+ * - alguns enviam um objeto aninhado em "fields"/"form_fields"/"data".
+ * Tudo vira chave simples ("nome", "email"…).
+ */
+function normalizar(dados: Record<string, unknown>): Record<string, unknown> {
+  const saida: Record<string, unknown> = {};
+  for (const [chave, valor] of Object.entries(dados)) {
+    const aninhado = chave.match(/^(?:form_fields|fields|data|form)\[([^\]]+)\]/);
+    if (aninhado) {
+      saida[aninhado[1]] = valor;
+      continue;
+    }
+    if (["form_fields", "fields", "data"].includes(chave) && valor && typeof valor === "object" && !Array.isArray(valor)) {
+      for (const [k, v] of Object.entries(valor as Record<string, unknown>)) {
+        // Elementor REST manda { campo: { id, value } }
+        saida[k] = v && typeof v === "object" && "value" in (v as object) ? (v as { value: unknown }).value : v;
+      }
+      continue;
+    }
+    saida[chave] = valor;
+  }
+  return saida;
+}
+
 /** Aceita os nomes de campo mais comuns de formulário/chatbot. */
 function pegar(dados: Record<string, unknown>, chaves: string[]) {
   for (const k of chaves) {
@@ -40,10 +66,11 @@ export async function POST(request: NextRequest) {
   const tipo = request.headers.get("content-type") ?? "";
   try {
     if (tipo.includes("application/json")) {
-      dados = (await request.json()) as Record<string, unknown>;
+      dados = normalizar((await request.json()) as Record<string, unknown>);
     } else {
       const form = await request.formData();
       dados = Object.fromEntries([...form.entries()].map(([k, v]) => [k, typeof v === "string" ? v : v.name]));
+      dados = normalizar(dados);
     }
   } catch {
     return NextResponse.json({ erro: "Corpo inválido." }, { status: 400, headers: CORS });

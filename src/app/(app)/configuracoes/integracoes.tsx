@@ -61,7 +61,7 @@ export function Integracoes({ urlLeads, ultimas }: { urlLeads: string | null; ul
           <details className="rounded-lg border border-[#311C45] bg-[#150C1D] px-4 py-3">
             <summary className="text-xs text-brand-400 cursor-pointer">Como ligar no formulário do site (Elementor)</summary>
             <ol className="mt-3 space-y-2 text-[11px] text-[#C5C2BE] leading-relaxed list-decimal pl-4">
-              <li>Edite o formulário no Elementor e abra <strong>Ações após enviar</strong>.</li>
+              <li>Edite o formulário no Elementor e abra <strong>Ações após enviar</strong> (aba Conteúdo, no painel do formulário).</li>
               <li>Adicione a ação <strong>Webhook</strong>.</li>
               <li>Em <strong>Webhook</strong> → <strong>URL</strong>, cole o endereço acima.</li>
               <li>
@@ -69,7 +69,8 @@ export function Integracoes({ urlLeads, ultimas }: { urlLeads: string | null; ul
                 <code className="text-brand-400">whatsapp</code>, <code className="text-brand-400">mensagem</code> e, se tiver, <code className="text-brand-400">servico</code> e{" "}
                 <code className="text-brand-400">empresa</code>.
               </li>
-              <li>Opcional: um campo escondido <code className="text-brand-400">origem</code> com o valor <code>site</code>.</li>
+              <li>Opcional: um campo escondido <code className="text-brand-400">origem</code> com o valor <code>site</code> e outro chamado <code className="text-brand-400">servico</code>.</li>
+              <li>O ID do campo é o que importa, não o rótulo: está em <strong>Avançado → ID</strong> de cada campo.</li>
               <li>Publique e mande um teste pelo próprio site.</li>
             </ol>
           </details>

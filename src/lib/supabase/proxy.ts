@@ -24,19 +24,31 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims valida o JWT localmente quando o projeto usa chaves assimétricas: uma ida
+  // à rede a menos por navegação. Só cai no getUser se não vierem claims.
+  let logado = false;
+  try {
+    const { data } = await supabase.auth.getClaims();
+    logado = !!(data?.claims as { sub?: string } | undefined)?.sub;
+  } catch {
+    logado = false;
+  }
+  if (!logado) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    logado = !!user;
+  }
 
   const isLogin = request.nextUrl.pathname.startsWith("/login");
 
-  if (!user && !isLogin) {
+  if (!logado && !isLogin) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && isLogin) {
+  if (logado && isLogin) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);

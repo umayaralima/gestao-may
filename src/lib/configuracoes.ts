@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Configuracoes } from "@/lib/types";
 
@@ -31,9 +32,12 @@ export const CONFIG_PADRAO: Configuracoes = {
   atualizado_em: "",
 };
 
-/** Linha única de `configuracoes` (server). Nunca falha: cai nos padrões. */
-export async function getConfiguracoes(): Promise<Configuracoes> {
+/**
+ * Linha única de `configuracoes` (server). Nunca falha: cai nos padrões.
+ * Em cache por request: layout e página compartilham a mesma consulta.
+ */
+export const getConfiguracoes = cache(async function getConfiguracoes(): Promise<Configuracoes> {
   const supabase = await createClient();
   const { data } = await supabase.from("configuracoes").select("*").eq("id", 1).maybeSingle<Configuracoes>();
   return { ...CONFIG_PADRAO, ...(data ?? {}) };
-}
+});

@@ -467,3 +467,6 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   `vercel.json` passou a fixar `"regions": ["gru1"]` (São Paulo). Se um dia o projeto Supabase mudar de região, mudar aqui também.
   Antes disso já foram cortadas duas idas de auth por página (proxy e layout usam `getClaims`) e o `getConfiguracoes` ganhou
   `cache()` por request. `/api/diagnostico?token=<leads_token>` mede latência e região a qualquer momento.
+  Depois do gru1: 89ms por consulta (era 371). O resto era handshake a cada chamada — `src/instrumentation.ts` configura um
+  Agent do undici com keep-alive como dispatcher global (vale pra Supabase, Resend, Autentique e InfinitePay).
+  A página do projeto deixou de fazer uma segunda rodada de consulta só pra buscar o modelo de contrato.

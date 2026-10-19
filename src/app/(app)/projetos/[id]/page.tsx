@@ -33,7 +33,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const aba: Aba = ABAS.some((a) => a.id === abaParam) ? (abaParam as Aba) : "geral";
   const supabase = await createClient();
 
-  const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }, { data: tarefas }, { data: categorias }, config] = await Promise.all([
+  const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }, { data: tarefas }, { data: categorias }, config, { data: modelosContrato }] = await Promise.all([
     supabase.from("projetos").select("*, clientes(id, nome, empresa, email)").eq("id", id).single<ProjetoJoin>(),
     supabase.from("pagamentos_view").select("*").eq("projeto_id", id).order("vencimento").returns<Pagamento[]>(),
     supabase.from("briefings").select("*").eq("projeto_id", id).maybeSingle<Briefing>(),
@@ -43,6 +43,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
     supabase.from("tarefas").select("*").eq("projeto_id", id).order("vencimento", { ascending: true, nullsFirst: false }).order("criado_em").returns<Tarefa[]>(),
     supabase.from("categorias_tarefa").select("*").order("ordem").returns<CategoriaTarefa[]>(),
     getConfiguracoes(),
+    supabase.from("modelos_contrato").select("*").returns<ModeloContrato[]>(),
   ]);
   if (!projeto) notFound();
 
@@ -54,9 +55,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const naoParcelado = projeto.valor_total !== null ? Number(projeto.valor_total) - totalPago - totalPendente - totalAtrasado : null;
 
   const listaContratos = contratos ?? [];
-  const { data: modeloContrato } = projeto.tipo
-    ? await supabase.from("modelos_contrato").select("*").eq("tipo_projeto", projeto.tipo).maybeSingle<ModeloContrato>()
-    : { data: null };
+  const modeloContrato = projeto.tipo ? ((modelosContrato ?? []).find((m) => m.tipo_projeto === projeto.tipo) ?? null) : null;
   const pagamentoPrevisto = blocoPagamento(lista, projeto.valor_total !== null ? Number(projeto.valor_total) : null, config.chave_pix);
   const temAssinado = listaContratos.some((c) => c.status === "assinado");
   const sugerirAprovado = temAssinado && ["briefing", "orcamento_enviado"].includes(projeto.status);

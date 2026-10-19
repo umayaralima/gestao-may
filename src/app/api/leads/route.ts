@@ -49,6 +49,15 @@ function normalizar(dados: Record<string, unknown>): Record<string, unknown> {
   return saida;
 }
 
+/** Faixa de investimento vem como texto ("de R$ 3 a 5 mil"); só vira número quando é um valor limpo. */
+function valorNumerico(bruto: string | null): number | null {
+  if (!bruto) return null;
+  const limpo = bruto.replace(/[R$\s]/gi, "");
+  if (!/^[\d.,]+$/.test(limpo)) return null;
+  const numero = Number(limpo.replace(/\./g, "").replace(",", "."));
+  return Number.isFinite(numero) && numero > 0 ? numero : null;
+}
+
 /** Aceita os nomes de campo mais comuns de formulário/chatbot. */
 function pegar(dados: Record<string, unknown>, chaves: string[]) {
   for (const k of chaves) {
@@ -60,6 +69,50 @@ function pegar(dados: Record<string, unknown>, chaves: string[]) {
 }
 
 const ORIGENS_VALIDAS = ["indicacao", "instagram", "site", "linkedin", "outro"];
+
+/** Campos que já viram coluna do lead — o resto do formulário vai pra "respostas". */
+const CAMPOS_CONHECIDOS = new Set([
+  "nome", "name", "nome_completo", "full_name", "first_name", "last_name",
+  "email", "e-mail", "mail",
+  "whatsapp", "telefone", "phone", "celular", "phone_number", "tel",
+  "instagram", "ig", "perfil", "ig_username",
+  "mensagem", "message", "msg", "observacoes", "comentario", "descricao", "last_input_text",
+  "servico", "servico_interesse", "assunto", "interesse", "subject", "tipo_projeto",
+  "empresa", "company", "negocio",
+  "origem", "source", "utm_source", "canal", "entrada",
+  "valor", "valor_estimado", "orcamento", "budget",
+  "token", "_honey", "website_url", "hp",
+]);
+
+/** Rótulo bonito pras perguntas que combinamos com a May no formulário do site. */
+const ROTULOS: Record<string, string> = {
+  segmento: "Segmento do negócio",
+  nicho: "Segmento do negócio",
+  prazo: "Prazo desejado",
+  prazo_entrega: "Prazo desejado",
+  investimento: "Faixa de investimento",
+  faixa_investimento: "Faixa de investimento",
+  horario: "Melhor horário pra conversar",
+  melhor_horario: "Melhor horário pra conversar",
+};
+
+/** Transforma "qual_o_segmento" em "Qual o segmento". */
+const rotularChave = (chave: string) =>
+  ROTULOS[chave.toLowerCase()] ??
+  chave.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim().replace(/^./, (c) => c.toUpperCase());
+
+/** Tudo que o formulário mandou e não virou coluna do lead. */
+function respostasExtras(dados: Record<string, unknown>): Record<string, string> {
+  const extras: Record<string, string> = {};
+  for (const [chave, valor] of Object.entries(dados)) {
+    if (CAMPOS_CONHECIDOS.has(chave.toLowerCase())) continue;
+    if (/^(form_id|form_name|post_id|page_url|queried_id|referrer|user_agent|remote_ip|page_title|flow_ns|subscriber_id)$/i.test(chave)) continue;
+    const texto = typeof valor === "string" ? valor.trim() : typeof valor === "number" ? String(valor) : "";
+    if (!texto || texto.length > 500) continue;
+    extras[rotularChave(chave)] = texto;
+  }
+  return extras;
+}
 
 export async function POST(request: NextRequest) {
   let dados: Record<string, unknown> = {};
@@ -100,7 +153,9 @@ export async function POST(request: NextRequest) {
   const origemBruta = (pegar(dados, ["origem", "source", "utm_source"]) ?? "site").toLowerCase();
   const origem = ORIGENS_VALIDAS.includes(origemBruta) ? origemBruta : origemBruta.includes("insta") ? "instagram" : "outro";
   const entrada = pegar(dados, ["entrada", "canal"]) ?? (origem === "instagram" ? "manychat" : "formulario");
-  const valor = pegar(dados, ["valor", "valor_estimado", "orcamento", "budget"]);
+  const valor = pegar(dados, ["valor", "valor_estimado", "orcamento", "budget", "investimento", "faixa_investimento"]);
+  const segmento = pegar(dados, ["segmento", "nicho"]);
+  const respostas = respostasExtras(dados);
 
   const registrar = (lead_id: string | null, erro?: string) =>
     supabase.from("entradas_lead").insert({ origem: entrada, payload: dados as never, lead_id, erro: erro ?? null });
@@ -112,7 +167,7 @@ export async function POST(request: NextRequest) {
   }
 
   const hoje = hojeISO();
-  const nota = mensagem ? mensagem.slice(0, 160) : "Responder contato novo";
+  const nota = [segmento, mensagem].filter(Boolean).join(" · ").slice(0, 160) || "Responder contato novo";
 
   // Já existe lead aberto desse contato? Então registra interação em vez de duplicar o funil.
   const filtros = [email ? `email.eq.${email}` : null, whatsapp ? `whatsapp.eq.${whatsapp}` : null].filter(Boolean).join(",");
@@ -123,7 +178,10 @@ export async function POST(request: NextRequest) {
   if (existente) {
     await Promise.all([
       supabase.from("interacoes").insert({ lead_id: existente.id, data: hoje, canal: entrada === "manychat" ? "instagram" : "outro", resumo: `Novo contato pelo ${entrada}: ${mensagem ?? "sem mensagem"}`.slice(0, 500) }),
-      supabase.from("leads").update({ proximo_followup: hoje, nota_followup: nota, atualizado_em: new Date().toISOString() }).eq("id", existente.id),
+      supabase
+        .from("leads")
+        .update({ proximo_followup: hoje, nota_followup: nota, respostas, atualizado_em: new Date().toISOString() })
+        .eq("id", existente.id),
       registrar(existente.id),
     ]);
     avisarPorEmail({ config, nome: existente.nome, mensagem, entrada, repetido: true }).catch(() => {});
@@ -142,7 +200,8 @@ export async function POST(request: NextRequest) {
       entrada,
       mensagem,
       servico_interesse: servico,
-      valor_estimado: valor ? Number(valor.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", ".")) || null : null,
+      valor_estimado: valorNumerico(valor),
+      respostas,
       etapa: "novo",
       prioridade: "alta",
       proximo_followup: hoje,

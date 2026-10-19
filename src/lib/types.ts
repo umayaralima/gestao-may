@@ -111,6 +111,8 @@ export type Lead = {
   motivo_perda: string | null;
   entrada: string | null;
   mensagem: string | null;
+  /** respostas extras do formulário: { "Pergunta": "resposta" } */
+  respostas: Record<string, string>;
   proximo_followup: string | null;
   nota_followup: string | null;
   observacoes: string | null;

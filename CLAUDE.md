@@ -458,3 +458,8 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
 - Telas: botão **Nova proposta** no header do lead (prazo e escopo vêm do tipo de serviço), cartão da proposta na página do lead
   e tela **/propostas** com KPIs (aguardando, aceitas, taxa de aceite, quantas foram abertas) e filtro por situação.
   PDF reaproveita `gerarPdfContrato`.
+- Formulário do site da May (Elementor, 10 campos): IDs combinados `nome`, `whatsapp`, `email`, `empresa`, `segmento`,
+  `servico`, `prazo`, `investimento`, `origem`, `horario`. O Elementor manda `form_fields[<id>]` — `normalizar()` na rota de
+  leads desempacota esse formato (e `fields[]`, `data[]`, objeto aninhado). Migração 015: `leads.respostas` (jsonb) guarda
+  qualquer campo que não vira coluna, com rótulo legível; aparece no bloco "Respostas do formulário" da página do lead.
+  Faixa de investimento só vira `valor_estimado` quando é número limpo (texto tipo "3 a 5 mil" fica nas respostas).

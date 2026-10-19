@@ -154,6 +154,25 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
               </Linha>
               <Linha k="Origem">{lead.origem ? ORIGEM_CLIENTE_LABEL[lead.origem as keyof typeof ORIGEM_CLIENTE_LABEL] ?? lead.origem : "—"}</Linha>
             </dl>
+            {lead.mensagem && (
+              <div className="border-t border-[#311C45] pt-3">
+                <p className="text-[10px] font-semibold text-[#968F88] uppercase tracking-wider mb-1.5">O que escreveu</p>
+                <p className="text-[11px] text-[#C5C2BE] leading-relaxed whitespace-pre-wrap">{lead.mensagem}</p>
+              </div>
+            )}
+            {Object.keys(lead.respostas ?? {}).length > 0 && (
+              <div className="border-t border-[#311C45] pt-3">
+                <p className="text-[10px] font-semibold text-[#968F88] uppercase tracking-wider mb-2">Respostas do formulário</p>
+                <dl className="space-y-2">
+                  {Object.entries(lead.respostas).map(([pergunta, resposta]) => (
+                    <div key={pergunta}>
+                      <dt className="text-[10px] text-[#968F88]">{pergunta}</dt>
+                      <dd className="text-[11px] text-[#C5C2BE] leading-relaxed">{resposta}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
             {lead.observacoes && (
               <div className="border-t border-[#311C45] pt-3">
                 <p className="text-[10px] font-semibold text-[#968F88] uppercase tracking-wider mb-1.5">Observações</p>

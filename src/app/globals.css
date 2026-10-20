@@ -211,3 +211,81 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
 .entrar-3 { animation-delay: 0.15s; }
 .entrar-4 { animation-delay: 0.2s; }
 @media (prefers-reduced-motion: reduce) { .entrar { animation: none; } }
+
+/* ---------- Sidebar recolhível ----------
+   O estado vive num atributo no <html> (escrito antes do primeiro paint, em layout.tsx),
+   e só o CSS reage a ele. Assim não há "pulo" ao carregar nem diferença entre servidor e cliente. */
+.sidebar {
+  width: 14rem; /* 224px, como o protótipo */
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar-item {
+  transition: padding 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar-recolher svg {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-sidebar="recolhida"] .sidebar {
+  width: 4.25rem;
+}
+[data-sidebar="recolhida"] .sidebar-texto {
+  display: none;
+}
+[data-sidebar="recolhida"] .sidebar-item {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+[data-sidebar="recolhida"] .sidebar-cabecalho {
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-left: 0;
+  padding-right: 0;
+}
+[data-sidebar="recolhida"] .sidebar-rodape {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+[data-sidebar="recolhida"] .sidebar-recolher svg {
+  transform: rotate(180deg);
+}
+[data-sidebar="recolhida"] .sidebar-logo-completa {
+  display: none;
+}
+.sidebar-logo-simbolo {
+  display: none;
+}
+[data-sidebar="recolhida"] .sidebar-logo-simbolo {
+  display: block;
+}
+
+/* No celular a sidebar é gaveta: nunca recolhe. */
+@media (max-width: 1023px) {
+  [data-sidebar="recolhida"] .sidebar {
+    width: 14rem;
+  }
+  [data-sidebar="recolhida"] .sidebar-texto,
+  [data-sidebar="recolhida"] .sidebar-logo-completa {
+    display: revert;
+  }
+  [data-sidebar="recolhida"] .sidebar-logo-simbolo {
+    display: none;
+  }
+  [data-sidebar="recolhida"] .sidebar-item {
+    justify-content: flex-start;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  [data-sidebar="recolhida"] .sidebar-cabecalho {
+    flex-direction: row;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+  [data-sidebar="recolhida"] .sidebar-rodape {
+    justify-content: flex-start;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}

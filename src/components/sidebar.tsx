@@ -36,31 +36,33 @@ export function Sidebar({ email, nome, titulo, sair, onFechar }: { email: string
   const Nav = ({ href, label, Icone, emBreve }: Item) => {
     const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
     const classes = cn(
-      "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 text-left",
+      "sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 text-left",
       active ? "bg-brand-400/15 text-brand-400 font-medium" : "text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/4",
       emBreve && "opacity-50 cursor-default hover:bg-transparent hover:text-[#968F88]",
     );
     if (emBreve) {
       return (
-        <span className={classes} title="Em breve">
+        <span className={classes} title={`${label} · em breve`}>
           <Icone active={false} />
-          {label}
-          <span className="ml-auto text-[9px] uppercase tracking-wider">em breve</span>
+          <span className="sidebar-texto">{label}</span>
+          <span className="sidebar-texto ml-auto text-[9px] uppercase tracking-wider">em breve</span>
         </span>
       );
     }
     return (
-      <Link href={href} className={classes}>
+      <Link href={href} className={classes} title={label}>
         <Icone active={active} />
-        {label}
+        <span className="sidebar-texto">{label}</span>
       </Link>
     );
   };
 
   return (
-    <aside className="flex flex-col w-56 shrink-0 h-full border-r border-[#311C45] bg-[#1B0F26]">
-      <div className="flex items-center justify-between px-5 py-5 border-b border-[#311C45]">
-        <Image src="/marca/logo-gradiente.png" alt="Mayara" width={531} height={131} priority className="h-7 w-auto" />
+    <aside className="sidebar flex flex-col shrink-0 h-full border-r border-[#311C45] bg-[#1B0F26]">
+      <div className="sidebar-cabecalho flex items-center justify-between px-5 py-5 border-b border-[#311C45]">
+        <Image src="/marca/logo-gradiente.png" alt="Mayara" width={531} height={131} priority className="sidebar-logo-completa h-7 w-auto" />
+        <Image src="/marca/favicon-gradiente.png" alt="Mayara" width={64} height={64} priority className="sidebar-logo-simbolo h-7 w-7 object-contain" />
+        <BotaoRecolher />
         {onFechar && (
           <button
             type="button"
@@ -76,26 +78,26 @@ export function Sidebar({ email, nome, titulo, sair, onFechar }: { email: string
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        <p className="px-2 pb-2 text-[10px] font-semibold tracking-widest text-[#968F88] uppercase">Principal</p>
+        <p className="sidebar-texto px-2 pb-2 text-[10px] font-semibold tracking-widest text-[#968F88] uppercase">Principal</p>
         {principal.map((i) => (
           <Nav key={i.href} {...i} />
         ))}
-        <p className="px-2 pt-4 pb-2 text-[10px] font-semibold tracking-widest text-[#968F88] uppercase">Configurações</p>
+        <p className="sidebar-texto px-2 pt-4 pb-2 text-[10px] font-semibold tracking-widest text-[#968F88] uppercase">Configurações</p>
         {configuracoes.map((i) => (
           <Nav key={i.href} {...i} />
         ))}
       </nav>
 
       <div className="px-3 py-4 border-t border-[#311C45]">
-        <form action={sair} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/4 transition-colors">
+        <form action={sair} className="sidebar-rodape flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/4 transition-colors" title={`${nome} · sair`}>
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-300 to-brand-600 flex items-center justify-center text-[11px] font-semibold text-white shrink-0">
             {iniciais(nome)}
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="sidebar-texto flex-1 min-w-0">
             <p className="text-xs font-medium text-[#DDDBD9] truncate">{nome}</p>
             <p className="text-[10px] text-[#968F88] truncate" title={email}>{titulo}</p>
           </div>
-          <button type="submit" title="Sair" className="text-[#968F88] hover:text-[#DDDBD9] shrink-0">
+          <button type="submit" title="Sair" className="sidebar-texto text-[#968F88] hover:text-[#DDDBD9] shrink-0">
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
               <path d="M5 2H2.5v9H5M8.5 9l3-2.5-3-2.5M11.5 6.5H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -103,6 +105,35 @@ export function Sidebar({ email, nome, titulo, sair, onFechar }: { email: string
         </form>
       </div>
     </aside>
+  );
+}
+
+/** Recolhe a sidebar pra faixa de ícones. O estado fica no <html> e no localStorage. */
+function BotaoRecolher() {
+  const alternar = () => {
+    const html = document.documentElement;
+    const recolhida = html.dataset.sidebar === "recolhida";
+    html.dataset.sidebar = recolhida ? "expandida" : "recolhida";
+    try {
+      localStorage.setItem("sidebar", html.dataset.sidebar);
+    } catch {
+      // navegador sem armazenamento: só não lembra na próxima visita
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={alternar}
+      aria-label="Recolher ou expandir o menu"
+      title="Recolher menu"
+      className="sidebar-recolher hidden lg:flex w-7 h-7 rounded-md items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/8 transition-colors shrink-0"
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M9 3.5L5.5 7l3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2.5 2.5v9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    </button>
   );
 }
 

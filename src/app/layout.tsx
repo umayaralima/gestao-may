@@ -29,6 +29,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${dmSerif.variable} ${jakarta.variable} ${jetbrains.variable} h-full`}>
+      <head>
+        {/* Aplica o estado da sidebar antes do primeiro paint, pra ela não "pular" ao carregar. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: 'try{document.documentElement.dataset.sidebar=localStorage.getItem("sidebar")==="recolhida"?"recolhida":"expandida"}catch(e){}',
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

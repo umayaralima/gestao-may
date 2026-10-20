@@ -488,3 +488,9 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
 - Recorrência: `src/lib/recorrencias.ts` lança as ocorrências vencidas a partir do molde (`recorrente = true`), sem duplicar
   (usa `origem_id` + última data) e respeitando `recorrencia_ate`. Roda no cron diário, antes do resumo.
   O mesmo mecanismo vai servir pras cobranças recorrentes (próximo item da fila).
+- **Sidebar recolhível (2026-10-20):** botão de seta no cabeçalho da sidebar (só em `lg+`) alterna entre 224px e 68px
+  (só ícones, com `title` como tooltip; a logo vira o símbolo `favicon-gradiente.png`). O estado fica em
+  `document.documentElement.dataset.sidebar` + `localStorage`, aplicado por um script inline no `<head>` do root layout —
+  por isso **o CSS faz todo o trabalho** (`.sidebar`, `.sidebar-texto`, `.sidebar-item`, `.sidebar-cabecalho`,
+  `.sidebar-rodape`, `.sidebar-logo-*` em `globals.css`), sem estado no React: zero flash no carregamento e nenhum risco de
+  divergência entre servidor e cliente. No celular a sidebar continua sendo gaveta e ignora o recolhimento (media query).

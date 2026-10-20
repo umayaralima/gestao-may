@@ -19,7 +19,7 @@ export default async function ConfiguracoesPage() {
     supabase.from("envios_resumo").select("dia, destino, itens, erro").order("dia", { ascending: false }).limit(1).maybeSingle<{ dia: string; destino: string; itens: number; erro: string | null }>(),
     supabase.auth.getUser(),
     supabase.from("modelos_contrato").select("*").order("tipo_projeto").returns<ModeloContrato[]>(),
-    supabase.from("entradas_lead").select("id, origem, erro, criado_em, lead_id").order("criado_em", { ascending: false }).limit(8).returns<EntradaLead[]>(),
+    supabase.from("entradas_lead").select("id, origem, erro, criado_em, lead_id, payload").order("criado_em", { ascending: false }).limit(8).returns<EntradaLead[]>(),
   ]);
 
   const usoCategorias: Record<string, number> = {};

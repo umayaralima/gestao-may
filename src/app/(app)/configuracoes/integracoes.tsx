@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 import { fmtRelativo } from "@/lib/format";
 import { trocarTokenLeads } from "./actions";
 
-export type EntradaLead = { id: string; origem: string; erro: string | null; criado_em: string; lead_id: string | null };
+export type EntradaLead = { id: string; origem: string; erro: string | null; criado_em: string; lead_id: string | null; payload?: Record<string, unknown> | null };
 
 /*
  * Aba Integrações: endereço e token da API pública de leads (formulário do site, ManyChat)
@@ -112,18 +112,40 @@ export function Integracoes({ urlLeads, ultimas }: { urlLeads: string | null; ul
         ) : (
           <ul className="divide-y divide-[#311C45]/60">
             {ultimas.map((e) => (
-              <li key={e.id} className="flex items-center justify-between gap-3 px-6 py-3">
-                <div className="min-w-0">
-                  <p className={cn("text-xs", e.erro ? "text-red-400" : "text-[#DDDBD9]")}>{e.erro ? `Falhou: ${e.erro}` : e.lead_id ? "Negócio criado no pipeline" : "Recebido"}</p>
-                  <p className="text-[10px] text-[#968F88]">via {e.origem}</p>
+              <li key={e.id} className="px-6 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className={cn("text-xs", e.erro ? "text-red-400" : "text-[#DDDBD9]")}>{e.erro ? `Falhou: ${e.erro}` : e.lead_id ? "Negócio criado no pipeline" : "Recebido"}</p>
+                    <p className="text-[10px] text-[#968F88]">via {e.origem}</p>
+                  </div>
+                  <span className="text-[10px] font-mono text-[#968F88] whitespace-nowrap">{fmtRelativo(e.criado_em)}</span>
                 </div>
-                <span className="text-[10px] font-mono text-[#968F88] whitespace-nowrap">{fmtRelativo(e.criado_em)}</span>
+                <CamposRecebidos payload={e.payload} />
               </li>
             ))}
           </ul>
         )}
       </Secao>
     </div>
+  );
+}
+
+/** Mostra o que a ferramenta mandou: é o que resolve "faltou nome ou contato". */
+function CamposRecebidos({ payload }: { payload?: Record<string, unknown> | null }) {
+  const campos = Object.entries(payload ?? {}).filter(([k]) => !k.startsWith("_"));
+  if (campos.length === 0) return null;
+  return (
+    <details className="mt-2">
+      <summary className="text-[10px] text-brand-400 cursor-pointer">Ver os {campos.length} campos recebidos</summary>
+      <dl className="mt-2 space-y-1 rounded-lg border border-[#311C45] bg-[#150C1D] px-3 py-2">
+        {campos.map(([chave, valor]) => (
+          <div key={chave} className="flex gap-2 text-[10px]">
+            <dt className="font-mono text-brand-400 shrink-0">{chave}</dt>
+            <dd className="text-[#C5C2BE] truncate">{String(valor).slice(0, 120)}</dd>
+          </div>
+        ))}
+      </dl>
+    </details>
   );
 }
 

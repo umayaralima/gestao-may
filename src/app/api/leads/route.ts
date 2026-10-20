@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { baseUrl } from "@/lib/enviar-resumo";
@@ -12,6 +12,16 @@ import { hojeISO } from "@/lib/format";
  */
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Resposta padrão da rota: sempre 200.
+ * O Elementor (e a maioria dos plugins) trata qualquer status de erro como falha do formulário
+ * e trava o envio do visitante — o que seria pior do que perder o registro. O motivo real fica
+ * no corpo da resposta e na lista "Últimos contatos recebidos", em Configurações → Integrações.
+ */
+function responder(corpo: Record<string, unknown>) {
+  return NextResponse.json(corpo, { status: 200, headers: CORS });
+}
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -114,6 +124,15 @@ function respostasExtras(dados: Record<string, unknown>): Record<string, string>
   return extras;
 }
 
+/** GET só confirma que o endereço está vivo e o token confere — não cria lead. */
+export async function GET(request: NextRequest) {
+  const token = request.nextUrl.searchParams.get("token");
+  if (!token || !/^[0-9a-f-]{36}$/i.test(token)) return responder({ ok: false, motivo: "Token ausente ou inválido." });
+  const supabase = createAdminClient();
+  const { data } = await supabase.from("configuracoes").select("id").eq("leads_token", token).maybeSingle();
+  return responder(data ? { ok: true, pronto: "Endereço válido. Configure o webhook do formulário para enviar por POST." } : { ok: false, motivo: "Token não reconhecido." });
+}
+
 export async function POST(request: NextRequest) {
   let dados: Record<string, unknown> = {};
   const tipo = request.headers.get("content-type") ?? "";
@@ -126,11 +145,11 @@ export async function POST(request: NextRequest) {
       dados = normalizar(dados);
     }
   } catch {
-    return NextResponse.json({ erro: "Corpo inválido." }, { status: 400, headers: CORS });
+    return responder({ ok: false, motivo: "Corpo inválido." });
   }
 
   const token = request.nextUrl.searchParams.get("token") ?? request.headers.get("x-api-key") ?? (typeof dados.token === "string" ? dados.token : null);
-  if (!token || !/^[0-9a-f-]{36}$/i.test(token)) return NextResponse.json({ erro: "Token ausente ou inválido." }, { status: 401, headers: CORS });
+  if (!token || !/^[0-9a-f-]{36}$/i.test(token)) return responder({ ok: false, motivo: "Token ausente ou inválido." });
 
   const supabase = createAdminClient();
   const { data: config } = await supabase
@@ -138,10 +157,10 @@ export async function POST(request: NextRequest) {
     .select("id, nome, email_contato, resumo_email")
     .eq("leads_token", token)
     .maybeSingle<{ id: number; nome: string | null; email_contato: string | null; resumo_email: string | null }>();
-  if (!config) return NextResponse.json({ erro: "Token não reconhecido." }, { status: 401, headers: CORS });
+  if (!config) return responder({ ok: false, motivo: "Token não reconhecido." });
 
   // honeypot: formulário com esse campo preenchido é robô
-  if (pegar(dados, ["_honey", "website_url", "hp"])) return NextResponse.json({ ok: true, ignorado: "spam" }, { headers: CORS });
+  if (pegar(dados, ["_honey", "website_url", "hp"])) return responder({ ok: true, ignorado: "spam" });
 
   const nome = pegar(dados, ["nome", "name", "nome_completo", "full_name", "first_name"]);
   const email = pegar(dados, ["email", "e-mail", "mail"]);
@@ -158,12 +177,17 @@ export async function POST(request: NextRequest) {
   const respostas = respostasExtras(dados);
 
   const registrar = (lead_id: string | null, erro?: string) =>
-    supabase.from("entradas_lead").insert({ origem: entrada, payload: dados as never, lead_id, erro: erro ?? null });
+    supabase.from("entradas_lead").insert({
+      origem: entrada,
+      payload: { ...dados, _content_type: tipo, _campos: Object.keys(dados).join(", ") } as never,
+      lead_id,
+      erro: erro ?? null,
+    });
 
   const parsed = z.object({ nome: z.string().trim().min(2, "Nome é obrigatório.") }).safeParse({ nome });
   if (!parsed.success || (!email && !whatsapp && !instagram)) {
     await registrar(null, "faltou nome ou contato");
-    return NextResponse.json({ erro: "Informe ao menos o nome e um contato (e-mail, WhatsApp ou Instagram)." }, { status: 400, headers: CORS });
+    return responder({ ok: false, motivo: "Informe ao menos o nome e um contato (e-mail, WhatsApp ou Instagram).", campos_recebidos: Object.keys(dados) });
   }
 
   const hoje = hojeISO();
@@ -184,8 +208,8 @@ export async function POST(request: NextRequest) {
         .eq("id", existente.id),
       registrar(existente.id),
     ]);
-    avisarPorEmail({ config, nome: existente.nome, mensagem, entrada, repetido: true }).catch(() => {});
-    return NextResponse.json({ ok: true, lead: existente.id, repetido: true }, { headers: CORS });
+    after(() => avisarPorEmail({ config, nome: existente.nome, mensagem, entrada, repetido: true }).catch(() => {}));
+    return responder({ ok: true, lead: existente.id, repetido: true });
   }
 
   const { data: lead, error } = await supabase
@@ -212,12 +236,12 @@ export async function POST(request: NextRequest) {
 
   if (error || !lead) {
     await registrar(null, error?.message ?? "falha ao inserir");
-    return NextResponse.json({ erro: "Não foi possível registrar o contato." }, { status: 500, headers: CORS });
+    return responder({ ok: false, motivo: "Não foi possível registrar o contato." });
   }
 
   await registrar(lead.id);
-  avisarPorEmail({ config, nome: parsed.data.nome, mensagem, entrada, leadId: lead.id }).catch(() => {});
-  return NextResponse.json({ ok: true, lead: lead.id }, { headers: CORS });
+  after(() => avisarPorEmail({ config, nome: parsed.data.nome, mensagem, entrada, leadId: lead.id }).catch(() => {}));
+  return responder({ ok: true, lead: lead.id });
 }
 
 async function avisarPorEmail({

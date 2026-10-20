@@ -476,3 +476,15 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   Depois do gru1: 89ms por consulta (era 371). O resto era handshake a cada chamada — `src/instrumentation.ts` configura um
   Agent do undici com keep-alive como dispatcher global (vale pra Supabase, Resend, Autentique e InfinitePay).
   A página do projeto deixou de fazer uma segunda rodada de consulta só pra buscar o modelo de contrato.
+
+## Despesas (2026-10-20)
+
+- Migração 016: `categorias_despesa` (lista editável, com ícone) e `despesas` (descricao, categoria, valor, data,
+  `pago_em` null = a pagar, forma_pagamento, fornecedor, `projeto_id` opcional = custo direto do projeto,
+  `recorrente` + `periodicidade` + `recorrencia_ate`, `origem_id` = molde que gerou a ocorrência).
+- Financeiro ganhou abas `?aba=entradas|saidas|resumo` (entradas é a tela antiga, intocada).
+  **Saídas**: tabela de despesas com marcar pago, editar e excluir; o modal tem recorrência e vínculo a projeto.
+  **Resumo**: entrou × saiu por mês (barras), lucro mês a mês (área) e tabela — é o que responde "sobrou quanto?".
+- Recorrência: `src/lib/recorrencias.ts` lança as ocorrências vencidas a partir do molde (`recorrente = true`), sem duplicar
+  (usa `origem_id` + última data) e respeitando `recorrencia_ate`. Roda no cron diário, antes do resumo.
+  O mesmo mecanismo vai servir pras cobranças recorrentes (próximo item da fila).

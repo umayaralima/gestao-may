@@ -226,3 +226,24 @@ export type Proposta = {
   criado_em: string;
   atualizado_em: string;
 };
+
+export type CategoriaDespesa = { id: string; nome: string; icone: string; ordem: number };
+
+export type Despesa = {
+  id: string;
+  descricao: string;
+  categoria: string;
+  valor: number;
+  /** competência / vencimento */
+  data: string;
+  pago_em: string | null;
+  forma_pagamento: string | null;
+  fornecedor: string | null;
+  projeto_id: string | null;
+  recorrente: boolean;
+  periodicidade: "mensal" | "bimestral" | "trimestral" | "semestral" | "anual" | null;
+  recorrencia_ate: string | null;
+  origem_id: string | null;
+  observacoes: string | null;
+  criado_em: string;
+};

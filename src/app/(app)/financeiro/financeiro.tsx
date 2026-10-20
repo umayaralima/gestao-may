@@ -11,6 +11,9 @@ import { diffDias, fmt, fmtData, hojeISO, mesAnoExtenso } from "@/lib/format";
 import type { Pagamento } from "@/lib/types";
 import { criarPagamento, desfazerPagamento, excluirPagamento, marcarComoPago, type FormState } from "./actions";
 import { BotoesCobranca } from "./cobranca";
+import { Despesas, type DespesaLinha, type ProjetoOpcaoDespesa } from "./despesas";
+import { ResumoFinanceiro, type MesResumo } from "./resumo";
+import type { CategoriaDespesa } from "@/lib/types";
 
 export type PagamentoLinha = Pagamento & { projetoNome: string; clienteNome: string; clienteId: string | null; clienteWhatsapp: string | null };
 export type ProjetoOpcao = { id: string; label: string; data_inicio: string | null };
@@ -28,12 +31,36 @@ type Props = {
   diasAviso: number;
   /** InfiniteTag configurado: habilita os botões de cobrança */
   temHandle: boolean;
+  /** ?aba= na URL: entradas (padrão), saidas ou resumo */
+  aba: "entradas" | "saidas" | "resumo";
+  despesas: DespesaLinha[];
+  categoriasDespesa: CategoriaDespesa[];
+  projetosDespesa: ProjetoOpcaoDespesa[];
+  resumoMeses: MesResumo[];
+  abrirNovaDespesa?: boolean;
 };
 
 const ICONE_FORMA: Record<string, string> = { pix: "⚡", transferencia: "🏦", boleto: "📄", cartao: "💳", permuta: "🤝", outro: "💰" };
 
 /** Tela Financeiro do protótipo: KPIs, barra tricolor, filtro hambúrguer, tabela, modal "Marcar pago". */
-export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial, busca, filtro, formaPreferida, diasAviso, temHandle }: Props) {
+export function Financeiro({
+  linhas,
+  todas,
+  projetos,
+  abrirNovo,
+  projetoInicial,
+  busca,
+  filtro,
+  formaPreferida,
+  diasAviso,
+  temHandle,
+  aba,
+  despesas,
+  categoriasDespesa,
+  projetosDespesa,
+  resumoMeses,
+  abrirNovaDespesa,
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [novo, setNovo] = useState(!!abrirNovo);
@@ -57,11 +84,34 @@ export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial,
       {pagando && <MarcarPagoModal pagamento={pagando} formaPreferida={formaPreferida} onClose={() => setPagando(null)} />}
 
       <div className="flex flex-col h-full">
-        <Header titulo="Financeiro" sub={`Controle de pagamentos · ${mesAnoExtenso()}`}>
-          {busca}
-          <BotaoPrimario onClick={() => setNovo(true)}>Novo lançamento</BotaoPrimario>
+        <Header titulo="Financeiro" sub={`Entradas, saídas e resultado · ${mesAnoExtenso()}`}>
+          {aba === "entradas" && busca}
+          {aba === "entradas" && <BotaoPrimario onClick={() => setNovo(true)}>Novo lançamento</BotaoPrimario>}
         </Header>
 
+        <div className="flex items-center gap-1 px-4 md:px-6 border-b border-[#311C45] shrink-0 overflow-x-auto">
+          {(
+            [
+              { id: "entradas", label: "Entradas" },
+              { id: "saidas", label: "Saídas" },
+              { id: "resumo", label: "Resumo" },
+            ] as const
+          ).map((a) => (
+            <Link
+              key={a.id}
+              href={`/financeiro?aba=${a.id}`}
+              className={cn(
+                "px-3 py-2.5 text-[11px] font-medium transition-colors border-b-2 -mb-px whitespace-nowrap",
+                aba === a.id ? "border-brand-400 text-brand-400" : "border-transparent text-[#968F88] hover:text-[#DDDBD9]",
+              )}
+            >
+              {a.label}
+            </Link>
+          ))}
+        </div>
+
+        {aba === "entradas" && (
+        <>
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 px-4 md:px-6 py-5 shrink-0 entrar">
           <KpiCard label="Total em carteira" value={fmt(total)} sub={`${todas.length} lançamentos`} />
           <KpiCard label="Recebido" value={fmt(totalPago)} sub={`${qtd("pago")} pagamentos`} accent="text-emerald-400" />
@@ -114,6 +164,20 @@ export function Financeiro({ linhas, todas, projetos, abrirNovo, projetoInicial,
           </table>
           {linhas.length === 0 && <Vazio icone="💰" titulo="Nenhum lançamento encontrado" sub="Tente ajustar os filtros ou a busca" />}
         </div>
+        </>
+        )}
+
+        {aba === "saidas" && (
+          <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-4 entrar">
+            <Despesas despesas={despesas} categorias={categoriasDespesa} projetos={projetosDespesa} abrirNova={abrirNovaDespesa} />
+          </div>
+        )}
+
+        {aba === "resumo" && (
+          <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5 entrar">
+            <ResumoFinanceiro meses={resumoMeses} />
+          </div>
+        )}
       </div>
     </>
   );

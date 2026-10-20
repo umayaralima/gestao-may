@@ -110,3 +110,15 @@ export const CANAL_INTERACAO_LABEL: Record<(typeof CANAIS_INTERACAO)[number], st
   reuniao: "Reunião",
   outro: "Outro",
 };
+
+// ---------- Despesas ----------
+export const PERIODICIDADES = ["mensal", "bimestral", "trimestral", "semestral", "anual"] as const;
+export type Periodicidade = (typeof PERIODICIDADES)[number];
+export const PERIODICIDADE_LABEL: Record<Periodicidade, string> = {
+  mensal: "Todo mês",
+  bimestral: "A cada 2 meses",
+  trimestral: "A cada 3 meses",
+  semestral: "A cada 6 meses",
+  anual: "Todo ano",
+};
+export const MESES_PERIODICIDADE: Record<Periodicidade, number> = { mensal: 1, bimestral: 2, trimestral: 3, semestral: 6, anual: 12 };

@@ -1,6 +1,7 @@
 import { FiltroMenu } from "@/components/ui/filtro-menu";
 import { Busca } from "@/components/ui/primitivos";
 import { getConfiguracoes } from "@/lib/configuracoes";
+import { modelosDaSituacao } from "@/lib/modelos-mensagem";
 import { hojeISO, mesCurto } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { CategoriaDespesa, Despesa, Pagamento } from "@/lib/types";
@@ -8,7 +9,7 @@ import type { DespesaLinha, ProjetoOpcaoDespesa } from "./despesas";
 import { Financeiro, type PagamentoLinha, type ProjetoOpcao } from "./financeiro";
 import type { MesResumo } from "./resumo";
 
-type PagamentoJoin = Pagamento & { projetos: { id: string; nome: string; data_inicio: string | null; clientes: { id: string; nome: string; empresa: string | null; whatsapp: string | null } | null } | null };
+type PagamentoJoin = Pagamento & { projetos: { id: string; nome: string; data_inicio: string | null; clientes: { id: string; nome: string; empresa: string | null; whatsapp: string | null; email: string | null } | null } | null };
 type DespesaJoin = Despesa & { projetos: { nome: string; clientes: { nome: string; empresa: string | null } | null } | null };
 
 const ABAS = ["entradas", "saidas", "resumo"] as const;
@@ -24,12 +25,14 @@ export default async function FinanceiroPage({
   const supabase = await createClient();
 
   const [{ data: pagamentos }, { data: projetos }, config, { data: despesas }, { data: categoriasDespesa }] = await Promise.all([
-    supabase.from("pagamentos_view").select("*, projetos(id, nome, data_inicio, clientes(id, nome, empresa, whatsapp))").order("vencimento", { ascending: false }).returns<PagamentoJoin[]>(),
+    supabase.from("pagamentos_view").select("*, projetos(id, nome, data_inicio, clientes(id, nome, empresa, whatsapp, email))").order("vencimento", { ascending: false }).returns<PagamentoJoin[]>(),
     supabase.from("projetos").select("id, nome, data_inicio, clientes(nome, empresa)").neq("status", "cancelado").order("criado_em", { ascending: false }),
     getConfiguracoes(),
     supabase.from("despesas").select("*, projetos(nome, clientes(nome, empresa))").order("data", { ascending: false }).returns<DespesaJoin[]>(),
     supabase.from("categorias_despesa").select("*").order("ordem").order("nome").returns<CategoriaDespesa[]>(),
   ]);
+
+  const modelosCobranca = await modelosDaSituacao("cobranca");
 
   const termo = q.trim().toLowerCase();
   const linhas: PagamentoLinha[] = (pagamentos ?? [])
@@ -39,6 +42,7 @@ export default async function FinanceiroPage({
       clienteNome: p.projetos?.clientes?.empresa ?? p.projetos?.clientes?.nome ?? "—",
       clienteId: p.projetos?.clientes?.id ?? null,
       clienteWhatsapp: p.projetos?.clientes?.whatsapp ?? null,
+      clienteEmail: p.projetos?.clientes?.email ?? null,
     }))
     .filter((p) => !status || p.status === status)
     .filter((p) => !termo || p.projetoNome.toLowerCase().includes(termo) || p.clienteNome.toLowerCase().includes(termo));
@@ -80,6 +84,8 @@ export default async function FinanceiroPage({
       formaPreferida={config.forma_pagamento_preferida}
       diasAviso={config.dias_aviso_vencimento}
       temHandle={!!config.infinitepay_handle}
+      config={config}
+      modelosCobranca={modelosCobranca}
       aba={aba}
       despesas={listaDespesas}
       categoriasDespesa={categoriasDespesa ?? []}

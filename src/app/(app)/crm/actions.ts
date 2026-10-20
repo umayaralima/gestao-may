@@ -85,3 +85,27 @@ export async function adiarFollowup(dono: Dono, dias: number) {
   await supabase.from(dono.tipo === "lead" ? "leads" : "clientes").update({ proximo_followup: somarDias(hojeISO(), dias) }).eq("id", dono.id);
   revalidar(dono);
 }
+
+/*
+ * Registra que uma mensagem de modelo foi enviada. Chamado pelo BotaoMensagem
+ * depois de copiar ou abrir o WhatsApp — é o que tira da May o trabalho de
+ * anotar a conversa depois.
+ */
+export async function registrarEnvioMensagem(dono: Dono, canal: "whatsapp" | "email", resumo: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("interacoes").insert({
+    data: hojeISO(),
+    canal,
+    resumo: resumo.slice(0, 500),
+    lead_id: dono.tipo === "lead" ? dono.id : null,
+    cliente_id: dono.tipo === "cliente" ? dono.id : null,
+  });
+  if (error) return { erro: "Não foi possível registrar a interação." };
+
+  if (dono.tipo === "lead") {
+    await supabase.from("leads").update({ etapa: "em_contato", atualizado_em: new Date().toISOString() }).eq("id", dono.id).eq("etapa", "novo");
+  }
+
+  revalidar(dono);
+  return { ok: true };
+}

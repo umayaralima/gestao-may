@@ -13,6 +13,8 @@ import { adiarFollowup, concluirFollowup, excluirInteracao, registrarInteracao, 
 import { PainelRelacionamento } from "../../crm/painel-relacionamento";
 import { converterEmCliente, excluirLead, mudarEtapaLead, salvarMotivoPerda } from "../actions";
 import { EditarLeadBotao } from "./editar-botao";
+import { BotaoMensagem } from "@/components/mensagem/botao-mensagem";
+import { modelosDaSituacao } from "@/lib/modelos-mensagem";
 
 export default async function LeadPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,6 +29,10 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
     supabase.from("modelos_contrato").select("tipo_projeto, prazo_extenso").returns<Array<Pick<ModeloContrato, "tipo_projeto" | "prazo_extenso">>>(),
     getConfiguracoes(),
   ]);
+
+  // Modelos de mensagem: os de proposta só fazem sentido quando existe uma proposta enviada.
+  const propostaAtual = (propostas ?? []).find((p) => p.status !== "rascunho") ?? null;
+  const modelosMensagem = await modelosDaSituacao(propostaAtual ? ["lead", "proposta"] : ["lead"]);
   if (!lead) notFound();
 
   const dono: Dono = { tipo: "lead", id: lead.id };
@@ -69,6 +75,22 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
             validadePadrao={config.proposta_validade}
           />
         )}
+        <BotaoMensagem
+          variante="ghost"
+          modelos={modelosMensagem}
+          contato={{ nome: lead.nome, whatsapp: lead.whatsapp, email: lead.email }}
+          dono={dono}
+          contexto={{
+            config,
+            clienteNome: lead.empresa ?? lead.nome,
+            servico: lead.servico_interesse,
+            valorEstimado: lead.valor_estimado !== null ? Number(lead.valor_estimado) : null,
+            valor: propostaAtual?.valor != null ? Number(propostaAtual.valor) : null,
+            validade: propostaAtual?.validade ?? null,
+            numero: propostaAtual?.numero ?? null,
+            linkProposta: propostaAtual ? `${baseUrl()}/p/${propostaAtual.token}` : null,
+          }}
+        />
         <EditarLeadBotao lead={lead} tipos={(tipos ?? []).map((t) => t.nome)} />
         {!clienteConvertido && lead.etapa !== "perdido" && (
           <form action={converter}>

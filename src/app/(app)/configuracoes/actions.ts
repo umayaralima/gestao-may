@@ -373,3 +373,67 @@ export async function trocarTokenLeads() {
   await supabase.from("configuracoes").update({ leads_token: crypto.randomUUID() }).eq("id", 1);
   revalidatePath("/configuracoes");
 }
+
+/* ----------------------------------------------------------------------------
+ * Modelos de mensagem (aba Mensagens)
+ * -------------------------------------------------------------------------- */
+
+const modeloMensagemSchema = z.object({
+  nome: z.string().trim().min(2, "Dê um nome ao modelo.").max(80),
+  situacao: z.enum(["lead", "proposta", "cobranca", "projeto", "cliente", "outro"]),
+  canal: z.enum(["whatsapp", "email", "ambos"]),
+  assunto: z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? null : v), z.string().trim().max(150).nullable()),
+  corpo: z.string().trim().min(5, "Escreva o texto da mensagem."),
+});
+
+function revalidarMensagens() {
+  revalidatePath("/configuracoes");
+  revalidatePath("/pipeline", "layout");
+  revalidatePath("/clientes", "layout");
+  revalidatePath("/projetos", "layout");
+  revalidatePath("/financeiro");
+}
+
+export async function criarModeloMensagem(_prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = modeloMensagemSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { erro: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { data: ultimo } = await supabase
+    .from("modelos_mensagem")
+    .select("ordem")
+    .eq("situacao", parsed.data.situacao)
+    .order("ordem", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ ordem: number }>();
+
+  const { error } = await supabase.from("modelos_mensagem").insert({ ...parsed.data, ordem: (ultimo?.ordem ?? 0) + 1 });
+  if (error) return { erro: error.code === "23505" ? "Já existe um modelo com esse nome." : "Não foi possível salvar." };
+
+  revalidarMensagens();
+  return { ok: true };
+}
+
+export async function salvarModeloMensagem(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = modeloMensagemSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { erro: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("modelos_mensagem").update(parsed.data).eq("id", id);
+  if (error) return { erro: error.code === "23505" ? "Já existe um modelo com esse nome." : "Não foi possível salvar." };
+
+  revalidarMensagens();
+  return { ok: true };
+}
+
+export async function alternarModeloMensagem(id: string, ativo: boolean) {
+  const supabase = await createClient();
+  await supabase.from("modelos_mensagem").update({ ativo }).eq("id", id);
+  revalidarMensagens();
+}
+
+export async function excluirModeloMensagem(id: string) {
+  const supabase = await createClient();
+  await supabase.from("modelos_mensagem").delete().eq("id", id);
+  revalidarMensagens();
+}

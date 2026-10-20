@@ -16,8 +16,10 @@ import { Contratos } from "./contratos";
 import { EditarProjetoBotao } from "./editar-botao";
 import { EtapasProjeto } from "./etapas-projeto";
 import { PagamentosProjeto } from "./pagamentos-projeto";
+import { BotaoMensagem } from "@/components/mensagem/botao-mensagem";
+import { modelosDaSituacao } from "@/lib/modelos-mensagem";
 
-type ProjetoJoin = Projeto & { clientes: { id: string; nome: string; empresa: string | null; email: string | null } | null };
+type ProjetoJoin = Projeto & { clientes: { id: string; nome: string; empresa: string | null; email: string | null; whatsapp: string | null } | null };
 const ABAS = [
   { id: "geral", label: "Visão geral" },
   { id: "etapas", label: "Etapas" },
@@ -34,7 +36,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const supabase = await createClient();
 
   const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }, { data: tarefas }, { data: categorias }, config, { data: modelosContrato }] = await Promise.all([
-    supabase.from("projetos").select("*, clientes(id, nome, empresa, email)").eq("id", id).single<ProjetoJoin>(),
+    supabase.from("projetos").select("*, clientes(id, nome, empresa, email, whatsapp)").eq("id", id).single<ProjetoJoin>(),
     supabase.from("pagamentos_view").select("*").eq("projeto_id", id).order("vencimento").returns<Pagamento[]>(),
     supabase.from("briefings").select("*").eq("projeto_id", id).maybeSingle<Briefing>(),
     supabase.from("contratos").select("*").eq("projeto_id", id).order("criado_em", { ascending: false }).returns<Contrato[]>(),
@@ -79,6 +81,10 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const excluir = excluirProjeto.bind(null, projeto.id, projeto.cliente_id);
   const clienteNome = projeto.clientes?.empresa ?? projeto.clientes?.nome ?? "—";
 
+  // Mensagens do projeto: a "etapa atual" é a próxima tarefa em aberto.
+  const modelosMensagem = await modelosDaSituacao("projeto");
+  const etapaAtual = etapas.find((t) => !t.concluida_em)?.titulo ?? null;
+
   return (
     <>
       <Header
@@ -97,6 +103,20 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
         }
       >
         <SelectInline name="status" label="Status" value={projeto.status} opcoes={STATUS_PROJETO.map((s) => ({ valor: s, label: STATUS_PROJETO_LABEL[s] }))} action={mudarStatus} />
+        <BotaoMensagem
+          variante="ghost"
+          modelos={modelosMensagem}
+          contato={{ nome: projeto.clientes?.nome ?? clienteNome, whatsapp: projeto.clientes?.whatsapp ?? null, email: projeto.clientes?.email ?? null }}
+          dono={projeto.cliente_id ? { tipo: "cliente", id: projeto.cliente_id } : undefined}
+          contexto={{
+            config,
+            clienteNome,
+            projeto: projeto.nome,
+            etapaAtual,
+            prazoEntrega: projeto.prazo_entrega,
+            linkProjeto: projeto.link_projeto,
+          }}
+        />
         <EditarProjetoBotao projeto={projeto} clientes={clientes ?? []} tipos={(tipos ?? []).map((t) => t.nome)} />
       </Header>
 

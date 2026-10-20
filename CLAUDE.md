@@ -479,6 +479,10 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
 
 ## Despesas (2026-10-20)
 
+- **Migrações 014, 015 e 016 rodadas no Supabase em 2026-10-20**, pelo consolidado `supabase/RODAR-014-016.sql`
+  (versão idempotente das três, com um `select` de conferência no fim). O SQL Editor mostra o aviso "Potential issue
+  detected" por causa dos `drop policy if exists` — é falso positivo: cada um é seguido do `create policy` idêntico,
+  e o script não tem `drop table`, `drop column`, `delete` nem `truncate`. Propostas e Despesas saíram do limbo.
 - Migração 016: `categorias_despesa` (lista editável, com ícone) e `despesas` (descricao, categoria, valor, data,
   `pago_em` null = a pagar, forma_pagamento, fornecedor, `projeto_id` opcional = custo direto do projeto,
   `recorrente` + `periodicidade` + `recorrencia_ate`, `origem_id` = molde que gerou a ocorrência).
@@ -493,4 +497,32 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   `document.documentElement.dataset.sidebar` + `localStorage`, aplicado por um script inline no `<head>` do root layout —
   por isso **o CSS faz todo o trabalho** (`.sidebar`, `.sidebar-texto`, `.sidebar-item`, `.sidebar-cabecalho`,
   `.sidebar-rodape`, `.sidebar-logo-*` em `globals.css`), sem estado no React: zero flash no carregamento e nenhum risco de
-  divergência entre servidor e cliente. No celular a sidebar continua sendo gaveta e ignora o recolhimento (media query).
+  divergência de ESTADO entre servidor e cliente. No celular a sidebar continua sendo gaveta e ignora o recolhimento (media query).
+  **Correção (2026-10-20):** a frase acima era otimista quanto ao DOM. O script escreve `data-sidebar` no `<html>` antes da
+  hidratação, então o atributo existe no cliente e não no HTML do servidor, e o React avisava de mismatch em TODA página
+  (inclusive `/login`). Não havia bug — o aviso diz "won't be patched up" e o valor do cliente é mantido —, mas aviso fixo
+  no console esconde erro de verdade. Resolvido com `suppressHydrationWarning` no `<html>` (`src/app/layout.tsx`), que é
+  exatamente o caso de uso do atributo: elemento mexido por script pré-hidratação. Ele vale só um nível, então mismatch
+  real nos filhos continua aparecendo. Conferido no navegador nos dois estados (expandida e recolhida): console limpo.
+
+## Modelos de mensagem (2026-10-20)
+
+- Escolhido pela May como próximo passo depois das migrações, com o critério "o que devolve mais tempo por semana"
+  (o portal do cliente ficou na fila, sem data). Ordem recomendada do que sobrou: tabela de preços → cobranças
+  recorrentes → editor dos modelos de contrato → busca global.
+- Migração 017: `modelos_mensagem` (nome único, `situacao`, `canal`, `assunto`, `corpo`, `ordem`, `ativo`) + biblioteca
+  inicial de 14 modelos. A `situacao` (lead/proposta/cobranca/projeto/cliente/outro) é o que decide em QUE TELA o modelo
+  aparece e QUAIS variáveis existem — é a chave do desenho todo.
+- `src/lib/mensagem.ts` (roda no cliente também): `SITUACOES`, `CANAIS`, catálogo de variáveis por situação,
+  `renderizarMensagem()`, `variaveisVazias()`, `linkWhatsApp()`, `linkEmail()`. Mesmo motor de `{{variaveis}}` do contrato
+  e da proposta, com uma diferença: **mensagem não é congelada** — renderiza, a May revisa, manda, acabou. O que fica é a
+  interação. Variável sem valor vira "" e a linha dela some, pra não deixar buraco no meio do texto.
+  `src/lib/modelos-mensagem.ts` é o lado servidor (`getModelosMensagem` em `cache()` por request, `modelosDaSituacao`).
+- `src/components/mensagem/botao-mensagem.tsx`: o botão 💬 Mensagem + modal (escolher modelo, texto já preenchido e
+  editável, aviso das variáveis sem valor, Copiar / WhatsApp / E-mail). Com `dono`, chama `registrarEnvioMensagem`
+  (nova action em `crm/actions.ts`) e grava a interação sozinho — é aí que mora a economia de tempo.
+- Onde aparece: **lead** (`/pipeline/[id]`, modelos de lead + proposta quando existe proposta enviada), **parcela**
+  (Financeiro, ao lado dos botões de cobrança, só em parcela não paga), **cliente** (`/clientes/[id]`) e **projeto**
+  (`/projetos/[id]`). Editor em **Configurações → Mensagens**, agrupado por situação, com a ajuda das variáveis embutida.
+- `BotaoMensagem` devolve `null` quando não há modelo ativo na situação — por isso o sistema não quebra enquanto a 017
+  não roda; a tela só não mostra o botão.

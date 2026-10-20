@@ -8,14 +8,16 @@ import { Avatar, BotaoPrimario, Campo, Header, Input, KpiCard, MensagemErro, Pil
 import { cn } from "@/lib/cn";
 import { FORMA_PAGAMENTO_LABEL, FORMAS_PAGAMENTO, TIPO_PAGAMENTO, TIPO_PAGAMENTO_LABEL } from "@/lib/constantes";
 import { diffDias, fmt, fmtData, hojeISO, mesAnoExtenso } from "@/lib/format";
-import type { Pagamento } from "@/lib/types";
+import type { Configuracoes, Pagamento } from "@/lib/types";
+import type { ModeloMensagem } from "@/lib/mensagem";
+import { BotaoMensagem } from "@/components/mensagem/botao-mensagem";
 import { criarPagamento, desfazerPagamento, excluirPagamento, marcarComoPago, type FormState } from "./actions";
 import { BotoesCobranca } from "./cobranca";
 import { Despesas, type DespesaLinha, type ProjetoOpcaoDespesa } from "./despesas";
 import { ResumoFinanceiro, type MesResumo } from "./resumo";
 import type { CategoriaDespesa } from "@/lib/types";
 
-export type PagamentoLinha = Pagamento & { projetoNome: string; clienteNome: string; clienteId: string | null; clienteWhatsapp: string | null };
+export type PagamentoLinha = Pagamento & { projetoNome: string; clienteNome: string; clienteId: string | null; clienteWhatsapp: string | null; clienteEmail: string | null };
 export type ProjetoOpcao = { id: string; label: string; data_inicio: string | null };
 
 type Props = {
@@ -31,6 +33,8 @@ type Props = {
   diasAviso: number;
   /** InfiniteTag configurado: habilita os botões de cobrança */
   temHandle: boolean;
+  config: Configuracoes;
+  modelosCobranca: ModeloMensagem[];
   /** ?aba= na URL: entradas (padrão), saidas ou resumo */
   aba: "entradas" | "saidas" | "resumo";
   despesas: DespesaLinha[];
@@ -54,6 +58,8 @@ export function Financeiro({
   formaPreferida,
   diasAviso,
   temHandle,
+  config,
+  modelosCobranca,
   aba,
   despesas,
   categoriasDespesa,
@@ -158,7 +164,7 @@ export function Financeiro({
             </thead>
             <tbody>
               {linhas.map((p) => (
-                <LinhaPagamento key={p.id} p={p} diasAviso={diasAviso} temHandle={temHandle} onPagar={() => setPagando(p)} />
+                <LinhaPagamento key={p.id} p={p} diasAviso={diasAviso} temHandle={temHandle} config={config} modelosCobranca={modelosCobranca} onPagar={() => setPagando(p)} />
               ))}
             </tbody>
           </table>
@@ -183,7 +189,7 @@ export function Financeiro({
   );
 }
 
-function LinhaPagamento({ p, diasAviso, temHandle, onPagar }: { p: PagamentoLinha; diasAviso: number; temHandle: boolean; onPagar: () => void }) {
+function LinhaPagamento({ p, diasAviso, temHandle, config, modelosCobranca, onPagar }: { p: PagamentoLinha; diasAviso: number; temHandle: boolean; config: Configuracoes; modelosCobranca: ModeloMensagem[]; onPagar: () => void }) {
   const [pending, startTransition] = useTransition();
   const vencido = p.status === "atrasado";
   const pago = p.status === "pago";
@@ -235,23 +241,41 @@ function LinhaPagamento({ p, diasAviso, temHandle, onPagar }: { p: PagamentoLinh
         )}
       </td>
       <td className="px-5 py-3.5">
-        {!pago && (
-          <BotoesCobranca
-            pagamentoId={p.id}
-            projetoId={p.projeto_id}
-            link={p.link_pagamento}
-            temHandle={temHandle}
-            whatsapp={p.clienteWhatsapp}
-            clienteNome={p.clienteNome}
-            descricao={p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "pagamento"}
-            valorFormatado={fmt(p.valor)}
-          />
-        )}
-        {pago && p.recibo_url && (
-          <a href={p.recibo_url} target="_blank" rel="noreferrer" className="text-[11px] text-brand-400 hover:text-brand-300 whitespace-nowrap">
-            Ver recibo ↗
-          </a>
-        )}
+        <div className="flex items-center gap-1.5">
+          {!pago && (
+            <>
+              <BotoesCobranca
+                pagamentoId={p.id}
+                projetoId={p.projeto_id}
+                link={p.link_pagamento}
+                temHandle={temHandle}
+                whatsapp={p.clienteWhatsapp}
+                clienteNome={p.clienteNome}
+                descricao={p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "pagamento"}
+                valorFormatado={fmt(p.valor)}
+              />
+              <BotaoMensagem
+                modelos={modelosCobranca}
+                contato={{ nome: p.clienteNome, whatsapp: p.clienteWhatsapp, email: p.clienteEmail }}
+                dono={p.clienteId ? { tipo: "cliente", id: p.clienteId } : undefined}
+                contexto={{
+                  config,
+                  clienteNome: p.clienteNome,
+                  valor: Number(p.valor),
+                  vencimento: p.vencimento,
+                  descricao: p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "pagamento",
+                  linkPagamento: p.link_pagamento,
+                  projeto: p.projetoNome,
+                }}
+              />
+            </>
+          )}
+          {pago && p.recibo_url && (
+            <a href={p.recibo_url} target="_blank" rel="noreferrer" className="text-[11px] text-brand-400 hover:text-brand-300 whitespace-nowrap">
+              Ver recibo ↗
+            </a>
+          )}
+        </div>
       </td>
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-2">

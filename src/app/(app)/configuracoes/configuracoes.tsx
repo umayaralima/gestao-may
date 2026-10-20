@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import { FORMA_PAGAMENTO_LABEL, FORMAS_PAGAMENTO, GRUPO_CATEGORIA_LABEL, GRUPOS_CATEGORIA } from "@/lib/constantes";
 import type { CategoriaTarefa, Configuracoes as Config, EtapaModelo, ModeloContrato, TipoProjeto } from "@/lib/types";
+import type { ModeloMensagem } from "@/lib/mensagem";
 import {
   alterarSenha,
   atualizarCategoriaTarefa,
@@ -16,6 +17,7 @@ import {
 } from "./actions";
 import { ContratosConfig } from "./contratos-config";
 import { Integracoes, type EntradaLead } from "./integracoes";
+import { MensagensConfig } from "./mensagens-config";
 import { EtapasModeloEditor } from "./etapas-modelo";
 import { Notificacoes, type UltimoEnvio } from "./notificacoes";
 import { NovaCategoriaForm } from "./nova-categoria-form";
@@ -34,6 +36,7 @@ const ABAS = [
   { id: "pipeline", label: "Pipeline", Icone: FunnelIcon },
   { id: "financeiro", label: "Financeiro", Icone: MoneyIcon },
   { id: "contratos", label: "Contratos", Icone: DocIcon },
+  { id: "mensagens", label: "Mensagens", Icone: ChatIcon },
   { id: "integracoes", label: "Integrações", Icone: PlugIcon },
   { id: "listas", label: "Listas", Icone: TagIcon },
   { id: "seguranca", label: "Segurança", Icone: LockIcon },
@@ -52,11 +55,12 @@ type Props = {
   linkAgenda: string | null;
   ultimoEnvio: UltimoEnvio;
   modelosContrato: ModeloContrato[];
+  modelosMensagem: ModeloMensagem[];
   urlLeads: string | null;
   entradasLead: EntradaLead[];
 };
 
-export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCategorias, etapasModelo, etapas, emailLogin, linkAgenda, ultimoEnvio, modelosContrato, urlLeads, entradasLead }: Props) {
+export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCategorias, etapasModelo, etapas, emailLogin, linkAgenda, ultimoEnvio, modelosContrato, modelosMensagem, urlLeads, entradasLead }: Props) {
   const [aba, setAba] = useState<Aba>("perfil");
   const [toast, setToast] = useState<string | null>(null);
 
@@ -228,6 +232,8 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
         )}
 
         {aba === "contratos" && <ContratosConfig config={config} modelos={modelosContrato} tipos={tipos} onSalvo={setToast} />}
+
+        {aba === "mensagens" && <MensagensConfig modelos={modelosMensagem} onSalvo={setToast} />}
 
         {aba === "integracoes" && <Integracoes urlLeads={urlLeads} ultimas={entradasLead} />}
 
@@ -504,6 +510,15 @@ function DocIcon() {
     </svg>
   );
 }
+function ChatIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+      <path d="M13 9.5a1.5 1.5 0 0 1-1.5 1.5H5l-3 2.5V3a1.5 1.5 0 0 1 1.5-1.5h8A1.5 1.5 0 0 1 13 3v6.5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M5 5h5M5 7.5h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function TagIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none">

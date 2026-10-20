@@ -14,6 +14,9 @@ import { tomStatus } from "../../projetos/status-tom";
 import { excluirCliente, mudarStatusCliente } from "../actions";
 import { EditarClienteBotao } from "./editar-botao";
 import { TarefasCliente } from "./tarefas-cliente";
+import { BotaoMensagem } from "@/components/mensagem/botao-mensagem";
+import { modelosDaSituacao } from "@/lib/modelos-mensagem";
+import { getConfiguracoes } from "@/lib/configuracoes";
 
 const ABAS = [
   { id: "geral", label: "Visão geral" },
@@ -57,6 +60,10 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
   const pendente = pags.filter((p) => p.status === "pendente").reduce((s, p) => s + Number(p.valor), 0);
   const atrasado = pags.filter((p) => p.status === "atrasado").reduce((s, p) => s + Number(p.valor), 0);
   const fase = faseCliente(lista);
+
+  // Mensagens do cliente: o projeto mais recente dá nome e link pras variáveis.
+  const [modelosMensagem, config] = await Promise.all([modelosDaSituacao("cliente"), getConfiguracoes()]);
+  const projetoRecente = ativos[0] ?? null;
   const hoje = hojeISO();
 
   // Tarefas do cliente = as ligadas direto a ele + as dos projetos dele
@@ -115,6 +122,18 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
             { valor: "inativo", label: "Inativo" },
           ]}
           action={mudarStatus}
+        />
+        <BotaoMensagem
+          variante="ghost"
+          modelos={modelosMensagem}
+          contato={{ nome: cliente.nome, whatsapp: cliente.whatsapp, email: cliente.email }}
+          dono={{ tipo: "cliente", id: cliente.id }}
+          contexto={{
+            config,
+            clienteNome: cliente.empresa ?? cliente.nome,
+            projeto: projetoRecente?.nome ?? null,
+            linkProjeto: projetoRecente?.link_projeto ?? null,
+          }}
         />
         <EditarClienteBotao cliente={cliente} />
         <BotaoPrimario href={`/projetos?novo=1&cliente=${cliente.id}`}>Novo projeto</BotaoPrimario>

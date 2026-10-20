@@ -463,6 +463,12 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   leads desempacota esse formato (e `fields[]`, `data[]`, objeto aninhado). Migração 015: `leads.respostas` (jsonb) guarda
   qualquer campo que não vira coluna, com rótulo legível; aparece no bloco "Respostas do formulário" da página do lead.
   Faixa de investimento só vira `valor_estimado` quando é número limpo (texto tipo "3 a 5 mil" fica nas respostas).
+- **Importante (2026-10-20):** o Elementor envia o RÓTULO como chave ("Qual o segmento do seu negócio?"), não o ID do campo —
+  renomear ID no Elementor não muda nada. Por isso `pegar()` normaliza a chave (sem acento, minúscula) e procura em duas
+  passadas: nome exato e depois palavra contida no rótulo; `META` descarta Date/Time/form_id/Page URL/User Agent etc.
+  "Nome do negócio + @ do Instagram" vem num campo só: o @ vira `instagram` e o resto vira `empresa`.
+  O webhook responde SEMPRE 200 (status de erro faz o Elementor travar o envio do visitante) e o e-mail sai em `after()`.
+  A lista em Configurações → Integrações mostra os campos recebidos de cada chamada — é por ali que se depura formulário novo.
 - **Desempenho (2026-10-19):** o diagnóstico mostrou função em `iad1` e 371ms por consulta — banco (Supabase) longe da função.
   `vercel.json` passou a fixar `"regions": ["gru1"]` (São Paulo). Se um dia o projeto Supabase mudar de região, mudar aqui também.
   Antes disso já foram cortadas duas idas de auth por página (proxy e layout usam `getClaims`) e o `getConfiguracoes` ganhou

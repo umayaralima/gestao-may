@@ -68,12 +68,39 @@ function valorNumerico(bruto: string | null): number | null {
   return Number.isFinite(numero) && numero > 0 ? numero : null;
 }
 
-/** Aceita os nomes de campo mais comuns de formulário/chatbot. */
+/** "Qual o segmento do seu negócio?" → "qual o segmento do seu negocio" */
+function normalizarChave(chave: string) {
+  return chave
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/** Metadados que o Elementor e outros plugins mandam junto e não interessam. */
+const META =
+  /^(date|time|form id|form name|post id|page url|page title|queried id|referrer|user agent|remote ip|powered by|token|submission id|flow ns|subscriber id)$/;
+
+/**
+ * Procura um campo por nome exato ou por palavra contida no rótulo.
+ * Isso é o que faz funcionar com qualquer formulário, sem a May ter que renomear campo.
+ */
 function pegar(dados: Record<string, unknown>, chaves: string[]) {
-  for (const k of chaves) {
-    const v = dados[k] ?? dados[k.toLowerCase()] ?? dados[k.toUpperCase()];
-    if (typeof v === "string" && v.trim()) return v.trim();
-    if (typeof v === "number") return String(v);
+  const entradas = Object.entries(dados).map(([k, v]) => [normalizarChave(k), v] as const);
+  const texto = (v: unknown) => (typeof v === "string" ? v.trim() : typeof v === "number" ? String(v) : "");
+
+  // 1ª passada: nome exato ("nome", "whatsapp", "email"…)
+  for (const alvo of chaves) {
+    const achou = entradas.find(([k]) => k === normalizarChave(alvo));
+    if (achou && texto(achou[1])) return texto(achou[1]);
+  }
+  // 2ª passada: a palavra aparece no rótulo ("qual o prazo pra entrega do projeto?" → "prazo")
+  for (const alvo of chaves) {
+    const palavra = normalizarChave(alvo);
+    if (palavra.length < 4) continue;
+    const achou = entradas.find(([k]) => !META.test(k) && k.includes(palavra));
+    if (achou && texto(achou[1])) return texto(achou[1]);
   }
   return null;
 }
@@ -106,19 +133,30 @@ const ROTULOS: Record<string, string> = {
   melhor_horario: "Melhor horário pra conversar",
 };
 
-/** Transforma "qual_o_segmento" em "Qual o segmento". */
+/** Mantém a pergunta como o formulário escreveu; só arruma IDs com underscore. */
 const rotularChave = (chave: string) =>
-  ROTULOS[chave.toLowerCase()] ??
-  chave.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim().replace(/^./, (c) => c.toUpperCase());
+  ROTULOS[normalizarChave(chave).replace(/ /g, "_")] ??
+  (/[_-]/.test(chave) && !/\s/.test(chave)
+    ? chave.replace(/[_-]+/g, " ").trim().replace(/^./, (c) => c.toUpperCase())
+    : chave.trim());
 
-/** Tudo que o formulário mandou e não virou coluna do lead. */
-function respostasExtras(dados: Record<string, unknown>): Record<string, string> {
+/**
+ * Tudo que o formulário mandou e não virou coluna do lead, com a pergunta original como rótulo
+ * ("Qual o prazo pra entrega do projeto?"). Assim qualquer campo novo aparece sem mexer no código.
+ */
+function respostasExtras(dados: Record<string, unknown>, jaUsados: Array<string | null>): Record<string, string> {
+  const usados = new Set(jaUsados.filter(Boolean).map((v) => String(v).trim()));
   const extras: Record<string, string> = {};
+
   for (const [chave, valor] of Object.entries(dados)) {
-    if (CAMPOS_CONHECIDOS.has(chave.toLowerCase())) continue;
-    if (/^(form_id|form_name|post_id|page_url|queried_id|referrer|user_agent|remote_ip|page_title|flow_ns|subscriber_id)$/i.test(chave)) continue;
+    const normal = normalizarChave(chave);
+    if (META.test(normal)) continue;
+    if (CAMPOS_CONHECIDOS.has(normal.replace(/ /g, "_"))) continue;
+
     const texto = typeof valor === "string" ? valor.trim() : typeof valor === "number" ? String(valor) : "";
     if (!texto || texto.length > 500) continue;
+    if (usados.has(texto)) continue; // já virou nome, e-mail, serviço…
+
     extras[rotularChave(chave)] = texto;
   }
   return extras;
@@ -162,19 +200,21 @@ export async function POST(request: NextRequest) {
   // honeypot: formulário com esse campo preenchido é robô
   if (pegar(dados, ["_honey", "website_url", "hp"])) return responder({ ok: true, ignorado: "spam" });
 
-  const nome = pegar(dados, ["nome", "name", "nome_completo", "full_name", "first_name"]);
+  const nome = pegar(dados, ["nome completo", "nome", "name", "full_name", "first_name"]);
   const email = pegar(dados, ["email", "e-mail", "mail"]);
   const whatsapp = pegar(dados, ["whatsapp", "telefone", "phone", "celular", "phone_number", "tel"]);
-  const instagram = pegar(dados, ["instagram", "ig", "perfil"]);
+  const instagram = pegar(dados, ["instagram", "ig", "perfil", "ig_username"]);
   const mensagem = pegar(dados, ["mensagem", "message", "msg", "observacoes", "comentario", "descricao"]);
-  const servico = pegar(dados, ["servico", "servico_interesse", "assunto", "interesse", "subject", "tipo_projeto"]);
-  const empresa = pegar(dados, ["empresa", "company", "negocio"]);
-  const origemBruta = (pegar(dados, ["origem", "source", "utm_source"]) ?? "site").toLowerCase();
+  const servico = pegar(dados, ["servico", "qual servico", "servico_interesse", "assunto", "interesse", "subject", "tipo_projeto"]);
+  // "Nome do negócio + @ do Instagram" tem "instagram" no rótulo: procura por negócio/empresa primeiro
+  const empresa = pegar(dados, ["nome do negocio", "empresa", "company", "negocio"]);
+  const origemBruta = (pegar(dados, ["onde me encontrou", "origem", "source", "utm_source"]) ?? "site").toLowerCase();
   const origem = ORIGENS_VALIDAS.includes(origemBruta) ? origemBruta : origemBruta.includes("insta") ? "instagram" : "outro";
   const entrada = pegar(dados, ["entrada", "canal"]) ?? (origem === "instagram" ? "manychat" : "formulario");
-  const valor = pegar(dados, ["valor", "valor_estimado", "orcamento", "budget", "investimento", "faixa_investimento"]);
-  const segmento = pegar(dados, ["segmento", "nicho"]);
-  const respostas = respostasExtras(dados);
+  const valor = pegar(dados, ["valor", "valor_estimado", "orcamento", "budget", "investimento"]);
+  const segmento = pegar(dados, ["segmento", "nicho", "ramo"]);
+  const mensagemFinal = mensagem ?? pegar(dados, ["mensagem", "conte", "detalhes", "projeto"]);
+  const respostas = respostasExtras(dados, [nome, email, whatsapp, instagram, empresa, servico, mensagemFinal, origemBruta]);
 
   const registrar = (lead_id: string | null, erro?: string) =>
     supabase.from("entradas_lead").insert({
@@ -190,8 +230,13 @@ export async function POST(request: NextRequest) {
     return responder({ ok: false, motivo: "Informe ao menos o nome e um contato (e-mail, WhatsApp ou Instagram).", campos_recebidos: Object.keys(dados) });
   }
 
+  // "Nome do negócio + @ do Instagram" costuma vir tudo junto: separa o arroba
+  const arroba = (empresa ?? "").match(/@([a-z0-9._]{2,})/i)?.[1] ?? null;
+  const instagramFinal = instagram ?? arroba;
+  const empresaFinal = arroba && empresa ? empresa.replace(/[@＠][a-z0-9._]{2,}/i, "").replace(/[\s\-–+|]+$/, "").trim() || null : empresa;
+
   const hoje = hojeISO();
-  const nota = [segmento, mensagem].filter(Boolean).join(" · ").slice(0, 160) || "Responder contato novo";
+  const nota = [segmento, mensagemFinal].filter(Boolean).join(" · ").slice(0, 160) || "Responder contato novo";
 
   // Já existe lead aberto desse contato? Então registra interação em vez de duplicar o funil.
   const filtros = [email ? `email.eq.${email}` : null, whatsapp ? `whatsapp.eq.${whatsapp}` : null].filter(Boolean).join(",");
@@ -216,13 +261,13 @@ export async function POST(request: NextRequest) {
     .from("leads")
     .insert({
       nome: parsed.data.nome,
-      empresa,
+      empresa: empresaFinal,
       email,
       whatsapp,
-      instagram,
+      instagram: instagramFinal,
       origem,
       entrada,
-      mensagem,
+      mensagem: mensagemFinal,
       servico_interesse: servico,
       valor_estimado: valorNumerico(valor),
       respostas,

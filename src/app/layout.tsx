@@ -28,7 +28,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${dmSerif.variable} ${jakarta.variable} ${jetbrains.variable} h-full`}>
+    // suppressHydrationWarning: o script abaixo escreve data-sidebar no <html> ANTES da
+    // hidratação, então o atributo existe no cliente e não no HTML do servidor. React avisa
+    // ("won't be patched up") e mantém o valor do cliente — o comportamento sempre esteve certo,
+    // o aviso é que era ruído, e ruído fixo no console esconde erro de verdade. O atributo vale
+    // só pro <html>: não desce pros filhos, então nenhum mismatch real fica escondido.
+    <html lang="pt-BR" suppressHydrationWarning className={`${dmSerif.variable} ${jakarta.variable} ${jetbrains.variable} h-full`}>
       <head>
         {/* Aplica o estado da sidebar antes do primeiro paint, pra ela não "pular" ao carregar. */}
         <script

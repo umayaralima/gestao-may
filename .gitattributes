@@ -1,0 +1,10 @@
+# Mantém LF no repositório, independente do sistema operacional.
+# Sem isso, uma ferramenta que salve em modo texto no Windows converte o
+# arquivo inteiro pra CRLF e o diff vira ruído.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
+*.pdf binary

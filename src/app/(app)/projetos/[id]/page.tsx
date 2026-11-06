@@ -1,17 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SelectInline } from "@/components/ui/select-inline";
-import { Avatar, BotaoGhost, Card, CardTitulo, Header, KpiCard, Pill } from "@/components/ui/primitivos";
+import { Avatar, Card, CardTitulo, Header, KpiCard, Pill } from "@/components/ui/primitivos";
 import { cn } from "@/lib/cn";
 import { STATUS_PROJETO, STATUS_PROJETO_LABEL } from "@/lib/constantes";
 import { diffDias, fmt, fmtData, hojeISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getConfiguracoes } from "@/lib/configuracoes";
+import { baseUrl } from "@/lib/enviar-resumo";
+import type { PerguntaBriefing } from "@/lib/briefing";
 import { blocoPagamento } from "@/lib/contrato";
 import type { Briefing, CategoriaTarefa, Contrato, ModeloContrato, Pagamento, Projeto, Tarefa } from "@/lib/types";
-import { aprovarProjeto, criarContrato, excluirProjeto, mudarStatusProjeto, mudarStatusSugerido, salvarBriefing } from "../actions";
+import { aprovarProjeto, criarContrato, excluirProjeto, mudarStatusProjeto, mudarStatusSugerido } from "../actions";
 import { tomStatus } from "../status-tom";
-import { BriefingForm } from "./briefing-form";
+import { BriefingCliente } from "./briefing-cliente";
 import { Contratos } from "./contratos";
 import { EditarProjetoBotao } from "./editar-botao";
 import { EtapasProjeto } from "./etapas-projeto";
@@ -35,7 +37,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const aba: Aba = ABAS.some((a) => a.id === abaParam) ? (abaParam as Aba) : "geral";
   const supabase = await createClient();
 
-  const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }, { data: tarefas }, { data: categorias }, config, { data: modelosContrato }] = await Promise.all([
+  const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }, { data: tarefas }, { data: categorias }, config, { data: modelosContrato }, { data: perguntasBriefingRaw }] = await Promise.all([
     supabase.from("projetos").select("*, clientes(id, nome, empresa, email, whatsapp)").eq("id", id).single<ProjetoJoin>(),
     supabase.from("pagamentos_view").select("*").eq("projeto_id", id).order("vencimento").returns<Pagamento[]>(),
     supabase.from("briefings").select("*").eq("projeto_id", id).maybeSingle<Briefing>(),
@@ -46,6 +48,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
     supabase.from("categorias_tarefa").select("*").order("ordem").returns<CategoriaTarefa[]>(),
     getConfiguracoes(),
     supabase.from("modelos_contrato").select("*").returns<ModeloContrato[]>(),
+    supabase.from("briefing_perguntas").select("*").eq("ativa", true).order("ordem").returns<PerguntaBriefing[]>(),
   ]);
   if (!projeto) notFound();
 
@@ -75,11 +78,11 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const sugerirDesenvolvimento = projeto.status === "aprovado" && etapasFeitas > 0 && etapasFeitas < etapas.length;
 
   const mudarStatus = mudarStatusProjeto.bind(null, projeto.id);
-  const salvarBriefingDoProjeto = salvarBriefing.bind(null, projeto.id);
   const criarContratoDoProjeto = criarContrato.bind(null, projeto.id);
   const aprovar = aprovarProjeto.bind(null, projeto.id);
   const excluir = excluirProjeto.bind(null, projeto.id, projeto.cliente_id);
   const clienteNome = projeto.clientes?.empresa ?? projeto.clientes?.nome ?? "—";
+  const perguntasBriefing = perguntasBriefingRaw ?? [];
 
   // Mensagens do projeto: a "etapa atual" é a próxima tarefa em aberto.
   const modelosMensagem = await modelosDaSituacao("projeto");
@@ -289,7 +292,13 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
 
         {aba === "briefing" && (
           <div className="entrar">
-            <BriefingForm action={salvarBriefingDoProjeto} briefing={briefing ?? null} />
+            <BriefingCliente
+              projetoId={projeto.id}
+              tipoProjeto={projeto.tipo}
+              perguntas={perguntasBriefing}
+              briefing={briefing ?? null}
+              linkBase={baseUrl()}
+            />
           </div>
         )}
         {aba === "contrato" && (

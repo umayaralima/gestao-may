@@ -1,3 +1,4 @@
+import type { Respostas, StatusBriefing } from "@/lib/briefing";
 import type { EtapaLead, GrupoCategoria, FormaPagamento, Prioridade, StatusProjeto, TipoPagamento } from "./constantes";
 
 export type Cliente = {
@@ -77,6 +78,15 @@ export type Briefing = {
   orcamento_aproximado: number | null;
   respostas_extra: Record<string, unknown> | null;
   criado_em: string;
+  // Briefing do cliente (migração 018). Os campos acima são do briefing antigo,
+  // que a May preenchia; ficam pra não perder o que já estava gravado.
+  token: string;
+  status: StatusBriefing;
+  respostas: Respostas;
+  enviado_em: string | null;
+  vista_em: string | null;
+  respondido_em: string | null;
+  atualizado_em: string;
 };
 
 export type Contrato = {
@@ -169,6 +179,7 @@ export type Configuracoes = {
   infinitepay_handle: string | null;
   leads_token: string;
   proposta_corpo: string | null;
+  briefing_intro: string | null;
   proposta_validade: number;
   resumo_diario: boolean;
   resumo_email: string | null;

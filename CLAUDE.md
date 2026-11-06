@@ -526,3 +526,38 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   (`/projetos/[id]`). Editor em **Configurações → Mensagens**, agrupado por situação, com a ajuda das variáveis embutida.
 - `BotaoMensagem` devolve `null` quando não há modelo ativo na situação — por isso o sistema não quebra enquanto a 017
   não roda; a tela só não mostra o botão.
+
+## Briefing respondido pelo cliente (2026-11-06)
+
+- Pedido da May: o briefing de site que ela escreveu (49 perguntas, 7 seções + blocos A/B/C) entra no sistema pra ser
+  **enviado ao cliente**. Substitui o briefing antigo — os 9 campos fixos que ela mesma preenchia saíram da tela
+  (`briefing-form.tsx` apagado, `salvarBriefing` e `briefingSchema` removidos de `projetos/actions.ts`); as COLUNAS
+  antigas continuam em `briefings` pra não perder o que já estava gravado.
+- Migração 018: `briefing_perguntas` (chave única, secao, bloco, texto, ajuda, tipo, obrigatoria, ordem, ativa) com as
+  49 perguntas; `briefings` ganhou `token`, `status` (rascunho/enviado/respondido), `respostas` jsonb, `enviado_em`,
+  `vista_em`, `respondido_em`, `atualizado_em`; `configuracoes.briefing_intro` guarda o texto de abertura.
+- **`chave` é o identificador estável das respostas**, não o id. Reordenar, renomear ou reescrever uma pergunta não
+  perde o que o cliente respondeu. Mesma ideia das `{{variaveis}}` do contrato.
+- **"Não sei responder" é uma resposta, não um branco.** A May avisou que muito cliente não sabe quem é a própria
+  persona. Então `respostas` é `{ "<chave>": { "t": "texto", "ns": true } }`: em branco = "não chegou lá",
+  `ns` = "isso a gente constrói junto". Na aba do projeto o "não sei" aparece destacado em âmbar — é o mapa de onde
+  ela precisa entrar. No progresso, "não sei" conta como respondida: penalizar a barra desencorajaria o botão,
+  que é justamente o que dá o sinal útil.
+- **Só 3 obrigatórias** (nome do negócio, WhatsApp do botão, e-mail do formulário) e elas não aceitam "não sei".
+  O resto é opcional, por decisão da May: ela orienta o cliente a responder o máximo que conseguir.
+- Blocos em `src/lib/briefing.ts`: A (landing/vendas) e B (e-commerce) saem de `projetos.tipo`, por palavra contida e
+  sem acento, pra sobreviver à May renomear o tipo de serviço em Configurações. C (identidade visual) aparece quando
+  o cliente responde "não" em `tem_identidade` — condicional em resposta, não em tipo.
+- Página pública **/b/[token]** (fora de `(app)`; `src/proxy.ts` agora ignora `api`, `p/` e `b/`). **Salva campo a
+  campo no blur**, sem botão de salvar: são 49 perguntas, ninguém termina de uma vez, e perder o digitado é o que faz
+  o briefing nunca voltar. Grava por chave dentro do jsonb, então duas abas não se sobrescrevem inteiras.
+  Barra de progresso fixa no topo; rascunho não abre por link; `vista_em` marca a primeira abertura.
+- Aba Briefing do projeto (`briefing-cliente.tsx`): gera/copia/revoga o link, mostra situação e progresso, lista as
+  respostas por seção e deixa a May completar na mão o que ouvir por WhatsApp (`ajustarRespostaBriefing`).
+- No envio, e-mail pro Resend em `after()` com o briefing em texto; as obrigatórias são conferidas NO SERVIDOR
+  (o botão desabilitado é conveniência, não garantia).
+- A pergunta 24 pede link de pasta do Drive em vez de upload — por isso o briefing funciona inteiro sem o Supabase
+  Storage, que segue sem uso no sistema. A pergunta 32 ("quem aprova as etapas") é o dado que falta pro registro
+  de aprovações, quando ele entrar.
+- Pendente: editor das perguntas em Configurações (hoje só por SQL) — a May vai querer reescrever depois dos
+  primeiros clientes reais.

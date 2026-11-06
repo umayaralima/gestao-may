@@ -14,7 +14,6 @@ import { consultarDocumentoAutentique, criarDocumentoAutentique, situacao } from
 export type FormState = { erro?: string; ok?: boolean };
 
 const vazioParaNull = (v: unknown) => (typeof v === "string" && v.trim() === "" ? null : v);
-const checkbox = z.preprocess((v) => v === "on" || v === "true", z.boolean());
 
 const projetoSchema = z
   .object({
@@ -82,30 +81,9 @@ export async function excluirProjeto(id: string, clienteId: string) {
 }
 
 // ---------- Briefing ----------
-const briefingSchema = z.object({
-  objetivo: z.preprocess(vazioParaNull, z.string().trim().nullable()),
-  publico_alvo: z.preprocess(vazioParaNull, z.string().trim().nullable()),
-  referencias: z.preprocess(vazioParaNull, z.string().trim().nullable()),
-  tem_identidade_visual: checkbox,
-  cores_preferidas: z.preprocess(vazioParaNull, z.string().trim().nullable()),
-  conteudo_disponivel: checkbox,
-  funcionalidades: z.preprocess(vazioParaNull, z.string().trim().nullable()),
-  concorrentes: z.preprocess(vazioParaNull, z.string().trim().nullable()),
-  orcamento_aproximado: z.preprocess(vazioParaNull, z.coerce.number().nonnegative("Orçamento inválido.").nullable()),
-});
-
-/** Um briefing por projeto: upsert em projeto_id. */
-export async function salvarBriefing(projetoId: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const parsed = briefingSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { erro: parsed.error.issues[0].message };
-
-  const supabase = await createClient();
-  const { error } = await supabase.from("briefings").upsert({ projeto_id: projetoId, ...parsed.data }, { onConflict: "projeto_id" });
-  if (error) return { erro: "Não foi possível salvar o briefing." };
-
-  revalidar(projetoId);
-  return { ok: true };
-}
+// O briefing de 9 campos preenchido pela May saiu na migração 018: quem responde
+// agora é o cliente, pelo link público (ver `liberarBriefing` no fim do arquivo).
+// As colunas antigas continuam na tabela pra não perder o que já estava gravado.
 
 // ---------- Contratos ----------
 export async function criarContrato(projetoId: string, _prev: FormState, formData: FormData): Promise<FormState> {
@@ -384,4 +362,85 @@ export async function atualizarStatusAssinatura(contratoId: string, projetoId: s
   } catch (e) {
     return { erro: e instanceof Error ? e.message : "Não foi possível consultar o Autentique." };
   }
+}
+
+/* ----------------------------------------------------------------------------
+ * Briefing do cliente (migração 018). O antigo `salvarBriefing` continua acima
+ * pros campos que a May preenchia; estes cuidam do link e das respostas dele.
+ * -------------------------------------------------------------------------- */
+
+/** Cria a linha se não existir e libera o link. Rascunho não abre pro cliente. */
+export async function liberarBriefing(projetoId: string): Promise<FormState> {
+  const supabase = await createClient();
+  const agora = new Date().toISOString();
+
+  const { data: existente } = await supabase
+    .from("briefings")
+    .select("id, status")
+    .eq("projeto_id", projetoId)
+    .maybeSingle<{ id: string; status: string }>();
+
+  const { error } = existente
+    ? await supabase
+        .from("briefings")
+        .update({ status: existente.status === "respondido" ? "respondido" : "enviado", enviado_em: agora, atualizado_em: agora })
+        .eq("id", existente.id)
+    : await supabase.from("briefings").insert({ projeto_id: projetoId, status: "enviado", enviado_em: agora });
+
+  if (error) return { erro: "Não foi possível liberar o briefing." };
+  revalidar(projetoId);
+  return { ok: true };
+}
+
+/** Novo token: derruba o link antigo, caso tenha ido pra pessoa errada. */
+export async function trocarTokenBriefing(projetoId: string): Promise<FormState> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("briefings")
+    .update({ token: crypto.randomUUID(), atualizado_em: new Date().toISOString() })
+    .eq("projeto_id", projetoId);
+  if (error) return { erro: "Não foi possível gerar um link novo." };
+  revalidar(projetoId);
+  return { ok: true };
+}
+
+/** Reabre pro cliente corrigir algo depois de enviado. */
+export async function reabrirBriefing(projetoId: string): Promise<FormState> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("briefings")
+    .update({ status: "enviado", atualizado_em: new Date().toISOString() })
+    .eq("projeto_id", projetoId);
+  if (error) return { erro: "Não foi possível reabrir." };
+  revalidar(projetoId);
+  return { ok: true };
+}
+
+/*
+ * A May corrigindo ou completando uma resposta do cliente — ela conversa por
+ * WhatsApp e anota aqui, em vez de pedir pro cliente voltar no link.
+ */
+export async function ajustarRespostaBriefing(projetoId: string, chave: string, texto: string): Promise<FormState> {
+  if (!/^[a-z0-9_]{1,60}$/.test(chave)) return { erro: "Pergunta inválida." };
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("briefings")
+    .select("id, respostas")
+    .eq("projeto_id", projetoId)
+    .maybeSingle<{ id: string; respostas: Record<string, { t?: string; ns?: boolean }> }>();
+  if (!data) return { erro: "Briefing não encontrado." };
+
+  const respostas = { ...(data.respostas ?? {}) };
+  if (texto.trim()) respostas[chave] = { t: texto.trim().slice(0, 5000) };
+  else delete respostas[chave];
+
+  const { error } = await supabase
+    .from("briefings")
+    .update({ respostas, atualizado_em: new Date().toISOString() })
+    .eq("id", data.id);
+  if (error) return { erro: "Não foi possível salvar." };
+
+  revalidar(projetoId);
+  return { ok: true };
 }

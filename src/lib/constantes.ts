@@ -79,18 +79,18 @@ export const ETAPA_LEAD_LABEL: Record<EtapaLead, string> = {
 
 /** Cor de cada etapa no Pipeline (protótipo). */
 export const ETAPA_LEAD_COR: Record<EtapaLead, string> = {
-  novo: "#38BDF8",
-  em_contato: "#C17AD2",
-  proposta_enviada: "#A151B5",
-  negociando: "#FBBF24",
-  ganho: "#34D399",
-  perdido: "#968F88",
+  novo: "var(--info-cor)",
+  em_contato: "var(--serie-1)",
+  proposta_enviada: "var(--serie-2)",
+  negociando: "var(--alerta-cor)",
+  ganho: "var(--sucesso-cor)",
+  perdido: "var(--texto-mudo)",
 };
 
 export const PRIORIDADES = ["alta", "media", "baixa"] as const;
 export type Prioridade = (typeof PRIORIDADES)[number];
 export const PRIORIDADE_LABEL: Record<Prioridade, string> = { alta: "Alta", media: "Média", baixa: "Baixa" };
-export const PRIORIDADE_COR: Record<Prioridade, string> = { alta: "#F87171", media: "#FBBF24", baixa: "#968F88" };
+export const PRIORIDADE_COR: Record<Prioridade, string> = { alta: "var(--falha-cor)", media: "var(--alerta-cor)", baixa: "var(--texto-mudo)" };
 
 /* Categorias de tarefa vivem na tabela categorias_tarefa (Configurações → Listas). Grupos: */
 export const GRUPOS_CATEGORIA = ["comercial", "producao", "outro"] as const;

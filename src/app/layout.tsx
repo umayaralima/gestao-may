@@ -35,10 +35,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     // só pro <html>: não desce pros filhos, então nenhum mismatch real fica escondido.
     <html lang="pt-BR" suppressHydrationWarning className={`${dmSerif.variable} ${jakarta.variable} ${jetbrains.variable} h-full`}>
       <head>
-        {/* Aplica o estado da sidebar antes do primeiro paint, pra ela não "pular" ao carregar. */}
+        {/*
+          Aplica sidebar e tema antes do primeiro paint, pra nada "pular" ao carregar.
+          Sem escolha salva, o padrão vem da rota: as páginas que o CLIENTE abre
+          (/p/ proposta, /b/ briefing, /c/ portal) nascem claras, porque são leitura
+          longa e ele costuma imprimir; o sistema nasce escuro, como o wireframe.
+        */}
         <script
           dangerouslySetInnerHTML={{
-            __html: 'try{document.documentElement.dataset.sidebar=localStorage.getItem("sidebar")==="recolhida"?"recolhida":"expandida"}catch(e){}',
+            __html:
+              'try{var d=document.documentElement,t=localStorage.getItem("tema");' +
+              // sem regex de propósito: a barra invertida se perde na string e quebra o script inteiro
+              'if(t!=="claro"&&t!=="escuro"){var p=location.pathname.slice(0,3);' +
+              't=(p==="/p/"||p==="/b/"||p==="/c/")?"claro":"escuro"}' +
+              'd.dataset.tema=t;' +
+              'd.dataset.sidebar=localStorage.getItem("sidebar")==="recolhida"?"recolhida":"expandida"}catch(e){}',
           }}
         />
       </head>

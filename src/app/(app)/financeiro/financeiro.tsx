@@ -95,7 +95,7 @@ export function Financeiro({
           {aba === "entradas" && <BotaoPrimario onClick={() => setNovo(true)}>Novo lançamento</BotaoPrimario>}
         </Header>
 
-        <div className="flex items-center gap-1 px-4 md:px-6 border-b border-[#311C45] shrink-0 overflow-x-auto">
+        <div className="flex items-center gap-1 px-4 md:px-6 border-b border-borda shrink-0 overflow-x-auto">
           {(
             [
               { id: "entradas", label: "Entradas" },
@@ -108,7 +108,7 @@ export function Financeiro({
               href={`/financeiro?aba=${a.id}`}
               className={cn(
                 "px-3 py-2.5 text-[11px] font-medium transition-colors border-b-2 -mb-px whitespace-nowrap",
-                aba === a.id ? "border-brand-400 text-brand-400" : "border-transparent text-[#968F88] hover:text-[#DDDBD9]",
+                aba === a.id ? "border-brand-400 text-brand-400" : "border-transparent text-texto-mudo hover:text-texto-suave",
               )}
             >
               {a.label}
@@ -120,14 +120,14 @@ export function Financeiro({
         <>
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 px-4 md:px-6 py-5 shrink-0 entrar">
           <KpiCard label="Total em carteira" value={fmt(total)} sub={`${todas.length} lançamentos`} />
-          <KpiCard label="Recebido" value={fmt(totalPago)} sub={`${qtd("pago")} pagamentos`} accent="text-emerald-400" />
-          <KpiCard label="A receber" value={fmt(totalPendente)} sub={`${qtd("pendente")} pendentes`} accent="text-amber-400" />
-          <KpiCard label="Vencido" value={fmt(totalVencido)} sub={`${qtd("atrasado")} em atraso`} accent="text-red-400" />
+          <KpiCard label="Recebido" value={fmt(totalPago)} sub={`${qtd("pago")} pagamentos`} accent="text-sucesso-cor" />
+          <KpiCard label="A receber" value={fmt(totalPendente)} sub={`${qtd("pendente")} pendentes`} accent="text-alerta-cor" />
+          <KpiCard label="Vencido" value={fmt(totalVencido)} sub={`${qtd("atrasado")} em atraso`} accent="text-falha-cor" />
         </div>
 
         {total > 0 && (
           <div className="px-4 md:px-6 pb-4 shrink-0 entrar entrar-1">
-            <div className="flex rounded-full overflow-hidden h-2 bg-[#311C45]">
+            <div className="flex rounded-full overflow-hidden h-2 bg-superficie-2">
               <div className="bg-emerald-500 transition-all duration-700" style={{ width: `${(totalPago / total) * 100}%` }} />
               <div className="bg-amber-500 transition-all duration-700" style={{ width: `${(totalPendente / total) * 100}%` }} />
               <div className="bg-red-500 transition-all duration-700" style={{ width: `${(totalVencido / total) * 100}%` }} />
@@ -140,8 +140,8 @@ export function Financeiro({
                   ["Vencido", "bg-red-500", totalVencido],
                 ] as const
               ).map(([label, cor, val]) => (
-                <span key={label} className="flex items-center gap-1.5 text-[10px] text-[#968F88]">
-                  <span className={cn("w-2 h-2 rounded-full", cor)} /> {label} <span className="font-mono text-[#C5C2BE]">{fmt(val)}</span>
+                <span key={label} className="flex items-center gap-1.5 text-[10px] text-texto-mudo">
+                  <span className={cn("w-2 h-2 rounded-full", cor)} /> {label} <span className="font-mono text-texto-sutil">{fmt(val)}</span>
                 </span>
               ))}
             </div>
@@ -150,13 +150,13 @@ export function Financeiro({
 
         <Subbar className="border-t">
           {filtro}
-          <span className="text-[11px] font-mono text-[#968F88]">{linhas.length} registros</span>
+          <span className="text-[11px] font-mono text-texto-mudo">{linhas.length} registros</span>
         </Subbar>
 
         <div className="flex-1 overflow-auto">
           <table className="w-full min-w-[720px] text-sm">
-            <thead className="sticky top-0 bg-[#150C1D] z-10">
-              <tr className="border-b border-[#311C45]">
+            <thead className="sticky top-0 bg-fundo z-10">
+              <tr className="border-b border-borda">
                 {["Cliente", "Projeto", "Tipo", "Vencimento", "Pagamento", "Valor", "Status", "Cobrança", ""].map((h) => (
                   <Th key={h}>{h}</Th>
                 ))}
@@ -196,38 +196,38 @@ function LinhaPagamento({ p, diasAviso, temHandle, config, modelosCobranca, onPa
   const diasAteVencer = !pago && !vencido ? diffDias(hojeISO(), p.vencimento) : null;
   const venceEmBreve = diasAteVencer !== null && diasAteVencer <= diasAviso;
   return (
-    <tr className={cn("border-b border-[#311C45]/50 hover:bg-white/[0.02] transition-colors", pending && "opacity-40")}>
+    <tr className={cn("border-b border-borda/50 hover:bg-white/[0.02] transition-colors", pending && "opacity-40")}>
       <td className="px-5 py-3.5">
         <Link href={p.clienteId ? `/clientes/${p.clienteId}` : "#"} className="flex items-center gap-2.5">
           <Avatar nome={p.clienteNome} tamanho={7} />
-          <span className="text-xs font-medium text-[#DDDBD9]">{p.clienteNome}</span>
+          <span className="text-xs font-medium text-texto-suave">{p.clienteNome}</span>
         </Link>
       </td>
-      <td className="px-5 py-3.5 text-xs text-[#968F88] max-w-[200px] truncate">
-        <Link href={`/projetos/${p.projeto_id}?aba=pagamentos`} className="hover:text-[#DDDBD9]">
+      <td className="px-5 py-3.5 text-xs text-texto-mudo max-w-[200px] truncate">
+        <Link href={`/projetos/${p.projeto_id}?aba=pagamentos`} className="hover:text-texto-suave">
           {p.projetoNome}
         </Link>
       </td>
-      <td className="px-5 py-3.5 text-[11px] font-mono text-[#968F88]">{p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "—"}</td>
+      <td className="px-5 py-3.5 text-[11px] font-mono text-texto-mudo">{p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "—"}</td>
       <td className="px-5 py-3.5">
-        <span className={cn("text-[11px] font-mono", vencido ? "text-red-400" : "text-[#968F88]")}>{fmtData(p.vencimento)}</span>
+        <span className={cn("text-[11px] font-mono", vencido ? "text-falha-cor" : "text-texto-mudo")}>{fmtData(p.vencimento)}</span>
       </td>
       <td className="px-5 py-3.5">
         {p.data_pagamento ? (
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-mono text-[#968F88]">{fmtData(p.data_pagamento)}</span>
+            <span className="text-[11px] font-mono text-texto-mudo">{fmtData(p.data_pagamento)}</span>
             {p.forma_pagamento && (
-              <span className="text-[10px] text-[#968F88]">
+              <span className="text-[10px] text-texto-mudo">
                 {ICONE_FORMA[p.forma_pagamento] ?? ""} {FORMA_PAGAMENTO_LABEL[p.forma_pagamento as keyof typeof FORMA_PAGAMENTO_LABEL] ?? p.forma_pagamento}
               </span>
             )}
           </div>
         ) : (
-          <span className="text-[11px] text-[#5A496A]">—</span>
+          <span className="text-[11px] text-texto-apagado">—</span>
         )}
       </td>
       <td className="px-5 py-3.5">
-        <span className={cn("text-sm font-semibold font-mono", pago ? "text-emerald-400" : vencido ? "text-red-400" : "text-[#DDDBD9]")}>{fmt(p.valor)}</span>
+        <span className={cn("text-sm font-semibold font-mono", pago ? "text-sucesso-cor" : vencido ? "text-falha-cor" : "text-texto-suave")}>{fmt(p.valor)}</span>
       </td>
       <td className="px-5 py-3.5">
         {pago ? (
@@ -283,7 +283,7 @@ function LinhaPagamento({ p, diasAviso, temHandle, config, modelosCobranca, onPa
             <button
               type="button"
               onClick={() => startTransition(() => desfazerPagamento(p.id, p.projeto_id))}
-              className="px-2.5 py-1 text-[11px] text-[#968F88] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors whitespace-nowrap"
+              className="px-2.5 py-1 text-[11px] text-texto-mudo border border-borda hover:border-borda-forte rounded-lg transition-colors whitespace-nowrap"
             >
               Desfazer
             </button>
@@ -291,7 +291,7 @@ function LinhaPagamento({ p, diasAviso, temHandle, config, modelosCobranca, onPa
             <button
               type="button"
               onClick={onPagar}
-              className="px-2.5 py-1 text-[11px] text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors whitespace-nowrap"
+              className="px-2.5 py-1 text-[11px] text-sucesso-cor border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors whitespace-nowrap"
             >
               Marcar pago
             </button>
@@ -299,7 +299,7 @@ function LinhaPagamento({ p, diasAviso, temHandle, config, modelosCobranca, onPa
           <button
             type="button"
             onClick={() => confirm("Excluir este lançamento?") && startTransition(() => excluirPagamento(p.id, p.projeto_id))}
-            className="w-6 h-6 rounded flex items-center justify-center text-[#5A496A] hover:text-red-400 transition-colors"
+            className="w-6 h-6 rounded flex items-center justify-center text-texto-apagado hover:text-falha-cor transition-colors"
             title="Excluir"
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
@@ -317,20 +317,20 @@ function MarcarPagoModal({ pagamento, formaPreferida, onClose }: { pagamento: Pa
   const [pending, startTransition] = useTransition();
   return (
     <Modal titulo="Confirmar pagamento" onClose={onClose} largura="sm">
-      <div className="bg-[#1B0F26] rounded-xl p-4">
-        <p className="text-xs font-semibold text-[#DDDBD9]">{pagamento.clienteNome}</p>
-        <p className="text-[11px] text-[#968F88] mt-0.5">
+      <div className="bg-campo rounded-xl p-4">
+        <p className="text-xs font-semibold text-texto-suave">{pagamento.clienteNome}</p>
+        <p className="text-[11px] text-texto-mudo mt-0.5">
           {pagamento.projetoNome}
           {pagamento.tipo && ` · ${TIPO_PAGAMENTO_LABEL[pagamento.tipo]}`}
         </p>
-        <p className="text-lg font-semibold font-mono text-emerald-400 mt-2">{fmt(pagamento.valor)}</p>
+        <p className="text-lg font-semibold font-mono text-sucesso-cor mt-2">{fmt(pagamento.valor)}</p>
       </div>
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88] block mb-2">Forma de pagamento</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo block mb-2">Forma de pagamento</p>
         <Escolha opcoes={FORMAS_PAGAMENTO.map((f) => ({ valor: f, label: `${ICONE_FORMA[f]} ${FORMA_PAGAMENTO_LABEL[f]}` }))} valor={forma} onChange={setForma} colunas={3} />
       </div>
       <div className="flex gap-2 pt-1">
-        <button type="button" onClick={onClose} className="flex-1 py-2 text-xs text-[#968F88] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+        <button type="button" onClick={onClose} className="flex-1 py-2 text-xs text-texto-mudo border border-borda hover:border-borda-forte rounded-lg transition-colors">
           Cancelar
         </button>
         <button

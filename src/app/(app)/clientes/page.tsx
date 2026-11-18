@@ -63,11 +63,11 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
             rotulo="Status"
             opcoes={[
               { valor: "", label: "Todos" },
-              { valor: "ativo", label: "Ativo", cor: "#34D399" },
-              { valor: "inativo", label: "Inativo", cor: "#968F88" },
+              { valor: "ativo", label: "Ativo", cor: "var(--sucesso-cor)" },
+              { valor: "inativo", label: "Inativo", cor: "var(--texto-mudo)" },
             ]}
           />
-          <span className="text-[11px] font-mono text-[#968F88]">{filtradas.length} registros</span>
+          <span className="text-[11px] font-mono text-texto-mudo">{filtradas.length} registros</span>
         </Subbar>
       }
     />

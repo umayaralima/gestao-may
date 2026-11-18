@@ -28,16 +28,16 @@ export function Modal({
       <div
         onMouseDown={(e) => e.stopPropagation()}
         className={cn(
-          "bg-[#231431] border border-[#311C45] rounded-2xl w-full mx-4 shadow-2xl entrar max-h-[92vh] flex flex-col",
+          "bg-superficie border border-borda rounded-2xl w-full mx-4 shadow-2xl entrar max-h-[92vh] flex flex-col",
           { sm: "max-w-sm", md: "max-w-md", lg: "max-w-2xl" }[largura],
         )}
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-[#311C45] shrink-0">
-          <p className="text-sm font-semibold text-[#F5F5F4]">{titulo}</p>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-borda shrink-0">
+          <p className="text-sm font-semibold text-texto">{titulo}</p>
           <button
             type="button"
             onClick={onClose}
-            className="w-6 h-6 rounded-md flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/8 transition-colors"
+            className="w-6 h-6 rounded-md flex items-center justify-center text-texto-mudo hover:text-texto-suave hover:bg-superficie-2 transition-colors"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
               <path d="M2 2l8 8M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -45,7 +45,7 @@ export function Modal({
           </button>
         </div>
         <div className="px-6 py-5 space-y-4 overflow-y-auto">{children}</div>
-        {rodape && <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#311C45] shrink-0">{rodape}</div>}
+        {rodape && <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-borda shrink-0">{rodape}</div>}
       </div>
     </div>
   );
@@ -56,7 +56,7 @@ export function BotaoCancelar({ onClick, children = "Cancelar" }: { onClick: () 
     <button
       type="button"
       onClick={onClick}
-      className="px-4 py-2 text-xs text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors"
+      className="px-4 py-2 text-xs text-texto-mudo hover:text-texto-suave border border-borda hover:border-borda-forte rounded-lg transition-colors"
     >
       {children}
     </button>
@@ -105,7 +105,7 @@ export function Escolha<T extends string>({
           onClick={() => onChange(o.valor)}
           className={cn(
             "flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs font-medium transition-colors",
-            valor === o.valor ? "bg-brand-400/15 text-brand-400 border-brand-400/30" : "text-[#968F88] border-[#311C45] hover:border-[#5A496A] hover:text-[#DDDBD9]",
+            valor === o.valor ? "bg-brand-400/15 text-brand-400 border-brand-400/30" : "text-texto-mudo border-borda hover:border-borda-forte hover:text-texto-suave",
           )}
         >
           {o.dot && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: o.dot }} />}

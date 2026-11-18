@@ -75,8 +75,8 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
   return (
     <div className="flex flex-col lg:flex-row h-full overflow-hidden">
       {/* Nav de abas: coluna no desktop, fileira rolável no celular */}
-      <aside className="lg:w-52 shrink-0 border-b lg:border-b-0 lg:border-r border-[#311C45] bg-[#1B0F26] flex flex-col lg:py-4">
-        <p className="hidden lg:block px-5 pb-3 text-[10px] font-semibold tracking-widest text-[#968F88] uppercase">Configurações</p>
+      <aside className="lg:w-52 shrink-0 border-b lg:border-b-0 lg:border-r border-borda bg-campo flex flex-col lg:py-4">
+        <p className="hidden lg:block px-5 pb-3 text-[10px] font-semibold tracking-widest text-texto-mudo uppercase">Configurações</p>
         <nav className="flex lg:flex-col gap-1 lg:gap-0.5 px-3 py-2 lg:py-0 overflow-x-auto lg:overflow-visible">
           {ABAS.map(({ id, label, Icone }) => (
             <button
@@ -85,7 +85,7 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
               onClick={() => setAba(id)}
               className={cn(
                 "flex items-center gap-2.5 lg:gap-3 px-3 py-2 rounded-lg text-sm text-left transition-all whitespace-nowrap lg:w-full",
-                aba === id ? "bg-brand-400/15 text-brand-400 font-medium" : "text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/4",
+                aba === id ? "bg-brand-400/15 text-brand-400 font-medium" : "text-texto-mudo hover:text-texto-suave hover:bg-superficie-2",
               )}
             >
               <Icone />
@@ -172,7 +172,7 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
               {etapas.map((e) => (
                 <div key={e} className="flex items-center gap-3 px-6 py-3">
                   <div className="w-2 h-2 rounded-full bg-brand-400" />
-                  <span className="text-sm text-[#DDDBD9]">{e}</span>
+                  <span className="text-sm text-texto-suave">{e}</span>
                 </div>
               ))}
             </Section>
@@ -181,7 +181,7 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
                 <Label label="Alerta de negócio parado" description="Marca com ⚠ no Pipeline o negócio que fica N dias sem movimentação" />
                 <div className="flex items-center gap-2">
                   <Input name="dias_negocio_parado" type="number" min={1} max={365} defaultValue={config.dias_negocio_parado} largura="sm:w-24" />
-                  <span className="text-xs text-[#968F88] whitespace-nowrap">dias</span>
+                  <span className="text-xs text-texto-mudo whitespace-nowrap">dias</span>
                 </div>
               </Row>
             </Section>
@@ -194,7 +194,7 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
               <Row>
                 <Label label="Meta mensal de receita" description="Aparece no card Receita do mês, no Dashboard" />
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-[#968F88]">R$</span>
+                  <span className="text-xs text-texto-mudo">R$</span>
                   <Input name="meta_mensal" inputMode="decimal" defaultValue={config.meta_mensal ?? ""} placeholder="8000" largura="sm:w-32" />
                 </div>
               </Row>
@@ -204,7 +204,7 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
                 <Label label="Aviso antes do vencimento" description="Quantos dias antes de uma parcela vencer ela aparece como “vence em breve” no Financeiro" />
                 <div className="flex items-center gap-2">
                   <Input name="dias_aviso_vencimento" type="number" min={0} max={90} defaultValue={config.dias_aviso_vencimento} largura="sm:w-24" />
-                  <span className="text-xs text-[#968F88] whitespace-nowrap">dias antes</span>
+                  <span className="text-xs text-texto-mudo whitespace-nowrap">dias antes</span>
                 </div>
               </Row>
             </Section>
@@ -244,7 +244,7 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
               title="Tipos de serviço"
               sub="Aparecem no “Tipo de serviço” do projeto e no “Serviço de interesse” do pipeline. Renomear atualiza quem já usa; excluir não apaga nada."
             >
-              {tipos.length === 0 && <p className="px-6 py-6 text-xs text-[#968F88]">Nenhum serviço cadastrado.</p>}
+              {tipos.length === 0 && <p className="px-6 py-6 text-xs text-texto-mudo">Nenhum serviço cadastrado.</p>}
               {tipos.map((t) => {
                 const usos = usoTipos[t.nome] ?? 0;
                 return (
@@ -254,15 +254,15 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
                         name="nome"
                         defaultValue={t.nome}
                         maxLength={80}
-                        className="w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm text-[#DDDBD9] hover:border-[#311C45] focus:border-brand-400/60 focus:bg-[#150C1D] focus:outline-none transition-colors"
+                        className="w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm text-texto-suave hover:border-borda focus:border-brand-400/60 focus:bg-fundo focus:outline-none transition-colors"
                       />
-                      <button type="submit" className="px-2.5 py-1 text-[11px] text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+                      <button type="submit" className="px-2.5 py-1 text-[11px] text-texto-mudo hover:text-texto-suave border border-borda hover:border-borda-forte rounded-lg transition-colors">
                         Salvar
                       </button>
                     </form>
-                    <span className="hidden sm:block w-20 text-right text-[10px] font-mono text-[#968F88]">{usos ? `${usos} em uso` : ""}</span>
+                    <span className="hidden sm:block w-20 text-right text-[10px] font-mono text-texto-mudo">{usos ? `${usos} em uso` : ""}</span>
                     <form action={excluirTipoProjeto.bind(null, t.id)}>
-                      <button type="submit" className="text-[#5A496A] hover:text-red-400 transition-colors text-xs">
+                      <button type="submit" className="text-texto-apagado hover:text-falha-cor transition-colors text-xs">
                         Remover
                       </button>
                     </form>
@@ -283,7 +283,7 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
                 if (doGrupo.length === 0) return null;
                 return (
                   <div key={g}>
-                    <p className="px-6 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-[#968F88]">{GRUPO_CATEGORIA_LABEL[g]}</p>
+                    <p className="px-6 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-texto-mudo">{GRUPO_CATEGORIA_LABEL[g]}</p>
                     {doGrupo.map((c) => (
                       <div key={c.id} className="flex items-center gap-3 px-6 py-2">
                         <form action={atualizarCategoriaTarefa.bind(null, c.id)} className="flex flex-1 items-center gap-2 min-w-0">
@@ -296,13 +296,13 @@ export function ConfiguracoesView({ config, tipos, usoTipos, categorias, usoCate
                               </option>
                             ))}
                           </select>
-                          <button type="submit" className="px-2.5 py-1 text-[11px] text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+                          <button type="submit" className="px-2.5 py-1 text-[11px] text-texto-mudo hover:text-texto-suave border border-borda hover:border-borda-forte rounded-lg transition-colors">
                             Salvar
                           </button>
                         </form>
-                        <span className="hidden sm:block w-20 text-right text-[10px] font-mono text-[#968F88]">{usoCategorias[c.nome] ? `${usoCategorias[c.nome]} em uso` : ""}</span>
+                        <span className="hidden sm:block w-20 text-right text-[10px] font-mono text-texto-mudo">{usoCategorias[c.nome] ? `${usoCategorias[c.nome]} em uso` : ""}</span>
                         <form action={excluirCategoriaTarefa.bind(null, c.id)}>
-                          <button type="submit" className="text-[#5A496A] hover:text-red-400 transition-colors text-xs">
+                          <button type="submit" className="text-texto-apagado hover:text-falha-cor transition-colors text-xs">
                             Remover
                           </button>
                         </form>
@@ -345,7 +345,7 @@ function FormSecao({ secao, titulo, sub, children, onSalvo }: { secao: SecaoConf
       <Titulo titulo={titulo} sub={sub} />
       {children}
       <div className="flex items-center justify-end gap-3">
-        {state.erro && <p className="text-xs text-red-400">{state.erro}</p>}
+        {state.erro && <p className="text-xs text-falha-cor">{state.erro}</p>}
         <SaveButton pending={pending} />
       </div>
     </form>
@@ -376,7 +376,7 @@ function Seguranca({ onSalvo }: { onSalvo: () => void }) {
           <Input name="senha_conf" type="password" placeholder="••••••••" autoComplete="new-password" />
         </Row>
         <div className="px-6 py-4 flex items-center justify-end gap-3">
-          {state.erro && <p className="text-xs text-red-400">{state.erro}</p>}
+          {state.erro && <p className="text-xs text-falha-cor">{state.erro}</p>}
           <SaveButton pending={pending}>Atualizar senha</SaveButton>
         </div>
       </Section>
@@ -389,20 +389,20 @@ function Seguranca({ onSalvo }: { onSalvo: () => void }) {
 function Titulo({ titulo, sub }: { titulo: string; sub: string }) {
   return (
     <div>
-      <h2 className="text-lg font-semibold text-[#F5F5F4] mb-0.5">{titulo}</h2>
-      <p className="text-xs text-[#968F88]">{sub}</p>
+      <h2 className="text-lg font-semibold text-texto mb-0.5">{titulo}</h2>
+      <p className="text-xs text-texto-mudo">{sub}</p>
     </div>
   );
 }
 
 function Section({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
-    <div className="bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden">
-      <div className="px-6 py-4 border-b border-[#311C45]">
-        <p className="text-sm font-semibold text-[#F5F5F4]">{title}</p>
-        {sub && <p className="text-xs text-[#968F88] mt-0.5">{sub}</p>}
+    <div className="bg-superficie border border-borda rounded-xl overflow-hidden">
+      <div className="px-6 py-4 border-b border-borda">
+        <p className="text-sm font-semibold text-texto">{title}</p>
+        {sub && <p className="text-xs text-texto-mudo mt-0.5">{sub}</p>}
       </div>
-      <div className="divide-y divide-[#311C45]/60">{children}</div>
+      <div className="divide-y divide-borda/60">{children}</div>
     </div>
   );
 }
@@ -414,18 +414,18 @@ function Row({ children }: { children: React.ReactNode }) {
 function Label({ label, description }: { label: string; description?: string }) {
   return (
     <div className="flex-1 min-w-0">
-      <p className="text-sm text-[#DDDBD9] font-medium">{label}</p>
-      {description && <p className="text-xs text-[#968F88] mt-0.5 leading-relaxed">{description}</p>}
+      <p className="text-sm text-texto-suave font-medium">{label}</p>
+      {description && <p className="text-xs text-texto-mudo mt-0.5 leading-relaxed">{description}</p>}
     </div>
   );
 }
 
 /** Input "de linha" das listas: transparente, borda só no hover/foco. */
 const campoLinha =
-  "rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm text-[#DDDBD9] hover:border-[#311C45] focus:border-brand-400/60 focus:bg-[#150C1D] focus:outline-none transition-colors";
+  "rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm text-texto-suave hover:border-borda focus:border-brand-400/60 focus:bg-fundo focus:outline-none transition-colors";
 
 const controleCls =
-  "bg-[#1B0F26] border border-[#311C45] rounded-lg px-3 py-2 text-sm text-[#DDDBD9] placeholder:text-[#5A496A] outline-none focus:border-brand-400/60 focus:ring-1 focus:ring-brand-400/20 transition-all";
+  "bg-campo border border-borda rounded-lg px-3 py-2 text-sm text-texto-suave placeholder:text-texto-apagado outline-none focus:border-brand-400/60 focus:ring-1 focus:ring-brand-400/20 transition-all";
 
 function Input({ className, largura = "sm:w-64", ...props }: React.InputHTMLAttributes<HTMLInputElement> & { largura?: string }) {
   return <input {...props} className={cn(controleCls, "w-full", largura, className)} />;

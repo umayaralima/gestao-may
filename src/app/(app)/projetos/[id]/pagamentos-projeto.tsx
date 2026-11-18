@@ -19,11 +19,11 @@ export function PagamentosProjeto({ pagamentos, projetoId }: { pagamentos: Pagam
   return (
     <>
       {pagando && <MarcarPago p={pagando} onClose={() => setPagando(null)} />}
-      <div className="bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#311C45]">
+      <div className="bg-superficie border border-borda rounded-xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-borda">
           <div>
-            <p className="text-sm font-semibold text-[#F5F5F4]">Parcelas</p>
-            <p className="text-xs text-[#968F88]">{pagamentos.length} lançamento(s)</p>
+            <p className="text-sm font-semibold text-texto">Parcelas</p>
+            <p className="text-xs text-texto-mudo">{pagamentos.length} lançamento(s)</p>
           </div>
           <BotaoGhost href={`/financeiro?novo=1&projeto=${projetoId}`}>+ Lançamento</BotaoGhost>
         </div>
@@ -33,7 +33,7 @@ export function PagamentosProjeto({ pagamentos, projetoId }: { pagamentos: Pagam
           <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-sm">
             <thead>
-              <tr className="border-b border-[#311C45]">
+              <tr className="border-b border-borda">
                 {["Tipo", "Vencimento", "Pagamento", "Valor", "Status", ""].map((h) => (
                   <Th key={h}>{h}</Th>
                 ))}
@@ -57,33 +57,33 @@ function Linha({ p, onPagar }: { p: Pagamento; onPagar: () => void }) {
   const vencido = p.status === "atrasado";
   const pago = p.status === "pago";
   return (
-    <tr className={cn("border-b border-[#311C45]/50 last:border-0 hover:bg-white/[0.02] transition-colors", pending && "opacity-40")}>
-      <td className="px-5 py-3.5 text-xs text-[#C5C2BE]">{p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "—"}</td>
-      <td className={cn("px-5 py-3.5 text-[11px] font-mono", vencido ? "text-red-400" : "text-[#968F88]")}>{fmtData(p.vencimento)}</td>
-      <td className="px-5 py-3.5 text-[11px] font-mono text-[#968F88]">
+    <tr className={cn("border-b border-borda/50 last:border-0 hover:bg-white/[0.02] transition-colors", pending && "opacity-40")}>
+      <td className="px-5 py-3.5 text-xs text-texto-sutil">{p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "—"}</td>
+      <td className={cn("px-5 py-3.5 text-[11px] font-mono", vencido ? "text-falha-cor" : "text-texto-mudo")}>{fmtData(p.vencimento)}</td>
+      <td className="px-5 py-3.5 text-[11px] font-mono text-texto-mudo">
         {p.data_pagamento ? (
           <>
             {fmtData(p.data_pagamento)}
             {p.forma_pagamento && <span className="ml-1.5 text-[10px]">{ICONE_FORMA[p.forma_pagamento]} {FORMA_PAGAMENTO_LABEL[p.forma_pagamento as keyof typeof FORMA_PAGAMENTO_LABEL]}</span>}
           </>
         ) : (
-          <span className="text-[#5A496A]">—</span>
+          <span className="text-texto-apagado">—</span>
         )}
       </td>
-      <td className={cn("px-5 py-3.5 text-sm font-semibold font-mono", pago ? "text-emerald-400" : vencido ? "text-red-400" : "text-[#DDDBD9]")}>{fmt(p.valor)}</td>
+      <td className={cn("px-5 py-3.5 text-sm font-semibold font-mono", pago ? "text-sucesso-cor" : vencido ? "text-falha-cor" : "text-texto-suave")}>{fmt(p.valor)}</td>
       <td className="px-5 py-3.5">{pago ? <Pill tom="success">Pago</Pill> : vencido ? <Pill tom="error">Vencido</Pill> : <Pill tom="warning">Pendente</Pill>}</td>
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-2">
           {pago ? (
-            <button type="button" onClick={() => startTransition(() => desfazerPagamento(p.id, p.projeto_id))} className="px-2.5 py-1 text-[11px] text-[#968F88] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+            <button type="button" onClick={() => startTransition(() => desfazerPagamento(p.id, p.projeto_id))} className="px-2.5 py-1 text-[11px] text-texto-mudo border border-borda hover:border-borda-forte rounded-lg transition-colors">
               Desfazer
             </button>
           ) : (
-            <button type="button" onClick={onPagar} className="px-2.5 py-1 text-[11px] text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors">
+            <button type="button" onClick={onPagar} className="px-2.5 py-1 text-[11px] text-sucesso-cor border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors">
               Marcar pago
             </button>
           )}
-          <button type="button" onClick={() => confirm("Excluir esta parcela?") && startTransition(() => excluirPagamento(p.id, p.projeto_id))} className="w-6 h-6 rounded flex items-center justify-center text-[#5A496A] hover:text-red-400 transition-colors" title="Excluir">
+          <button type="button" onClick={() => confirm("Excluir esta parcela?") && startTransition(() => excluirPagamento(p.id, p.projeto_id))} className="w-6 h-6 rounded flex items-center justify-center text-texto-apagado hover:text-falha-cor transition-colors" title="Excluir">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
             </svg>
@@ -99,17 +99,17 @@ function MarcarPago({ p, onClose }: { p: Pagamento; onClose: () => void }) {
   const [pending, startTransition] = useTransition();
   return (
     <Modal titulo="Confirmar pagamento" onClose={onClose} largura="sm">
-      <div className="bg-[#1B0F26] rounded-xl p-4">
-        <p className="text-xs font-semibold text-[#DDDBD9]">{p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "Parcela"}</p>
-        <p className="text-[11px] text-[#968F88] mt-0.5">Vencimento {fmtData(p.vencimento)}</p>
-        <p className="text-lg font-semibold font-mono text-emerald-400 mt-2">{fmt(p.valor)}</p>
+      <div className="bg-campo rounded-xl p-4">
+        <p className="text-xs font-semibold text-texto-suave">{p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "Parcela"}</p>
+        <p className="text-[11px] text-texto-mudo mt-0.5">Vencimento {fmtData(p.vencimento)}</p>
+        <p className="text-lg font-semibold font-mono text-sucesso-cor mt-2">{fmt(p.valor)}</p>
       </div>
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88] block mb-2">Forma de pagamento</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo block mb-2">Forma de pagamento</p>
         <Escolha opcoes={FORMAS_PAGAMENTO.map((f) => ({ valor: f, label: `${ICONE_FORMA[f]} ${FORMA_PAGAMENTO_LABEL[f]}` }))} valor={forma} onChange={setForma} colunas={3} />
       </div>
       <div className="flex gap-2 pt-1">
-        <button type="button" onClick={onClose} className="flex-1 py-2 text-xs text-[#968F88] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+        <button type="button" onClick={onClose} className="flex-1 py-2 text-xs text-texto-mudo border border-borda hover:border-borda-forte rounded-lg transition-colors">
           Cancelar
         </button>
         <button

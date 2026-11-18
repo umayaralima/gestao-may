@@ -10,7 +10,7 @@ import { atualizarEtapaModelo, criarEtapaModelo, excluirEtapaModelo, type FormSt
 
 /** Input "de linha" das listas (mesmo visual do editor de tipos/categorias). */
 const campoLinha =
-  "rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm text-[#DDDBD9] hover:border-[#311C45] focus:border-brand-400/60 focus:bg-[#150C1D] focus:outline-none transition-colors";
+  "rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm text-texto-suave hover:border-borda focus:border-brand-400/60 focus:bg-fundo focus:outline-none transition-colors";
 
 /**
  * Editor das etapas padrão por tipo de serviço. Cada tipo é um bloco recolhível;
@@ -25,16 +25,16 @@ export function EtapasModeloEditor({ tipos, etapas, categorias }: { tipos: TipoP
         const lista = etapas.filter((e) => e.tipo_projeto === tipo.nome).sort((a, b) => a.ordem - b.ordem);
         const ativo = aberto === tipo.nome;
         return (
-          <div key={tipo.id} className="border-b border-[#311C45]/60 last:border-b-0">
+          <div key={tipo.id} className="border-b border-borda/60 last:border-b-0">
             <button type="button" onClick={() => setAberto(ativo ? null : tipo.nome)} className="w-full flex items-center justify-between px-6 py-3 text-left hover:bg-white/[0.02] transition-colors">
-              <span className="text-sm text-[#DDDBD9] font-medium">{tipo.nome}</span>
-              <span className="text-[10px] font-mono text-[#968F88]">
+              <span className="text-sm text-texto-suave font-medium">{tipo.nome}</span>
+              <span className="text-[10px] font-mono text-texto-mudo">
                 {lista.length} etapa(s){lista.length ? ` · ~${Math.max(...lista.map((e) => e.dias_apos_inicio))} dias` : ""} <span className="ml-2">{ativo ? "−" : "+"}</span>
               </span>
             </button>
             {ativo && (
               <div className="pb-4">
-                {lista.length === 0 && <p className="px-6 py-2 text-xs text-[#5A496A]">Nenhuma etapa padrão. Adicione abaixo.</p>}
+                {lista.length === 0 && <p className="px-6 py-2 text-xs text-texto-apagado">Nenhuma etapa padrão. Adicione abaixo.</p>}
                 {lista.map((e) => (
                   <form key={e.id} action={atualizarEtapaModelo.bind(null, e.id)} className="flex items-center gap-2 px-6 py-1">
                     <input name="ordem" type="number" min={0} defaultValue={e.ordem} className={cn(campoLinha, "w-12 text-center font-mono text-xs shrink-0")} title="Ordem" />
@@ -44,12 +44,12 @@ export function EtapasModeloEditor({ tipos, etapas, categorias }: { tipos: TipoP
                     </select>
                     <div className="flex items-center gap-1 shrink-0">
                       <input name="dias_apos_inicio" type="number" min={0} max={365} defaultValue={e.dias_apos_inicio} className={cn(campoLinha, "w-14 text-center font-mono text-xs")} title="Dias após o início do projeto" />
-                      <span className="text-[10px] text-[#968F88] hidden sm:inline">dias</span>
+                      <span className="text-[10px] text-texto-mudo hidden sm:inline">dias</span>
                     </div>
-                    <button type="submit" className="px-2.5 py-1 text-[11px] text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors shrink-0">
+                    <button type="submit" className="px-2.5 py-1 text-[11px] text-texto-mudo hover:text-texto-suave border border-borda hover:border-borda-forte rounded-lg transition-colors shrink-0">
                       Salvar
                     </button>
-                    <button type="submit" formAction={excluirEtapaModelo.bind(null, e.id)} className="text-[#5A496A] hover:text-red-400 transition-colors text-xs shrink-0" title="Remover etapa">
+                    <button type="submit" formAction={excluirEtapaModelo.bind(null, e.id)} className="text-texto-apagado hover:text-falha-cor transition-colors text-xs shrink-0" title="Remover etapa">
                       ×
                     </button>
                   </form>

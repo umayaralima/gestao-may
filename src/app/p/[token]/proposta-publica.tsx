@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { BotaoTema } from "@/components/botao-tema";
 import { useState, useTransition } from "react";
 import { cn } from "@/lib/cn";
 import { formatBRL } from "@/lib/format";
@@ -45,11 +46,14 @@ export function PropostaPublica({
     });
 
   return (
-    <main className="min-h-dvh bg-[#150C1D] text-[#DDDBD9]">
+    <main className="min-h-dvh bg-fundo text-texto-suave">
       <div className="mx-auto max-w-3xl px-5 py-10 sm:py-16">
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
           <Image src="/marca/logo-gradiente.png" alt={contato.nome} width={531} height={131} priority className="h-8 w-auto" />
-          {proposta.numero && <span className="text-[11px] font-mono text-[#968F88]">Proposta {proposta.numero}</span>}
+          <div className="flex items-center gap-3">
+            {proposta.numero && <span className="text-[11px] font-mono text-texto-mudo">Proposta {proposta.numero}</span>}
+            <BotaoTema variante="flutuante" />
+          </div>
         </header>
 
         {status === "aceita" && (
@@ -58,14 +62,14 @@ export function PropostaPublica({
         {status === "recusada" && <Aviso tom="neutro" titulo="Resposta registrada" texto="Obrigada pelo retorno! Se mudar de ideia ou quiser ajustar algo, é só chamar." />}
         {status === "expirada" && <Aviso tom="alerta" titulo="Proposta vencida" texto={`A validade era ${proposta.validadeFormatada}. Me chame que eu atualizo valores e prazo pra você.`} />}
 
-        <article className="rounded-2xl border border-[#311C45] bg-[#231431] px-6 sm:px-10 py-8 sm:py-12">
+        <article className="rounded-2xl border border-borda bg-superficie px-6 sm:px-10 py-8 sm:py-12">
           <Documento texto={proposta.documento} />
         </article>
 
         {status === "enviada" && (
           <section className="mt-8 rounded-2xl border border-brand-400/30 bg-brand-400/5 px-6 sm:px-10 py-8">
-            <h2 className="text-lg font-semibold text-[#F5F5F4]">Vamos começar?</h2>
-            <p className="mt-1.5 text-sm text-[#968F88]">
+            <h2 className="text-lg font-semibold text-texto">Vamos começar?</h2>
+            <p className="mt-1.5 text-sm text-texto-mudo">
               Ao aceitar, eu envio o contrato para assinatura eletrônica e o link do primeiro pagamento.
               {proposta.validadeFormatada && ` Esta proposta vale até ${proposta.validadeFormatada}.`}
             </p>
@@ -83,7 +87,7 @@ export function PropostaPublica({
                 <button
                   type="button"
                   onClick={() => setMostrarRecusa(true)}
-                  className="px-6 py-3.5 text-sm text-[#968F88] border border-[#311C45] hover:border-[#5A496A] hover:text-[#DDDBD9] rounded-xl transition-colors"
+                  className="px-6 py-3.5 text-sm text-texto-mudo border border-borda hover:border-borda-forte hover:text-texto-suave rounded-xl transition-colors"
                 >
                   Tenho dúvidas / quero ajustar
                 </button>
@@ -95,30 +99,30 @@ export function PropostaPublica({
                   onChange={(e) => setObservacao(e.target.value)}
                   rows={4}
                   placeholder="Conta pra mim o que você gostaria de mudar — prazo, escopo, valor, forma de pagamento…"
-                  className="w-full bg-[#150C1D] border border-[#311C45] rounded-xl px-4 py-3 text-sm text-[#DDDBD9] placeholder:text-[#5A496A] outline-none focus:border-brand-400/60 transition-colors"
+                  className="w-full bg-fundo border border-borda rounded-xl px-4 py-3 text-sm text-texto-suave placeholder:text-texto-apagado outline-none focus:border-brand-400/60 transition-colors"
                 />
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     type="button"
                     disabled={enviando || observacao.trim().length < 3}
                     onClick={() => responder("recusada")}
-                    className="px-6 py-3 bg-[#311C45] hover:bg-[#3d2456] disabled:opacity-40 text-[#DDDBD9] text-sm font-medium rounded-xl transition-colors"
+                    className="px-6 py-3 bg-superficie-2 hover:bg-[#3d2456] disabled:opacity-40 text-texto-suave text-sm font-medium rounded-xl transition-colors"
                   >
                     {enviando ? "Enviando…" : "Enviar observação"}
                   </button>
-                  <button type="button" onClick={() => setMostrarRecusa(false)} className="px-6 py-3 text-sm text-[#968F88] hover:text-[#DDDBD9] transition-colors">
+                  <button type="button" onClick={() => setMostrarRecusa(false)} className="px-6 py-3 text-sm text-texto-mudo hover:text-texto-suave transition-colors">
                     Voltar
                   </button>
                 </div>
               </div>
             )}
-            {erro && <p className="mt-3 text-xs text-red-400">{erro}</p>}
+            {erro && <p className="mt-3 text-xs text-falha-cor">{erro}</p>}
           </section>
         )}
 
-        <footer className="mt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#968F88]">
+        <footer className="mt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-texto-mudo">
           <div>
-            <p className="text-[#C5C2BE] font-medium">{contato.nome}</p>
+            <p className="text-texto-sutil font-medium">{contato.nome}</p>
             <p>{contato.titulo}</p>
           </div>
           <div className="flex flex-wrap gap-4">
@@ -146,9 +150,9 @@ export function PropostaPublica({
 
 function Aviso({ tom, titulo, texto }: { tom: "sucesso" | "alerta" | "neutro"; titulo: string; texto: string }) {
   const cores = {
-    sucesso: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-    alerta: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-    neutro: "border-[#311C45] bg-[#231431] text-[#C5C2BE]",
+    sucesso: "border-emerald-500/30 bg-emerald-500/10 text-sucesso-cor",
+    alerta: "border-amber-500/30 bg-amber-500/10 text-alerta-cor",
+    neutro: "border-borda bg-superficie text-texto-sutil",
   }[tom];
   return (
     <div className={cn("mb-6 rounded-2xl border px-6 py-5", cores)}>
@@ -161,26 +165,26 @@ function Aviso({ tom, titulo, texto }: { tom: "sucesso" | "alerta" | "neutro"; t
 /** Mesmo markdown simples do contrato, em tipografia de leitura. */
 function Documento({ texto }: { texto: string }) {
   const inline = (s: string) =>
-    s.split(/(\*\*[^*]+\*\*)/).map((p, i) => (p.startsWith("**") ? <strong key={i} className="font-semibold text-[#F5F5F4]">{p.slice(2, -2)}</strong> : <span key={i}>{p}</span>));
+    s.split(/(\*\*[^*]+\*\*)/).map((p, i) => (p.startsWith("**") ? <strong key={i} className="font-semibold text-texto">{p.slice(2, -2)}</strong> : <span key={i}>{p}</span>));
 
   return (
     <div className="space-y-3">
       {texto.split("\n").map((linha, i) => {
         if (!linha.trim()) return <div key={i} className="h-2" />;
         if (linha.startsWith("# ")) return <p key={i} className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-400">{linha.slice(2)}</p>;
-        if (linha.startsWith("## ")) return <h1 key={i} className="text-2xl sm:text-3xl font-semibold text-[#F5F5F4] leading-tight">{linha.slice(3)}</h1>;
-        if (linha.startsWith("### ")) return <h2 key={i} className="pt-6 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#968F88]">{linha.slice(4)}</h2>;
+        if (linha.startsWith("## ")) return <h1 key={i} className="text-2xl sm:text-3xl font-semibold text-texto leading-tight">{linha.slice(3)}</h1>;
+        if (linha.startsWith("### ")) return <h2 key={i} className="pt-6 text-[11px] font-semibold uppercase tracking-[0.15em] text-texto-mudo">{linha.slice(4)}</h2>;
         if (linha.startsWith("- ")) {
           const conteudo = linha.slice(2).replace(/^\d+\.\s*/, "");
           const numerado = /^\d+\./.test(linha.slice(2));
           return (
-            <p key={i} className="flex gap-3 text-sm leading-relaxed text-[#C5C2BE]">
+            <p key={i} className="flex gap-3 text-sm leading-relaxed text-texto-sutil">
               <span className={cn("shrink-0", numerado ? "text-brand-400 font-mono text-xs pt-0.5" : "text-brand-400")}>{numerado ? linha.slice(2).match(/^\d+/)?.[0] : "—"}</span>
               <span>{inline(conteudo)}</span>
             </p>
           );
         }
-        return <p key={i} className="text-sm leading-relaxed text-[#C5C2BE]">{inline(linha)}</p>;
+        return <p key={i} className="text-sm leading-relaxed text-texto-sutil">{inline(linha)}</p>;
       })}
     </div>
   );

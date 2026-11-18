@@ -84,7 +84,7 @@ export function Tarefas({ tarefas, vinculos, categorias, visao, dataBase, abrirN
           sub={
             <>
               {pendentes.length} pendentes ·{" "}
-              {altas > 0 && <span className="text-red-400 font-medium">{altas} alta prioridade · </span>}
+              {altas > 0 && <span className="text-falha-cor font-medium">{altas} alta prioridade · </span>}
               {concluidas.length} concluídas
             </>
           }
@@ -95,7 +95,7 @@ export function Tarefas({ tarefas, vinculos, categorias, visao, dataBase, abrirN
 
         <Subbar className="gap-3 md:gap-4">
           {/* Dia / Semana / Mês */}
-          <div className="flex items-center gap-1 rounded-lg border border-[#311C45] p-0.5">
+          <div className="flex items-center gap-1 rounded-lg border border-borda p-0.5">
             {(["dia", "semana", "mes"] as const).map((v) => (
               <button
                 key={v}
@@ -103,7 +103,7 @@ export function Tarefas({ tarefas, vinculos, categorias, visao, dataBase, abrirN
                 onClick={() => setParam("ver", v === "dia" ? null : v)}
                 className={cn(
                   "px-3 py-1 rounded-md text-[11px] font-medium transition-colors",
-                  visao === v ? "bg-brand-400/15 text-brand-400" : "text-[#968F88] hover:text-[#DDDBD9]",
+                  visao === v ? "bg-brand-400/15 text-brand-400" : "text-texto-mudo hover:text-texto-suave",
                 )}
               >
                 {{ dia: "Dia", semana: "Semana", mes: "Mês" }[v]}
@@ -111,17 +111,17 @@ export function Tarefas({ tarefas, vinculos, categorias, visao, dataBase, abrirN
             ))}
           </div>
           {visao !== "dia" && <NavegacaoPeriodo visao={visao} base={base} onChange={(d) => setParam("data", d === hoje ? null : d)} />}
-          <div className="w-px h-4 bg-[#311C45] shrink-0" />
+          <div className="w-px h-4 bg-superficie-2 shrink-0" />
           {filtros}
         </Subbar>
 
         {total > 0 && visao === "dia" && (
-          <div className="px-4 md:px-6 py-3 border-b border-[#311C45] shrink-0">
+          <div className="px-4 md:px-6 py-3 border-b border-borda shrink-0">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-medium text-[#968F88]">Progresso geral</span>
+              <span className="text-[10px] font-medium text-texto-mudo">Progresso geral</span>
               <span className="text-[10px] font-mono text-brand-400">{progresso}%</span>
             </div>
-            <div className="h-1 bg-[#311C45] rounded-full overflow-hidden">
+            <div className="h-1 bg-superficie-2 rounded-full overflow-hidden">
               <div className="h-full bg-brand-400 rounded-full transition-all duration-500" style={{ width: `${progresso}%` }} />
             </div>
           </div>
@@ -175,14 +175,14 @@ function VisaoDia({ pendentes, concluidas, onEditar }: { pendentes: TarefaComVin
         return (
           <div key={key} className="entrar" style={{ animationDelay: `${i * 0.05}s` }}>
             <button type="button" onClick={() => toggle(key)} className="flex items-center gap-2.5 mb-3 w-full text-left">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={cn("text-[#968F88] transition-transform duration-150", recolhido && "-rotate-90")}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={cn("text-texto-mudo transition-transform duration-150", recolhido && "-rotate-90")}>
                 <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span className={cn("text-xs font-semibold", feito ? "text-[#968F88]" : atras ? "text-red-400" : "text-[#DDDBD9]")}>{GRUPOS[key]}</span>
-              <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold", feito ? "bg-[#311C45] text-[#968F88]" : atras ? "bg-red-500/20 text-red-400" : "bg-brand-400/20 text-brand-400")}>
+              <span className={cn("text-xs font-semibold", feito ? "text-texto-mudo" : atras ? "text-falha-cor" : "text-texto-suave")}>{GRUPOS[key]}</span>
+              <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold", feito ? "bg-superficie-2 text-texto-mudo" : atras ? "bg-red-500/20 text-falha-cor" : "bg-brand-400/20 text-brand-400")}>
                 {itens.length}
               </span>
-              {key === "hoje" && <span className="ml-auto text-[10px] text-red-400 font-medium">Vence hoje</span>}
+              {key === "hoje" && <span className="ml-auto text-[10px] text-falha-cor font-medium">Vence hoje</span>}
             </button>
             {!recolhido && (
               <div className="space-y-2">
@@ -204,14 +204,14 @@ function CartaoTarefa({ tarefa: t, onEditar }: { tarefa: TarefaComVinculo; onEdi
   const feita = !!t.concluida_em;
   const hoje = hojeISO();
   const dias = t.vencimento ? diffDias(hoje, t.vencimento) : null;
-  const tomPrazo = feita ? "text-[#968F88] bg-[#311C45] border-[#5A496A]" : dias === null ? "text-[#968F88] bg-[#311C45] border-[#5A496A]" : dias < 0 ? "text-red-400 bg-red-500/10 border-red-500/20" : dias === 0 ? "text-red-400 bg-red-500/10 border-red-500/20" : dias === 1 ? "text-amber-400 bg-amber-500/10 border-amber-500/20" : "text-[#968F88] bg-[#311C45] border-[#5A496A]";
+  const tomPrazo = feita ? "text-texto-mudo bg-superficie-2 border-borda-forte" : dias === null ? "text-texto-mudo bg-superficie-2 border-borda-forte" : dias < 0 ? "text-falha-cor bg-red-500/10 border-red-500/20" : dias === 0 ? "text-falha-cor bg-red-500/10 border-red-500/20" : dias === 1 ? "text-alerta-cor bg-amber-500/10 border-amber-500/20" : "text-texto-mudo bg-superficie-2 border-borda-forte";
   const corP = PRIORIDADE_COR[t.prioridade];
 
   return (
     <div
       className={cn(
         "group flex gap-3.5 p-4 rounded-xl border transition-all duration-150",
-        feita ? "bg-transparent border-[#311C45]/40 opacity-50" : "bg-[#231431] border-[#311C45] hover:border-[#5A496A]",
+        feita ? "bg-transparent border-borda/40 opacity-50" : "bg-superficie border-borda hover:border-borda-forte",
         pending && "opacity-40",
       )}
     >
@@ -220,7 +220,7 @@ function CartaoTarefa({ tarefa: t, onEditar }: { tarefa: TarefaComVinculo; onEdi
         onClick={() => startTransition(() => alternarTarefa(t.id, !feita))}
         className={cn(
           "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all",
-          feita ? "bg-emerald-500 border-emerald-500" : "border-[#5A496A] hover:border-brand-400",
+          feita ? "bg-emerald-500 border-emerald-500" : "border-borda-forte hover:border-brand-400",
         )}
       >
         {feita && (
@@ -232,13 +232,13 @@ function CartaoTarefa({ tarefa: t, onEditar }: { tarefa: TarefaComVinculo; onEdi
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2 mb-1.5">
-          <button type="button" onClick={onEditar} className={cn("text-sm font-medium leading-snug text-left", feita ? "line-through text-[#968F88]" : "text-[#DDDBD9] hover:text-[#F5F5F4]")}>
+          <button type="button" onClick={onEditar} className={cn("text-sm font-medium leading-snug text-left", feita ? "line-through text-texto-mudo" : "text-texto-suave hover:text-texto")}>
             {t.titulo}
           </button>
           <button
             type="button"
             onClick={() => startTransition(() => excluirTarefa(t.id))}
-            className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded flex items-center justify-center text-[#968F88] hover:text-red-400 transition-all shrink-0"
+            className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded flex items-center justify-center text-texto-mudo hover:text-falha-cor transition-all shrink-0"
             title="Excluir"
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
@@ -246,25 +246,25 @@ function CartaoTarefa({ tarefa: t, onEditar }: { tarefa: TarefaComVinculo; onEdi
             </svg>
           </button>
         </div>
-        {t.descricao && !feita && <p className="text-[11px] text-[#968F88] leading-relaxed mb-2 line-clamp-2">{t.descricao}</p>}
+        {t.descricao && !feita && <p className="text-[11px] text-texto-mudo leading-relaxed mb-2 line-clamp-2">{t.descricao}</p>}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="flex items-center gap-1 text-[10px] text-[#968F88]">
+          <span className="flex items-center gap-1 text-[10px] text-texto-mudo">
             <span>{icone(t.categoria)}</span>
             {t.categoria}
           </span>
           {t.vinculoNome && (
             <>
-              <span className="text-[#5A496A]">·</span>
+              <span className="text-texto-apagado">·</span>
               <Link
                 href={linkVinculo(t)}
-                className="flex items-center gap-1 text-[10px] text-[#968F88] hover:text-brand-400"
+                className="flex items-center gap-1 text-[10px] text-texto-mudo hover:text-brand-400"
               >
                 <span className="w-3.5 h-3.5 rounded-sm flex items-center justify-center text-[7px] font-bold bg-brand-400/25 text-brand-300">{t.vinculoNome[0]}</span>
                 {t.vinculoNome}
               </Link>
             </>
           )}
-          <span className="text-[#5A496A]">·</span>
+          <span className="text-texto-apagado">·</span>
           <span className={cn("flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-medium", tomPrazo)}>
             <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
               <circle cx="4" cy="4" r="3.2" stroke="currentColor" strokeWidth="1.1" />
@@ -315,11 +315,11 @@ function NavegacaoPeriodo({ visao, base, onChange }: { visao: Visao; base: strin
 
   return (
     <div className="flex items-center gap-1">
-      <button type="button" onClick={() => mover(-1)} className="w-6 h-6 rounded-md flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/8">
+      <button type="button" onClick={() => mover(-1)} className="w-6 h-6 rounded-md flex items-center justify-center text-texto-mudo hover:text-texto-suave hover:bg-superficie-2">
         ‹
       </button>
-      <span className="text-xs font-medium text-[#DDDBD9] min-w-[140px] text-center">{rotulo}</span>
-      <button type="button" onClick={() => mover(1)} className="w-6 h-6 rounded-md flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/8">
+      <span className="text-xs font-medium text-texto-suave min-w-[140px] text-center">{rotulo}</span>
+      <button type="button" onClick={() => mover(1)} className="w-6 h-6 rounded-md flex items-center justify-center text-texto-mudo hover:text-texto-suave hover:bg-superficie-2">
         ›
       </button>
       {base !== hoje && (
@@ -346,18 +346,18 @@ function VisaoSemana({ tarefas, base, onEditar, onNova }: { tarefas: TarefaComVi
           const doDia = tarefas.filter((t) => t.vencimento === d);
           const ehHoje = d === hoje;
           return (
-            <div key={d} className={cn("flex flex-col rounded-xl border min-h-[420px] entrar", ehHoje ? "border-brand-400/40 bg-brand-400/5" : "border-[#311C45] bg-[#1B0F26]/40")} style={{ animationDelay: `${i * 0.04}s` }}>
-              <div className="flex items-center justify-between px-3 py-2.5 border-b border-[#311C45]">
+            <div key={d} className={cn("flex flex-col rounded-xl border min-h-[420px] entrar", ehHoje ? "border-brand-400/40 bg-brand-400/5" : "border-borda bg-campo/40")} style={{ animationDelay: `${i * 0.04}s` }}>
+              <div className="flex items-center justify-between px-3 py-2.5 border-b border-borda">
                 <div>
-                  <p className={cn("text-[10px] font-semibold uppercase tracking-wider", ehHoje ? "text-brand-400" : "text-[#968F88]")}>{DIAS_SEMANA[i]}</p>
-                  <p className={cn("text-sm font-mono font-semibold", ehHoje ? "text-[#F5F5F4]" : "text-[#DDDBD9]")}>{d.slice(8, 10)}</p>
+                  <p className={cn("text-[10px] font-semibold uppercase tracking-wider", ehHoje ? "text-brand-400" : "text-texto-mudo")}>{DIAS_SEMANA[i]}</p>
+                  <p className={cn("text-sm font-mono font-semibold", ehHoje ? "text-texto" : "text-texto-suave")}>{d.slice(8, 10)}</p>
                 </div>
-                <button type="button" onClick={() => onNova(d)} className="w-6 h-6 rounded-md flex items-center justify-center text-[#968F88] hover:text-brand-400 hover:bg-white/8 transition-colors" title="Nova tarefa neste dia">
+                <button type="button" onClick={() => onNova(d)} className="w-6 h-6 rounded-md flex items-center justify-center text-texto-mudo hover:text-brand-400 hover:bg-superficie-2 transition-colors" title="Nova tarefa neste dia">
                   +
                 </button>
               </div>
               <div className="flex-1 p-2 space-y-2 overflow-y-auto">
-                {doDia.length === 0 && <p className="text-[10px] text-[#5A496A] text-center pt-6">—</p>}
+                {doDia.length === 0 && <p className="text-[10px] text-texto-apagado text-center pt-6">—</p>}
                 {doDia.map((t) => (
                   <MiniTarefa key={t.id} tarefa={t} onEditar={() => onEditar(t)} />
                 ))}
@@ -368,7 +368,7 @@ function VisaoSemana({ tarefas, base, onEditar, onNova }: { tarefas: TarefaComVi
       </div>
       {semData.length > 0 && (
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88] mb-2">Sem data ({semData.length})</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo mb-2">Sem data ({semData.length})</p>
           <div className="grid grid-cols-4 gap-2">
             {semData.map((t) => (
               <MiniTarefa key={t.id} tarefa={t} onEditar={() => onEditar(t)} />
@@ -386,11 +386,11 @@ function MiniTarefa({ tarefa: t, onEditar }: { tarefa: TarefaComVinculo; onEdita
   const feita = !!t.concluida_em;
   const corP = PRIORIDADE_COR[t.prioridade];
   return (
-    <div className={cn("group flex items-start gap-2 p-2 rounded-lg border text-left transition-colors", feita ? "border-[#311C45]/40 opacity-50" : "bg-[#231431] border-[#311C45] hover:border-[#5A496A]", pending && "opacity-40")}>
+    <div className={cn("group flex items-start gap-2 p-2 rounded-lg border text-left transition-colors", feita ? "border-borda/40 opacity-50" : "bg-superficie border-borda hover:border-borda-forte", pending && "opacity-40")}>
       <button
         type="button"
         onClick={() => startTransition(() => alternarTarefa(t.id, !feita))}
-        className={cn("w-3.5 h-3.5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center", feita ? "bg-emerald-500 border-emerald-500" : "border-[#5A496A] hover:border-brand-400")}
+        className={cn("w-3.5 h-3.5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center", feita ? "bg-emerald-500 border-emerald-500" : "border-borda-forte hover:border-brand-400")}
       >
         {feita && (
           <svg width="7" height="7" viewBox="0 0 9 9" fill="none">
@@ -399,8 +399,8 @@ function MiniTarefa({ tarefa: t, onEditar }: { tarefa: TarefaComVinculo; onEdita
         )}
       </button>
       <button type="button" onClick={onEditar} className="flex-1 min-w-0 text-left">
-        <p className={cn("text-[11px] font-medium leading-snug line-clamp-2", feita ? "line-through text-[#968F88]" : "text-[#DDDBD9]")}>{t.titulo}</p>
-        <p className="mt-1 flex items-center gap-1.5 text-[9px] text-[#968F88] truncate">
+        <p className={cn("text-[11px] font-medium leading-snug line-clamp-2", feita ? "line-through text-texto-mudo" : "text-texto-suave")}>{t.titulo}</p>
+        <p className="mt-1 flex items-center gap-1.5 text-[9px] text-texto-mudo truncate">
           <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: corP }} />
           {icone(t.categoria)} {t.vinculoNome ?? t.categoria}
         </p>
@@ -423,7 +423,7 @@ function VisaoMes({ tarefas, base, onEditar, onNova }: { tarefas: TarefaComVincu
     <div className="space-y-3">
       <div className="grid grid-cols-7 gap-1">
         {DIAS_SEMANA.map((d) => (
-          <p key={d} className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88] text-center py-1">
+          <p key={d} className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo text-center py-1">
             {d}
           </p>
         ))}
@@ -440,22 +440,22 @@ function VisaoMes({ tarefas, base, onEditar, onNova }: { tarefas: TarefaComVincu
               onClick={() => setAberto(d)}
               className={cn(
                 "flex flex-col items-start rounded-lg border p-1 sm:p-1.5 min-h-[52px] sm:min-h-[86px] text-left transition-colors entrar",
-                doMes ? "bg-[#231431] border-[#311C45] hover:border-[#5A496A]" : "bg-transparent border-[#311C45]/40 opacity-40",
+                doMes ? "bg-superficie border-borda hover:border-borda-forte" : "bg-transparent border-borda/40 opacity-40",
                 ehHoje && "border-brand-400/60",
               )}
               style={{ animationDelay: `${(i % 7) * 0.02}s` }}
             >
-              <span className={cn("text-[11px] font-mono", ehHoje ? "text-brand-400 font-semibold" : "text-[#968F88]")}>{Number(d.slice(8, 10))}</span>
+              <span className={cn("text-[11px] font-mono", ehHoje ? "text-brand-400 font-semibold" : "text-texto-mudo")}>{Number(d.slice(8, 10))}</span>
               <div className="mt-1 space-y-0.5 w-full hidden sm:block">
                 {doDia.slice(0, 3).map((t) => (
-                  <p key={t.id} className={cn("text-[9px] leading-tight truncate px-1 rounded", t.concluida_em ? "text-[#5A496A] line-through" : atras ? "text-red-300 bg-red-500/10" : "text-[#DDDBD9] bg-white/5")}>
+                  <p key={t.id} className={cn("text-[9px] leading-tight truncate px-1 rounded", t.concluida_em ? "text-texto-apagado line-through" : atras ? "text-falha-cor bg-red-500/10" : "text-texto-suave bg-superficie-2")}>
                     {t.titulo}
                   </p>
                 ))}
-                {doDia.length > 3 && <p className="text-[9px] text-[#968F88] px-1">+{doDia.length - 3}</p>}
+                {doDia.length > 3 && <p className="text-[9px] text-texto-mudo px-1">+{doDia.length - 3}</p>}
               </div>
               {doDia.length > 0 && (
-                <span className={cn("sm:hidden mt-1 text-[9px] font-mono px-1 rounded", atras ? "text-red-300 bg-red-500/10" : pend.length ? "text-[#DDDBD9] bg-white/5" : "text-[#5A496A]")}>
+                <span className={cn("sm:hidden mt-1 text-[9px] font-mono px-1 rounded", atras ? "text-falha-cor bg-red-500/10" : pend.length ? "text-texto-suave bg-superficie-2" : "text-texto-apagado")}>
                   {doDia.length}
                 </span>
               )}
@@ -465,22 +465,22 @@ function VisaoMes({ tarefas, base, onEditar, onNova }: { tarefas: TarefaComVincu
       </div>
 
       {aberto && (
-        <div className="rounded-xl border border-[#311C45] bg-[#1B0F26] p-4 entrar">
+        <div className="rounded-xl border border-borda bg-campo p-4 entrar">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold text-[#DDDBD9]">
-              {rotuloDia(aberto)} <span className="text-[#968F88] font-normal">· {fmtData(aberto)}</span>
+            <p className="text-xs font-semibold text-texto-suave">
+              {rotuloDia(aberto)} <span className="text-texto-mudo font-normal">· {fmtData(aberto)}</span>
             </p>
             <div className="flex items-center gap-2">
               <button type="button" onClick={() => onNova(aberto)} className="px-2.5 py-1 text-[11px] text-brand-400 border border-brand-400/30 hover:bg-brand-400/10 rounded-lg transition-colors">
                 + Tarefa neste dia
               </button>
-              <button type="button" onClick={() => setAberto(null)} className="text-[#968F88] hover:text-[#DDDBD9] text-xs px-1">
+              <button type="button" onClick={() => setAberto(null)} className="text-texto-mudo hover:text-texto-suave text-xs px-1">
                 ×
               </button>
             </div>
           </div>
           {tarefas.filter((t) => t.vencimento === aberto).length === 0 ? (
-            <p className="text-xs text-[#968F88]">Nada agendado.</p>
+            <p className="text-xs text-texto-mudo">Nada agendado.</p>
           ) : (
             <div className="space-y-2">
               {tarefas

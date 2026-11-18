@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { BotaoTema } from "@/components/botao-tema";
 import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 import { cn } from "@/lib/cn";
 import {
@@ -83,8 +84,8 @@ export function BriefingPublico({
     return (
       <Moldura contato={contato}>
         <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-6 py-8 text-center">
-          <p className="text-lg font-semibold text-[#F5F5F4] mb-2">Briefing enviado 🎉</p>
-          <p className="text-sm text-[#C5C2BE] leading-relaxed">
+          <p className="text-lg font-semibold text-texto mb-2">Briefing enviado 🎉</p>
+          <p className="text-sm text-texto-sutil leading-relaxed">
             Obrigada, {cliente?.split(" ")[0] ?? "pessoa"}! Recebi tudo e já começo a trabalhar no {projeto}.
             <br />
             Se lembrar de algo que ficou de fora, é só me chamar.
@@ -97,10 +98,10 @@ export function BriefingPublico({
   return (
     <Moldura contato={contato}>
       <header className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-serif italic text-[#F5F5F4] mb-3">Briefing do seu site</h1>
-        {cliente && <p className="text-sm text-[#968F88] mb-4">{cliente} · {projeto}</p>}
+        <h1 className="text-2xl sm:text-3xl font-serif italic text-texto mb-3">Briefing do seu site</h1>
+        {cliente && <p className="text-sm text-texto-mudo mb-4">{cliente} · {projeto}</p>}
         {intro && (
-          <div className="space-y-3 text-sm text-[#C5C2BE] leading-relaxed">
+          <div className="space-y-3 text-sm text-texto-sutil leading-relaxed">
             {intro.split("\n").filter((l) => l.trim()).map((linha, i) => <p key={i}>{linha}</p>)}
           </div>
         )}
@@ -111,7 +112,7 @@ export function BriefingPublico({
       <div className="space-y-10 mt-8">
         {grupos.map((g) => (
           <section key={g.secao}>
-            <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#968F88] mb-5 pb-2 border-b border-[#311C45]">
+            <h2 className="text-[11px] font-semibold uppercase tracking-widest text-texto-mudo mb-5 pb-2 border-b border-borda">
               {g.secao}
             </h2>
             <div className="space-y-7">
@@ -130,15 +131,15 @@ export function BriefingPublico({
         ))}
       </div>
 
-      <div className="mt-12 pt-8 border-t border-[#311C45] space-y-4">
+      <div className="mt-12 pt-8 border-t border-borda space-y-4">
         {p.faltamObrigatorias.length > 0 && (
           <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3">
-            <p className="text-xs text-amber-200/90 leading-relaxed">
+            <p className="text-xs text-alerta-cor/90 leading-relaxed">
               Antes de enviar, só preciso destas: <strong>{p.faltamObrigatorias.map((q) => q.texto).join(" · ")}</strong>
             </p>
           </div>
         )}
-        {erroEnvio && <p className="text-xs text-red-400">{erroEnvio}</p>}
+        {erroEnvio && <p className="text-xs text-falha-cor">{erroEnvio}</p>}
 
         <button
           type="button"
@@ -153,19 +154,19 @@ export function BriefingPublico({
           className={cn(
             "w-full sm:w-auto px-6 py-3 rounded-lg text-sm font-semibold transition-colors",
             p.faltamObrigatorias.length > 0 || enviando
-              ? "bg-[#311C45] text-[#5A496A] cursor-not-allowed"
+              ? "bg-superficie-2 text-texto-apagado cursor-not-allowed"
               : "bg-brand-400 hover:bg-brand-300 text-white",
           )}
         >
           {enviando ? "Enviando…" : "Enviar briefing"}
         </button>
 
-        <p className="text-[11px] text-[#5A496A] leading-relaxed">
+        <p className="text-[11px] text-texto-apagado leading-relaxed">
           Suas respostas são salvas sozinhas conforme você escreve. Pode fechar e voltar depois pelo mesmo link —
           nada se perde. O botão acima é só pra me avisar que terminou.
         </p>
         {erroSalvar && (
-          <p className="text-[11px] text-red-400">
+          <p className="text-[11px] text-falha-cor">
             {erroSalvar} — copie o que escreveu antes de fechar a página, por segurança.
           </p>
         )}
@@ -176,15 +177,15 @@ export function BriefingPublico({
 
 function Progresso({ progresso: p }: { progresso: ReturnType<typeof progresso> }) {
   return (
-    <div className="sticky top-0 z-10 -mx-5 px-5 py-3 bg-[#150C1D]/95 backdrop-blur border-b border-[#311C45]">
+    <div className="sticky top-0 z-10 -mx-5 px-5 py-3 bg-fundo/95 backdrop-blur border-b border-borda">
       <div className="flex items-center justify-between gap-3 mb-2">
-        <span className="text-[11px] text-[#968F88]">
+        <span className="text-[11px] text-texto-mudo">
           {p.respondidas} de {p.total} respondidas
-          {p.naoSei > 0 && <span className="text-[#5A496A]"> · {p.naoSei} em aberto</span>}
+          {p.naoSei > 0 && <span className="text-texto-apagado"> · {p.naoSei} em aberto</span>}
         </span>
-        <span className="text-[11px] font-mono text-[#968F88]">{p.percentual}%</span>
+        <span className="text-[11px] font-mono text-texto-mudo">{p.percentual}%</span>
       </div>
-      <div className="h-1 rounded-full bg-[#311C45] overflow-hidden">
+      <div className="h-1 rounded-full bg-superficie-2 overflow-hidden">
         <div className="h-full bg-brand-400 transition-all duration-300" style={{ width: `${p.percentual}%` }} />
       </div>
     </div>
@@ -224,15 +225,15 @@ function CampoPergunta({
   };
 
   const campoCls =
-    "w-full bg-[#1B0F27] border border-[#311C45] rounded-lg px-3.5 py-2.5 text-sm text-[#DDDBD9] placeholder:text-[#5A496A] focus:outline-none focus:border-brand-400 transition-colors disabled:opacity-40";
+    "w-full bg-campo border border-borda rounded-lg px-3.5 py-2.5 text-sm text-texto-suave placeholder:text-texto-apagado focus:outline-none focus:border-brand-400 transition-colors disabled:opacity-40";
 
   return (
     <div>
-      <label htmlFor={pergunta.chave} className="block text-sm text-[#DDDBD9] leading-relaxed mb-1">
+      <label htmlFor={pergunta.chave} className="block text-sm text-texto-suave leading-relaxed mb-1">
         {pergunta.texto}
         {pergunta.obrigatoria && <span className="text-brand-400 ml-1" title="Obrigatória">*</span>}
       </label>
-      {pergunta.ajuda && <p className="text-[11px] text-[#968F88] leading-relaxed mb-2">{pergunta.ajuda}</p>}
+      {pergunta.ajuda && <p className="text-[11px] text-texto-mudo leading-relaxed mb-2">{pergunta.ajuda}</p>}
 
       {pergunta.tipo === "sim_nao" ? (
         <div className="flex gap-2">
@@ -254,7 +255,7 @@ function CampoPergunta({
                 "px-5 py-2 rounded-lg border text-sm transition-colors disabled:opacity-40",
                 valor === o.v
                   ? "bg-brand-400/15 text-brand-400 border-brand-400/30 font-medium"
-                  : "text-[#968F88] border-[#311C45] hover:border-[#5A496A]",
+                  : "text-texto-mudo border-borda hover:border-borda-forte",
               )}
             >
               {o.label}
@@ -287,20 +288,20 @@ function CampoPergunta({
 
       <div className="flex items-center justify-between gap-3 mt-1.5">
         {pergunta.obrigatoria ? (
-          <span className="text-[10px] text-[#5A496A]">Preciso desta pra montar o site</span>
+          <span className="text-[10px] text-texto-apagado">Preciso desta pra montar o site</span>
         ) : (
           <button
             type="button"
             onClick={alternarNaoSei}
             className={cn(
               "text-[11px] transition-colors",
-              naoSei ? "text-brand-400 font-medium" : "text-[#5A496A] hover:text-[#968F88]",
+              naoSei ? "text-brand-400 font-medium" : "text-texto-apagado hover:text-texto-mudo",
             )}
           >
             {naoSei ? "✓ não sei responder — a gente vê junto" : "não sei responder"}
           </button>
         )}
-        {salvando && <span className="text-[10px] text-[#5A496A]">salvando…</span>}
+        {salvando && <span className="text-[10px] text-texto-apagado">salvando…</span>}
       </div>
     </div>
   );
@@ -308,15 +309,16 @@ function CampoPergunta({
 
 function Moldura({ contato, children }: { contato: Contato; children: React.ReactNode }) {
   return (
-    <main className="min-h-dvh bg-[#150C1D] text-[#DDDBD9]">
+    <main className="min-h-dvh bg-fundo text-texto-suave">
       <div className="mx-auto max-w-2xl px-5 py-10 sm:py-14">
-        <header className="mb-8">
+        <header className="mb-8 flex items-center justify-between gap-4">
           <Image src="/marca/logo-gradiente.png" alt={contato.nome} width={531} height={131} priority className="h-8 w-auto" />
+          <BotaoTema variante="flutuante" />
         </header>
 
         {children}
 
-        <footer className="mt-14 pt-6 border-t border-[#311C45] text-[11px] text-[#5A496A] leading-relaxed">
+        <footer className="mt-14 pt-6 border-t border-borda text-[11px] text-texto-apagado leading-relaxed">
           {contato.nome} · {contato.titulo}
           {contato.email && <> · {contato.email}</>}
           {contato.telefone && <> · {contato.telefone}</>}

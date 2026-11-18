@@ -57,17 +57,17 @@ export default async function ProjetosPage({
           param="status"
           opcoes={[
             { valor: "", label: "Todos" },
-            { valor: "ativos", label: "Ativos", cor: "#B159C7" },
+            { valor: "ativos", label: "Ativos", cor: "var(--acento-texto)" },
             ...STATUS_PROJETO.map((s) => ({ valor: s, label: STATUS_PROJETO_LABEL[s] })),
           ]}
         />
-        <span className="text-[11px] font-mono text-[#968F88]">{lista.length} registros</span>
+        <span className="text-[11px] font-mono text-texto-mudo">{lista.length} registros</span>
       </Subbar>
 
       <div className="flex-1 overflow-auto">
         <table className="w-full min-w-[720px] text-sm">
-          <thead className="sticky top-0 bg-[#150C1D] z-10">
-            <tr className="border-b border-[#311C45]">
+          <thead className="sticky top-0 bg-fundo z-10">
+            <tr className="border-b border-borda">
               {["Projeto", "Cliente", "Tipo", "Status", "Valor", "Recebido", "Prazo", ""].map((h) => (
                 <Th key={h}>{h}</Th>
               ))}
@@ -81,30 +81,30 @@ export default async function ProjetosPage({
               return (
                 <Tr key={p.id}>
                   <Td>
-                    <Link href={`/projetos/${p.id}`} className="text-xs font-semibold text-[#DDDBD9] hover:text-brand-400">
+                    <Link href={`/projetos/${p.id}`} className="text-xs font-semibold text-texto-suave hover:text-brand-400">
                       {p.nome}
                     </Link>
                   </Td>
                   <Td>
                     <Link href={`/clientes/${p.cliente_id}`} className="flex items-center gap-2">
                       <Avatar nome={p.clientes?.empresa ?? p.clientes?.nome ?? "?"} tamanho={7} />
-                      <span className="text-xs text-[#C5C2BE]">{p.clientes?.empresa ?? p.clientes?.nome ?? "—"}</span>
+                      <span className="text-xs text-texto-sutil">{p.clientes?.empresa ?? p.clientes?.nome ?? "—"}</span>
                     </Link>
                   </Td>
                   <Td>{p.tipo ?? "—"}</Td>
                   <Td>
                     <Pill tom={tomStatus(p.status)}>{STATUS_PROJETO_LABEL[p.status]}</Pill>
                   </Td>
-                  <Td className="font-mono text-[#DDDBD9]">{fmt(p.valor_total)}</Td>
+                  <Td className="font-mono text-texto-suave">{fmt(p.valor_total)}</Td>
                   <Td className="w-36">
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 h-1 bg-[#311C45] rounded-full overflow-hidden">
+                      <div className="flex-1 h-1 bg-superficie-2 rounded-full overflow-hidden">
                         <div className="h-full rounded-full transition-all duration-500 bg-emerald-400" style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="text-[10px] font-mono text-[#968F88] w-8 text-right">{pct.toFixed(0)}%</span>
+                      <span className="text-[10px] font-mono text-texto-mudo w-8 text-right">{pct.toFixed(0)}%</span>
                     </div>
                   </Td>
-                  <Td className={atrasoPrazo ? "font-mono text-red-400" : "font-mono text-[#968F88]"}>{fmtData(p.prazo_entrega)}</Td>
+                  <Td className={atrasoPrazo ? "font-mono text-falha-cor" : "font-mono text-texto-mudo"}>{fmtData(p.prazo_entrega)}</Td>
                   <Td>
                     <BotaoLinha href={`/projetos/${p.id}`}>Abrir</BotaoLinha>
                   </Td>

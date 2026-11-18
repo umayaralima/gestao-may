@@ -58,7 +58,7 @@ export function ProjetoFormModal({ action, clientes, tipos, projeto, inicial, on
                 </option>
               ))}
             </Select>
-            <p className="mt-1 text-[11px] text-[#968F88]">
+            <p className="mt-1 text-[11px] text-texto-mudo">
               Faltou algum?{" "}
               <Link href="/configuracoes" className="text-brand-400 hover:text-brand-300">
                 Gerenciar serviços

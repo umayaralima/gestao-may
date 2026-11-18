@@ -55,7 +55,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         titulo={lead.empresa ?? lead.nome}
         sub={
           <>
-            <Link href="/pipeline" className="hover:text-[#DDDBD9]">
+            <Link href="/pipeline" className="hover:text-texto-suave">
               Pipeline
             </Link>{" "}
             › {ETAPA_LEAD_LABEL[lead.etapa]} · {lead.empresa ? lead.nome : lead.servico_interesse ?? "negócio"}
@@ -104,27 +104,27 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
       <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-5">
         {clienteConvertido && (
           <div className="flex items-center justify-between gap-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 entrar">
-            <p className="text-xs text-[#DDDBD9]">
+            <p className="text-xs text-texto-suave">
               Negócio fechado. Cliente:{" "}
-              <Link href={`/clientes/${clienteConvertido.id}`} className="font-medium text-emerald-400 hover:underline">
+              <Link href={`/clientes/${clienteConvertido.id}`} className="font-medium text-sucesso-cor hover:underline">
                 {clienteConvertido.empresa ?? clienteConvertido.nome}
               </Link>
             </p>
-            <Link href={`/projetos?novo=1&cliente=${clienteConvertido.id}`} className="text-xs text-emerald-400 hover:text-emerald-300 font-medium">
+            <Link href={`/projetos?novo=1&cliente=${clienteConvertido.id}`} className="text-xs text-sucesso-cor hover:text-sucesso-cor font-medium">
               Novo projeto →
             </Link>
           </div>
         )}
 
         {lead.etapa === "perdido" && (
-          <form action={motivoPerda} className="flex items-end gap-2 rounded-xl border border-[#311C45] bg-[#231431] px-5 py-4 entrar">
+          <form action={motivoPerda} className="flex items-end gap-2 rounded-xl border border-borda bg-superficie px-5 py-4 entrar">
             <div className="flex-1">
-              <label htmlFor="motivo_perda" className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88] block mb-1.5">
+              <label htmlFor="motivo_perda" className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo block mb-1.5">
                 Motivo da perda
               </label>
               <Input id="motivo_perda" name="motivo_perda" placeholder="Preço, prazo, fechou com outro, sumiu…" defaultValue={lead.motivo_perda ?? ""} />
             </div>
-            <button type="submit" className="px-3 py-2.5 text-xs text-[#968F88] border border-[#311C45] hover:border-[#5A496A] hover:text-[#DDDBD9] rounded-lg transition-colors">
+            <button type="submit" className="px-3 py-2.5 text-xs text-texto-mudo border border-borda hover:border-borda-forte hover:text-texto-suave rounded-lg transition-colors">
               Salvar
             </button>
           </form>
@@ -132,8 +132,8 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
 
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 entrar">
           <KpiCard label="Valor estimado" value={lead.valor_estimado !== null ? fmt(lead.valor_estimado) : "—"} sub={lead.servico_interesse ?? "serviço não definido"} />
-          <KpiCard label="Etapa" value={ETAPA_LEAD_LABEL[lead.etapa]} sub={`há ${diasNaEtapa} dia(s) nesta etapa`} accent={diasNaEtapa > 10 ? "text-amber-400" : undefined} />
-          <KpiCard label="Prioridade" value={PRIORIDADE_LABEL[lead.prioridade]} accent={lead.prioridade === "alta" ? "text-red-400" : lead.prioridade === "media" ? "text-amber-400" : "text-[#968F88]"} sub={`cadastrado ${fmtData(lead.criado_em)}`} />
+          <KpiCard label="Etapa" value={ETAPA_LEAD_LABEL[lead.etapa]} sub={`há ${diasNaEtapa} dia(s) nesta etapa`} accent={diasNaEtapa > 10 ? "text-alerta-cor" : undefined} />
+          <KpiCard label="Prioridade" value={PRIORIDADE_LABEL[lead.prioridade]} accent={lead.prioridade === "alta" ? "text-falha-cor" : lead.prioridade === "media" ? "text-alerta-cor" : "text-texto-mudo"} sub={`cadastrado ${fmtData(lead.criado_em)}`} />
           <KpiCard label="Interações" value={String((interacoes ?? []).length)} sub={interacoes?.[0] ? `última ${fmtData(interacoes[0].data)}` : "nenhuma ainda"} />
         </div>
 
@@ -142,8 +142,8 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
             <div className="flex items-center gap-3">
               <Avatar nome={lead.empresa ?? lead.nome} tamanho={11} />
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-[#F5F5F4] truncate">{lead.nome}</p>
-                <p className="text-[11px] text-[#968F88] truncate">{lead.empresa ?? "Sem empresa"}</p>
+                <p className="text-sm font-semibold text-texto truncate">{lead.nome}</p>
+                <p className="text-[11px] text-texto-mudo truncate">{lead.empresa ?? "Sem empresa"}</p>
               </div>
             </div>
             <dl className="space-y-2.5 text-xs">
@@ -177,39 +177,39 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
               <Linha k="Origem">{lead.origem ? ORIGEM_CLIENTE_LABEL[lead.origem as keyof typeof ORIGEM_CLIENTE_LABEL] ?? lead.origem : "—"}</Linha>
             </dl>
             {lead.mensagem && (
-              <div className="border-t border-[#311C45] pt-3">
-                <p className="text-[10px] font-semibold text-[#968F88] uppercase tracking-wider mb-1.5">O que escreveu</p>
-                <p className="text-[11px] text-[#C5C2BE] leading-relaxed whitespace-pre-wrap">{lead.mensagem}</p>
+              <div className="border-t border-borda pt-3">
+                <p className="text-[10px] font-semibold text-texto-mudo uppercase tracking-wider mb-1.5">O que escreveu</p>
+                <p className="text-[11px] text-texto-sutil leading-relaxed whitespace-pre-wrap">{lead.mensagem}</p>
               </div>
             )}
             {Object.keys(lead.respostas ?? {}).length > 0 && (
-              <div className="border-t border-[#311C45] pt-3">
-                <p className="text-[10px] font-semibold text-[#968F88] uppercase tracking-wider mb-2">Respostas do formulário</p>
+              <div className="border-t border-borda pt-3">
+                <p className="text-[10px] font-semibold text-texto-mudo uppercase tracking-wider mb-2">Respostas do formulário</p>
                 <dl className="space-y-2">
                   {Object.entries(lead.respostas).map(([pergunta, resposta]) => (
                     <div key={pergunta}>
-                      <dt className="text-[10px] text-[#968F88]">{pergunta}</dt>
-                      <dd className="text-[11px] text-[#C5C2BE] leading-relaxed">{resposta}</dd>
+                      <dt className="text-[10px] text-texto-mudo">{pergunta}</dt>
+                      <dd className="text-[11px] text-texto-sutil leading-relaxed">{resposta}</dd>
                     </div>
                   ))}
                 </dl>
               </div>
             )}
             {lead.observacoes && (
-              <div className="border-t border-[#311C45] pt-3">
-                <p className="text-[10px] font-semibold text-[#968F88] uppercase tracking-wider mb-1.5">Observações</p>
-                <p className="text-[11px] text-[#C5C2BE] leading-relaxed whitespace-pre-wrap">{lead.observacoes}</p>
+              <div className="border-t border-borda pt-3">
+                <p className="text-[10px] font-semibold text-texto-mudo uppercase tracking-wider mb-1.5">Observações</p>
+                <p className="text-[11px] text-texto-sutil leading-relaxed whitespace-pre-wrap">{lead.observacoes}</p>
               </div>
             )}
             {lead.motivo_perda && (
-              <div className="border-t border-[#311C45] pt-3">
+              <div className="border-t border-borda pt-3">
                 <Pill tom="error" dot={false}>
                   Perdido: {lead.motivo_perda}
                 </Pill>
               </div>
             )}
-            <form action={excluir} className="border-t border-[#311C45] pt-3">
-              <button type="submit" className="text-[11px] text-[#968F88] hover:text-red-400 transition-colors">
+            <form action={excluir} className="border-t border-borda pt-3">
+              <button type="submit" className="text-[11px] text-texto-mudo hover:text-falha-cor transition-colors">
                 Excluir negócio
               </button>
             </form>
@@ -218,7 +218,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           <div className="lg:col-span-2">
             {(propostas ?? []).length > 0 && (
               <div className="space-y-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88]">Propostas</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo">Propostas</p>
                 {(propostas ?? []).map((pr) => (
                   <CartaoProposta key={pr.id} p={pr} baseUrlPublico={baseUrl()} />
                 ))}
@@ -236,8 +236,8 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
 function Linha({ k, children }: { k: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <dt className="text-[#968F88]">{k}</dt>
-      <dd className="text-[#DDDBD9] truncate">{children}</dd>
+      <dt className="text-texto-mudo">{k}</dt>
+      <dd className="text-texto-suave truncate">{children}</dd>
     </div>
   );
 }

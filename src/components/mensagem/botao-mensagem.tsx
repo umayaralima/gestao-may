@@ -51,7 +51,7 @@ export function BotaoMensagem({
           "whitespace-nowrap transition-colors",
           variante === "linha"
             ? "px-2.5 py-1 text-[11px] text-brand-400 border border-brand-400/30 hover:bg-brand-400/10 rounded-lg"
-            : "px-3 py-1.5 text-xs text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg",
+            : "px-3 py-1.5 text-xs text-texto-mudo hover:text-texto-suave border border-borda hover:border-borda-forte rounded-lg",
         )}
         title="Montar mensagem a partir de um modelo"
       >
@@ -137,7 +137,7 @@ function PainelMensagem({
                   "px-2.5 py-1.5 text-[11px] rounded-lg border transition-colors text-left",
                   m.id === escolhidoId
                     ? "bg-brand-400/15 text-brand-400 border-brand-400/30 font-medium"
-                    : "text-[#968F88] border-[#311C45] hover:border-[#5A496A] hover:text-[#DDDBD9]",
+                    : "text-texto-mudo border-borda hover:border-borda-forte hover:text-texto-suave",
                 )}
               >
                 {m.nome}
@@ -150,7 +150,7 @@ function PainelMensagem({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <Rotulo htmlFor="mensagem-texto">Mensagem</Rotulo>
-          <span className="text-[10px] text-[#5A496A] font-mono">{texto.length} caracteres</span>
+          <span className="text-[10px] text-texto-apagado font-mono">{texto.length} caracteres</span>
         </div>
         <Textarea
           id="mensagem-texto"
@@ -162,15 +162,15 @@ function PainelMensagem({
           }}
           className="font-sans leading-relaxed"
         />
-        <p className="text-[10px] text-[#5A496A]">
+        <p className="text-[10px] text-texto-apagado">
           Pode ajustar à vontade antes de mandar — o modelo original não muda.
         </p>
       </div>
 
       {faltando.length > 0 && (
         <div className="flex gap-2 px-3 py-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25">
-          <span className="text-amber-400 text-xs shrink-0">⚠</span>
-          <p className="text-[11px] text-amber-200/90 leading-relaxed">
+          <span className="text-alerta-cor text-xs shrink-0">⚠</span>
+          <p className="text-[11px] text-alerta-cor/90 leading-relaxed">
             Sem valor no cadastro: <span className="font-mono">{faltando.join(", ")}</span>. As linhas
             correspondentes saíram da mensagem — confira se ficou faltando alguma informação.
           </p>
@@ -185,7 +185,7 @@ function PainelMensagem({
             onChange={(e) => setRegistrar(e.target.checked)}
             className="w-3.5 h-3.5 rounded accent-brand-400"
           />
-          <span className="text-[11px] text-[#968F88]">
+          <span className="text-[11px] text-texto-mudo">
             Registrar a interação {dono.tipo === "lead" ? "no lead" : "no cliente"} ao mandar
           </span>
         </label>
@@ -206,25 +206,25 @@ function PainelMensagem({
             target="_blank"
             rel="noreferrer"
             onClick={() => registrarSePedido("whatsapp")}
-            className="px-3 py-2 text-xs text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors"
+            className="px-3 py-2 text-xs text-sucesso-cor border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors"
           >
             Abrir no WhatsApp
           </a>
         ) : (
-          <span className="text-[10px] text-[#5A496A]">Sem WhatsApp no cadastro</span>
+          <span className="text-[10px] text-texto-apagado">Sem WhatsApp no cadastro</span>
         )}
 
         {mail && (
           <a
             href={mail}
             onClick={() => registrarSePedido("email")}
-            className="px-3 py-2 text-xs text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors"
+            className="px-3 py-2 text-xs text-texto-mudo hover:text-texto-suave border border-borda hover:border-borda-forte rounded-lg transition-colors"
           >
             Abrir no e-mail
           </a>
         )}
 
-        {pendente && <span className="text-[10px] text-[#5A496A]">registrando…</span>}
+        {pendente && <span className="text-[10px] text-texto-apagado">registrando…</span>}
       </div>
 
       <div className="flex justify-end pt-1">

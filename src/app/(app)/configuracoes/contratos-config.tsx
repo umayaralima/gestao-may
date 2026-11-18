@@ -41,8 +41,8 @@ export function ContratosConfig({
   return (
     <div className="space-y-5 entrar">
       <div>
-        <h2 className="text-lg font-semibold text-[#F5F5F4] mb-0.5">Contratos</h2>
-        <p className="text-xs text-[#968F88]">Seus dados, o corpo das cláusulas e o escopo de cada tipo de serviço</p>
+        <h2 className="text-lg font-semibold text-texto mb-0.5">Contratos</h2>
+        <p className="text-xs text-texto-mudo">Seus dados, o corpo das cláusulas e o escopo de cada tipo de serviço</p>
       </div>
 
       <DadosEcorpo config={config} onSalvo={onSalvo} />
@@ -54,7 +54,7 @@ export function ContratosConfig({
       </Secao>
 
       <Secao titulo="Modelos por tipo de serviço" sub="Cada tipo tem seu título, objeto (cláusula 1.1), prazo e Anexo I. Mudanças aqui não alteram contratos já gerados.">
-        {modelos.length === 0 && <p className="px-6 py-6 text-xs text-[#968F88]">Nenhum modelo ainda. Rode a migração 010 ou crie um abaixo.</p>}
+        {modelos.length === 0 && <p className="px-6 py-6 text-xs text-texto-mudo">Nenhum modelo ainda. Rode a migração 010 ou crie um abaixo.</p>}
         {modelos.map((m) => (
           <ModeloEditor key={m.id} modelo={m} onSalvo={onSalvo} />
         ))}
@@ -80,9 +80,9 @@ function TesteAutentique() {
       >
         {testando ? "Testando…" : "Testar conexão"}
       </button>
-      {resultado?.erro && <p className="text-[11px] text-red-400">{resultado.erro}</p>}
+      {resultado?.erro && <p className="text-[11px] text-falha-cor">{resultado.erro}</p>}
       {resultado?.conta && (
-        <p className="text-[11px] text-emerald-400">
+        <p className="text-[11px] text-sucesso-cor">
           Conectado: {resultado.conta} · {resultado.documentos}
         </p>
       )}
@@ -131,23 +131,23 @@ function DadosEcorpo({ config, onSalvo }: { config: Config; onSalvo: (msg: strin
             {verVariaveis ? "Esconder" : "Ver"} variáveis disponíveis
           </button>
           {verVariaveis && (
-            <ul className="rounded-lg border border-[#311C45] bg-[#150C1D] p-3 space-y-1.5">
+            <ul className="rounded-lg border border-borda bg-fundo p-3 space-y-1.5">
               {VARIAVEIS_CORPO.map(([v, d]) => (
                 <li key={v} className="text-[11px]">
-                  <code className="text-brand-400 font-mono">{v}</code> <span className="text-[#968F88]">— {d}</span>
+                  <code className="text-brand-400 font-mono">{v}</code> <span className="text-texto-mudo">— {d}</span>
                 </li>
               ))}
             </ul>
           )}
           <Textarea name="contrato_corpo" rows={18} defaultValue={config.contrato_corpo ?? ""} className="font-mono text-[11px]" />
-          <p className="text-[11px] text-[#5A496A]">
+          <p className="text-[11px] text-texto-apagado">
             Formatação: <code>#</code> título, <code>##</code> subtítulo, <code>###</code> cláusula, <code>-</code> item, <code>**negrito**</code>.
           </p>
         </div>
       </Secao>
 
       <div className="flex items-center justify-end gap-3">
-        {state.erro && <p className="text-xs text-red-400">{state.erro}</p>}
+        {state.erro && <p className="text-xs text-falha-cor">{state.erro}</p>}
         <BotaoConfirmar disabled={pending}>{pending ? "Salvando…" : "Salvar"}</BotaoConfirmar>
       </div>
     </form>
@@ -164,10 +164,10 @@ function ModeloEditor({ modelo, onSalvo }: { modelo: ModeloContrato; onSalvo: (m
   }, [state]);
 
   return (
-    <div className="border-b border-[#311C45]/60 last:border-b-0">
+    <div className="border-b border-borda/60 last:border-b-0">
       <button type="button" onClick={() => setAberto((v) => !v)} className="w-full flex items-center justify-between px-6 py-3 text-left hover:bg-white/[0.02] transition-colors">
-        <span className="text-sm text-[#DDDBD9] font-medium">{modelo.tipo_projeto}</span>
-        <span className="text-[10px] font-mono text-[#968F88]">
+        <span className="text-sm text-texto-suave font-medium">{modelo.tipo_projeto}</span>
+        <span className="text-[10px] font-mono text-texto-mudo">
           {modelo.prazo_extenso} <span className="ml-2">{aberto ? "−" : "+"}</span>
         </span>
       </button>
@@ -196,7 +196,7 @@ function ModeloEditor({ modelo, onSalvo }: { modelo: ModeloContrato; onSalvo: (m
               type="button"
               disabled={excluindo}
               onClick={() => confirm(`Excluir o modelo de ${modelo.tipo_projeto}?`) && excluir(() => excluirModeloContrato(modelo.id))}
-              className="text-[11px] text-[#968F88] hover:text-red-400 transition-colors disabled:opacity-40"
+              className="text-[11px] text-texto-mudo hover:text-falha-cor transition-colors disabled:opacity-40"
             >
               Excluir modelo
             </button>
@@ -211,11 +211,11 @@ function ModeloEditor({ modelo, onSalvo }: { modelo: ModeloContrato; onSalvo: (m
 function NovoModelo({ tipos, modelos }: { tipos: TipoProjeto[]; modelos: ModeloContrato[] }) {
   const [state, action, pending] = useActionState<FormState, FormData>(criarModeloContrato, {});
 
-  if (tipos.length === 0) return <p className="text-[11px] text-[#5A496A]">Todos os tipos de serviço já têm modelo.</p>;
+  if (tipos.length === 0) return <p className="text-[11px] text-texto-apagado">Todos os tipos de serviço já têm modelo.</p>;
 
   return (
     <form action={action} className="space-y-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88]">Novo modelo</p>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo">Novo modelo</p>
       <div className="flex flex-wrap gap-2">
         <div className="flex-1 min-w-[160px]">
           <Select name="tipo_projeto" className="py-2 text-xs" defaultValue={tipos[0].nome}>
@@ -245,10 +245,10 @@ function NovoModelo({ tipos, modelos }: { tipos: TipoProjeto[]; modelos: ModeloC
 
 function Secao({ titulo, sub, children }: { titulo: string; sub?: string; children: React.ReactNode }) {
   return (
-    <div className={cn("bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden")}>
-      <div className="px-6 py-4 border-b border-[#311C45]">
-        <p className="text-sm font-semibold text-[#F5F5F4]">{titulo}</p>
-        {sub && <p className="text-xs text-[#968F88] mt-0.5 leading-relaxed">{sub}</p>}
+    <div className={cn("bg-superficie border border-borda rounded-xl overflow-hidden")}>
+      <div className="px-6 py-4 border-b border-borda">
+        <p className="text-sm font-semibold text-texto">{titulo}</p>
+        {sub && <p className="text-xs text-texto-mudo mt-0.5 leading-relaxed">{sub}</p>}
       </div>
       {children}
     </div>

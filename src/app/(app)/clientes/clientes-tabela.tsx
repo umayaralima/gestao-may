@@ -76,7 +76,7 @@ export function ClientesTabela({ linhas, abrirNovo, sub, busca, subbar }: Props)
             {selecionados.size > 0 && (
               <div className="flex items-center gap-2 px-3 py-2 bg-brand-400/10 border border-brand-400/20 rounded-lg">
                 <span className="text-xs text-brand-400 font-medium">{selecionados.size} selecionados</span>
-                <button type="button" onClick={excluirSelecionados} disabled={pending} className="text-[11px] text-[#968F88] hover:text-red-400 transition-colors ml-1">
+                <button type="button" onClick={excluirSelecionados} disabled={pending} className="text-[11px] text-texto-mudo hover:text-falha-cor transition-colors ml-1">
                   {pending ? "Excluindo…" : "Excluir"}
                 </button>
               </div>
@@ -88,14 +88,14 @@ export function ClientesTabela({ linhas, abrirNovo, sub, busca, subbar }: Props)
 
           <div className="flex-1 overflow-auto">
             <table className="w-full min-w-[720px] text-sm">
-              <thead className="sticky top-0 bg-[#150C1D] z-10">
-                <tr className="border-b border-[#311C45]">
+              <thead className="sticky top-0 bg-fundo z-10">
+                <tr className="border-b border-borda">
                   <th className="pl-5 pr-3 py-3">
                     <input
                       type="checkbox"
                       checked={selecionados.size === linhas.length && linhas.length > 0}
                       onChange={toggleTodos}
-                      className="w-3.5 h-3.5 rounded border-[#5A496A] accent-brand-400 cursor-pointer"
+                      className="w-3.5 h-3.5 rounded border-borda-forte accent-brand-400 cursor-pointer"
                     />
                   </th>
                   {["Cliente", "Contato", "Fase", "Valor", "Proj.", "Últ. contato", ""].map((h) => (
@@ -113,7 +113,7 @@ export function ClientesTabela({ linhas, abrirNovo, sub, busca, subbar }: Props)
                     <tr
                       key={c.id}
                       onClick={() => setAberto((prev) => (prev === c.id ? null : c.id))}
-                      className={cn("border-b border-[#311C45]/60 hover:bg-white/[0.02] transition-colors cursor-pointer", sel && "bg-brand-400/5", aberto === c.id && "bg-brand-400/5")}
+                      className={cn("border-b border-borda/60 hover:bg-white/[0.02] transition-colors cursor-pointer", sel && "bg-brand-400/5", aberto === c.id && "bg-brand-400/5")}
                     >
                       <td className="pl-5 pr-3 py-3.5">
                         <input
@@ -121,23 +121,23 @@ export function ClientesTabela({ linhas, abrirNovo, sub, busca, subbar }: Props)
                           checked={sel}
                           onChange={() => toggle(c.id)}
                           onClick={(e) => e.stopPropagation()}
-                          className="w-3.5 h-3.5 rounded border-[#5A496A] accent-brand-400 cursor-pointer"
+                          className="w-3.5 h-3.5 rounded border-borda-forte accent-brand-400 cursor-pointer"
                         />
                       </td>
                       <td className="px-3 py-3.5">
                         <div className="flex items-center gap-3">
                           <Avatar nome={c.empresa ?? c.nome} />
                           <div>
-                            <p className="text-xs font-semibold text-[#DDDBD9]">{c.empresa ?? c.nome}</p>
-                            <p className="text-[10px] text-[#968F88]">
+                            <p className="text-xs font-semibold text-texto-suave">{c.empresa ?? c.nome}</p>
+                            <p className="text-[10px] text-texto-mudo">
                               {[c.nicho, c.origem ? ORIGEM_CLIENTE_LABEL[c.origem as keyof typeof ORIGEM_CLIENTE_LABEL] : null].filter(Boolean).join(" · ") || "—"}
                             </p>
                           </div>
                         </div>
                       </td>
                       <td className="px-3 py-3.5">
-                        <p className="text-xs text-[#C5C2BE]">{c.empresa ? c.nome : c.whatsapp ?? "—"}</p>
-                        <p className="text-[10px] text-[#968F88] font-mono">{c.email ?? c.whatsapp ?? ""}</p>
+                        <p className="text-xs text-texto-sutil">{c.empresa ? c.nome : c.whatsapp ?? "—"}</p>
+                        <p className="text-[10px] text-texto-mudo font-mono">{c.email ?? c.whatsapp ?? ""}</p>
                       </td>
                       <td className="px-3 py-3.5">
                         <div className="flex items-center gap-1.5 flex-wrap">
@@ -145,9 +145,9 @@ export function ClientesTabela({ linhas, abrirNovo, sub, busca, subbar }: Props)
                           {c.status === "inativo" && <BadgeStatusCliente status={c.status} />}
                         </div>
                       </td>
-                      <td className="px-3 py-3.5 text-xs font-mono text-[#DDDBD9]">{fmt(l.valor)}</td>
-                      <td className="px-3 py-3.5 text-xs font-mono text-[#968F88] text-center">{l.negocios}</td>
-                      <td className="px-3 py-3.5 text-[11px] font-mono text-[#968F88]">{l.ultimoContato ? fmtData(l.ultimoContato) : "—"}</td>
+                      <td className="px-3 py-3.5 text-xs font-mono text-texto-suave">{fmt(l.valor)}</td>
+                      <td className="px-3 py-3.5 text-xs font-mono text-texto-mudo text-center">{l.negocios}</td>
+                      <td className="px-3 py-3.5 text-[11px] font-mono text-texto-mudo">{l.ultimoContato ? fmtData(l.ultimoContato) : "—"}</td>
                       <td className="px-3 pr-5 py-3.5">
                         <BotaoLinha
                           onClick={(e) => {
@@ -182,21 +182,21 @@ function PainelDetalhe({ linha, onClose }: { linha: ClienteLinha; onClose: () =>
   void recebido;
 
   return (
-    <div className="fixed inset-y-0 right-0 z-40 w-full max-w-sm shadow-2xl lg:static lg:z-auto lg:w-80 lg:max-w-none lg:shadow-none shrink-0 border-l border-[#311C45] flex flex-col bg-[#1B0F26] overflow-hidden entrar">
-      <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[#311C45]">
-        <p className="text-xs font-semibold text-[#968F88] uppercase tracking-wider">Detalhes</p>
-        <button type="button" onClick={onClose} className="w-6 h-6 rounded-md flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/8 transition-colors">
+    <div className="fixed inset-y-0 right-0 z-40 w-full max-w-sm shadow-2xl lg:static lg:z-auto lg:w-80 lg:max-w-none lg:shadow-none shrink-0 border-l border-borda flex flex-col bg-campo overflow-hidden entrar">
+      <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-borda">
+        <p className="text-xs font-semibold text-texto-mudo uppercase tracking-wider">Detalhes</p>
+        <button type="button" onClick={onClose} className="w-6 h-6 rounded-md flex items-center justify-center text-texto-mudo hover:text-texto-suave hover:bg-superficie-2 transition-colors">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M2 2l8 8M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
       </div>
 
-      <div className="px-5 py-5 border-b border-[#311C45]">
+      <div className="px-5 py-5 border-b border-borda">
         <div className="flex items-center gap-3 mb-4">
           <Avatar nome={c.empresa ?? c.nome} tamanho={11} />
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-[#F5F5F4] truncate">{c.empresa ?? c.nome}</p>
+            <p className="text-sm font-semibold text-texto truncate">{c.empresa ?? c.nome}</p>
             <div className="flex items-center gap-1.5 flex-wrap">
               <Pill tom={FASE_CLIENTE_TOM[linha.fase]}>{FASE_CLIENTE_LABEL[linha.fase]}</Pill>
               {c.status === "inativo" && <BadgeStatusCliente status={c.status} />}
@@ -209,15 +209,15 @@ function PainelDetalhe({ linha, onClose }: { linha: ClienteLinha; onClose: () =>
             { label: "Projetos", value: String(linha.negocios) },
             { label: "Interações", value: String(linha.interacoes.length) },
           ].map((s) => (
-            <div key={s.label} className="bg-[#231431] rounded-lg p-2.5 text-center">
-              <p className="text-xs font-mono font-semibold text-[#DDDBD9] truncate">{s.value}</p>
-              <p className="text-[9px] text-[#968F88] mt-0.5">{s.label}</p>
+            <div key={s.label} className="bg-superficie rounded-lg p-2.5 text-center">
+              <p className="text-xs font-mono font-semibold text-texto-suave truncate">{s.value}</p>
+              <p className="text-[9px] text-texto-mudo mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex border-b border-[#311C45] px-2 pt-2">
+      <div className="flex border-b border-borda px-2 pt-2">
         {ABAS.map((t, i) => (
           <button
             key={t}
@@ -225,7 +225,7 @@ function PainelDetalhe({ linha, onClose }: { linha: ClienteLinha; onClose: () =>
             onClick={() => setAba(i)}
             className={cn(
               "px-3 py-2 text-[11px] font-medium transition-colors border-b-2 -mb-px",
-              aba === i ? "border-brand-400 text-brand-400" : "border-transparent text-[#968F88] hover:text-[#DDDBD9]",
+              aba === i ? "border-brand-400 text-brand-400" : "border-transparent text-texto-mudo hover:text-texto-suave",
             )}
           >
             {t}
@@ -251,7 +251,7 @@ function PainelDetalhe({ linha, onClose }: { linha: ClienteLinha; onClose: () =>
               <>
                 <Divisor />
                 <Secao titulo="Observações">
-                  <p className="text-[11px] text-[#C5C2BE] leading-relaxed whitespace-pre-wrap">{c.observacoes}</p>
+                  <p className="text-[11px] text-texto-sutil leading-relaxed whitespace-pre-wrap">{c.observacoes}</p>
                 </Secao>
               </>
             )}
@@ -268,12 +268,12 @@ function PainelDetalhe({ linha, onClose }: { linha: ClienteLinha; onClose: () =>
                     key={a.label}
                     href={a.href}
                     target={a.externo ? "_blank" : undefined}
-                    className="flex items-center justify-center gap-1.5 py-2 bg-[#231431] border border-[#311C45] hover:border-[#5A496A] rounded-lg text-[11px] text-[#C5C2BE] hover:text-[#DDDBD9] transition-colors"
+                    className="flex items-center justify-center gap-1.5 py-2 bg-superficie border border-borda hover:border-borda-forte rounded-lg text-[11px] text-texto-sutil hover:text-texto-suave transition-colors"
                   >
                     <span>{a.icone}</span> {a.label}
                   </Link>
                 ) : (
-                  <span key={a.label} className="flex items-center justify-center gap-1.5 py-2 bg-[#231431] border border-[#311C45] rounded-lg text-[11px] text-[#5A496A]">
+                  <span key={a.label} className="flex items-center justify-center gap-1.5 py-2 bg-superficie border border-borda rounded-lg text-[11px] text-texto-apagado">
                     <span>{a.icone}</span> {a.label}
                   </span>
                 ),
@@ -287,18 +287,18 @@ function PainelDetalhe({ linha, onClose }: { linha: ClienteLinha; onClose: () =>
 
         {aba === 1 && (
           <div className="px-5 py-4">
-            <p className="text-[10px] font-semibold text-[#968F88] uppercase tracking-wider mb-3">Projetos</p>
+            <p className="text-[10px] font-semibold text-texto-mudo uppercase tracking-wider mb-3">Projetos</p>
             {linha.projetos.length ? (
               <div className="space-y-2">
                 {linha.projetos.map((p) => (
-                  <Link key={p.id} href={`/projetos/${p.id}`} className="block bg-[#231431] border border-[#311C45] hover:border-[#5A496A] rounded-lg p-3 transition-colors">
+                  <Link key={p.id} href={`/projetos/${p.id}`} className="block bg-superficie border border-borda hover:border-borda-forte rounded-lg p-3 transition-colors">
                     <div className="flex items-start justify-between mb-1.5 gap-2">
-                      <span className="text-xs font-medium text-[#DDDBD9]">{p.nome}</span>
-                      <span className="text-[10px] font-mono text-emerald-400 shrink-0">{fmt(p.valor_total)}</span>
+                      <span className="text-xs font-medium text-texto-suave">{p.nome}</span>
+                      <span className="text-[10px] font-mono text-sucesso-cor shrink-0">{fmt(p.valor_total)}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className={cn("w-1.5 h-1.5 rounded-full", p.status === "cancelado" ? "bg-[#968F88]" : p.status === "concluido" ? "bg-emerald-400" : "bg-brand-300")} />
-                      <span className="text-[10px] text-[#968F88]">
+                      <span className={cn("w-1.5 h-1.5 rounded-full", p.status === "cancelado" ? "bg-texto-mudo" : p.status === "concluido" ? "bg-emerald-400" : "bg-brand-300")} />
+                      <span className="text-[10px] text-texto-mudo">
                         {STATUS_PROJETO_LABEL[p.status]}
                         {p.tipo && ` · ${p.tipo}`}
                       </span>
@@ -307,52 +307,52 @@ function PainelDetalhe({ linha, onClose }: { linha: ClienteLinha; onClose: () =>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-[#968F88] text-center py-8">Nenhum projeto ainda</p>
+              <p className="text-xs text-texto-mudo text-center py-8">Nenhum projeto ainda</p>
             )}
           </div>
         )}
 
         {aba === 2 && (
           <div className="px-5 py-4">
-            <p className="text-[10px] font-semibold text-[#968F88] uppercase tracking-wider mb-3">Histórico</p>
+            <p className="text-[10px] font-semibold text-texto-mudo uppercase tracking-wider mb-3">Histórico</p>
             {linha.interacoes.length ? (
               <div className="relative">
-                <div className="absolute left-3 top-0 bottom-0 w-px bg-[#311C45]" />
+                <div className="absolute left-3 top-0 bottom-0 w-px bg-superficie-2" />
                 <div className="space-y-4 pl-8">
                   {linha.interacoes.slice(0, 20).map((t) => (
                     <div key={t.id} className="relative">
-                      <div className="absolute -left-[26px] w-5 h-5 rounded-full bg-[#311C45] border border-[#5A496A] flex items-center justify-center text-[10px]">
+                      <div className="absolute -left-[26px] w-5 h-5 rounded-full bg-superficie-2 border border-borda-forte flex items-center justify-center text-[10px]">
                         {{ whatsapp: "💬", email: "✉️", instagram: "📸", ligacao: "📞", reuniao: "📅" }[t.canal ?? ""] ?? "📝"}
                       </div>
-                      <p className="text-xs font-medium text-[#DDDBD9]">{t.canal ? CANAL_INTERACAO_LABEL[t.canal as keyof typeof CANAL_INTERACAO_LABEL] ?? t.canal : "Interação"}</p>
-                      <p className="text-[10px] font-mono text-[#968F88] mt-0.5">{fmtData(t.data)}</p>
-                      <p className="text-[10px] text-[#968F88] mt-1 leading-relaxed">{t.resumo}</p>
+                      <p className="text-xs font-medium text-texto-suave">{t.canal ? CANAL_INTERACAO_LABEL[t.canal as keyof typeof CANAL_INTERACAO_LABEL] ?? t.canal : "Interação"}</p>
+                      <p className="text-[10px] font-mono text-texto-mudo mt-0.5">{fmtData(t.data)}</p>
+                      <p className="text-[10px] text-texto-mudo mt-1 leading-relaxed">{t.resumo}</p>
                     </div>
                   ))}
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-[#968F88] text-center py-8">Nenhuma interação registrada</p>
+              <p className="text-xs text-texto-mudo text-center py-8">Nenhuma interação registrada</p>
             )}
           </div>
         )}
 
         {aba === 3 && (
           <div className="px-5 py-4">
-            <p className="text-[10px] font-semibold text-[#968F88] uppercase tracking-wider mb-3">Contratos</p>
+            <p className="text-[10px] font-semibold text-texto-mudo uppercase tracking-wider mb-3">Contratos</p>
             {linha.contratos.length ? (
               linha.contratos.map((k) => (
-                <div key={k.id} className="flex items-center gap-3 py-2.5 border-b border-[#311C45]/60 last:border-0">
-                  <div className="w-7 h-7 rounded-lg bg-[#311C45] flex items-center justify-center text-[10px] font-bold text-[#968F88] shrink-0">DOC</div>
+                <div key={k.id} className="flex items-center gap-3 py-2.5 border-b border-borda/60 last:border-0">
+                  <div className="w-7 h-7 rounded-lg bg-superficie-2 flex items-center justify-center text-[10px] font-bold text-texto-mudo shrink-0">DOC</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] text-[#DDDBD9] truncate">{k.projeto_nome}</p>
-                    <p className="text-[10px] text-[#968F88] font-mono">
+                    <p className="text-[11px] text-texto-suave truncate">{k.projeto_nome}</p>
+                    <p className="text-[10px] text-texto-mudo font-mono">
                       {k.status === "assinado" ? `Assinado ${fmtData(k.data_assinatura, false)}` : k.status === "enviado" ? `Enviado ${fmtData(k.data_envio, false)}` : "Rascunho"}
                     </p>
                   </div>
                   {k.status === "assinado" ? <Pill tom="success" dot={false}>OK</Pill> : k.status === "enviado" ? <Pill tom="warning" dot={false}>Aguardando</Pill> : <Pill tom="muted" dot={false}>Rascunho</Pill>}
                   {k.link_documento && (
-                    <a href={k.link_documento} target="_blank" rel="noreferrer" className="text-[#968F88] hover:text-brand-400 transition-colors" title="Abrir documento">
+                    <a href={k.link_documento} target="_blank" rel="noreferrer" className="text-texto-mudo hover:text-brand-400 transition-colors" title="Abrir documento">
                       <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                         <path d="M6.5 2v7M3.5 6l3 3 3-3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
                         <path d="M1.5 11h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
@@ -362,7 +362,7 @@ function PainelDetalhe({ linha, onClose }: { linha: ClienteLinha; onClose: () =>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-[#968F88] text-center py-8">Nenhum contrato</p>
+              <p className="text-xs text-texto-mudo text-center py-8">Nenhum contrato</p>
             )}
           </div>
         )}
@@ -374,19 +374,19 @@ function PainelDetalhe({ linha, onClose }: { linha: ClienteLinha; onClose: () =>
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold text-[#968F88] uppercase tracking-wider mb-2">{titulo}</p>
+      <p className="text-[10px] font-semibold text-texto-mudo uppercase tracking-wider mb-2">{titulo}</p>
       <div className="space-y-2.5">{children}</div>
     </div>
   );
 }
 function Divisor() {
-  return <div className="h-px bg-[#311C45]" />;
+  return <div className="h-px bg-superficie-2" />;
 }
 function InfoRow({ icone, valor, mono }: { icone: React.ReactNode; valor: string; mono?: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="text-[#968F88] shrink-0">{icone}</span>
-      <span className={cn("text-xs text-[#C5C2BE] truncate", mono && "font-mono text-[11px]")}>{valor}</span>
+      <span className="text-texto-mudo shrink-0">{icone}</span>
+      <span className={cn("text-xs text-texto-sutil truncate", mono && "font-mono text-[11px]")}>{valor}</span>
     </div>
   );
 }

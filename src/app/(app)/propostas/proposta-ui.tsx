@@ -91,7 +91,7 @@ function ModalProposta({
         </div>
 
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88] mb-1.5">Condição de pagamento</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo mb-1.5">Condição de pagamento</p>
           <input type="hidden" name="condicao" value={condicao} />
           <Escolha colunas={3} valor={condicao} onChange={setCondicao} opcoes={CONDICOES.map((c) => ({ valor: c.id, label: c.label }))} />
         </div>
@@ -104,8 +104,8 @@ function ModalProposta({
           {editarEscopo ? (
             <Textarea id="escopo" name="escopo" rows={12} defaultValue={escopo ?? ""} className="font-mono text-[11px]" />
           ) : (
-            <div className="rounded-lg border border-[#311C45] bg-[#150C1D] px-3 py-2.5 max-h-40 overflow-y-auto">
-              <pre className="whitespace-pre-wrap text-[11px] text-[#968F88] font-sans leading-relaxed">{carregando ? "Carregando…" : (escopo ?? "").replace(/^#+ /gm, "").slice(0, 600)}</pre>
+            <div className="rounded-lg border border-borda bg-fundo px-3 py-2.5 max-h-40 overflow-y-auto">
+              <pre className="whitespace-pre-wrap text-[11px] text-texto-mudo font-sans leading-relaxed">{carregando ? "Carregando…" : (escopo ?? "").replace(/^#+ /gm, "").slice(0, 600)}</pre>
               <button type="button" onClick={() => setEditarEscopo(true)} className="mt-2 text-[11px] text-brand-400 hover:text-brand-300">
                 Editar escopo desta proposta
               </button>
@@ -130,11 +130,11 @@ function ModalProposta({
 /* ---------- Cartão da proposta (lead, cliente e lista) ---------- */
 
 const TOM: Record<Proposta["status"], { rotulo: string; classe: string }> = {
-  rascunho: { rotulo: "Rascunho", classe: "bg-white/5 border-[#5A496A] text-[#968F88]" },
-  enviada: { rotulo: "Enviada", classe: "bg-amber-500/10 border-amber-500/20 text-amber-400" },
-  aceita: { rotulo: "Aceita", classe: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" },
-  recusada: { rotulo: "Pediu ajuste", classe: "bg-red-500/10 border-red-500/20 text-red-400" },
-  expirada: { rotulo: "Vencida", classe: "bg-white/5 border-[#5A496A] text-[#968F88]" },
+  rascunho: { rotulo: "Rascunho", classe: "bg-superficie-2 border-borda-forte text-texto-mudo" },
+  enviada: { rotulo: "Enviada", classe: "bg-amber-500/10 border-amber-500/20 text-alerta-cor" },
+  aceita: { rotulo: "Aceita", classe: "bg-emerald-500/10 border-emerald-500/20 text-sucesso-cor" },
+  recusada: { rotulo: "Pediu ajuste", classe: "bg-red-500/10 border-red-500/20 text-falha-cor" },
+  expirada: { rotulo: "Vencida", classe: "bg-superficie-2 border-borda-forte text-texto-mudo" },
 };
 
 export function CartaoProposta({ p, baseUrlPublico, compacto }: { p: Proposta; baseUrlPublico: string; compacto?: boolean }) {
@@ -160,16 +160,16 @@ export function CartaoProposta({ p, baseUrlPublico, compacto }: { p: Proposta; b
   };
 
   return (
-    <div className="bg-[#231431] border border-[#311C45] rounded-xl p-5 space-y-4">
+    <div className="bg-superficie border border-borda rounded-xl p-5 space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border", tom.classe)}>{tom.rotulo}</span>
-            {p.numero && <span className="text-[11px] font-mono text-[#968F88]">{p.numero}</span>}
+            {p.numero && <span className="text-[11px] font-mono text-texto-mudo">{p.numero}</span>}
           </div>
-          <p className="text-sm font-semibold text-[#DDDBD9] mt-1.5 truncate">{p.titulo}</p>
-          <p className="text-[11px] text-[#968F88] mt-0.5">
-            <span className="font-mono text-[#C5C2BE]">{formatBRL(p.valor)}</span>
+          <p className="text-sm font-semibold text-texto-suave mt-1.5 truncate">{p.titulo}</p>
+          <p className="text-[11px] text-texto-mudo mt-0.5">
+            <span className="font-mono text-texto-sutil">{formatBRL(p.valor)}</span>
             {p.prazo_extenso && ` · ${p.prazo_extenso}`}
             {p.validade && ` · vale até ${formatDate(p.validade)}`}
           </p>
@@ -178,7 +178,7 @@ export function CartaoProposta({ p, baseUrlPublico, compacto }: { p: Proposta; b
           <a href={link} target="_blank" rel="noreferrer" className="px-2.5 py-1.5 text-[11px] text-brand-400 border border-brand-400/30 hover:bg-brand-400/10 rounded-lg transition-colors">
             Ver como cliente ↗
           </a>
-          <button type="button" onClick={copiar} className="px-2.5 py-1.5 text-[11px] text-[#968F88] border border-[#311C45] hover:border-[#5A496A] hover:text-[#DDDBD9] rounded-lg transition-colors">
+          <button type="button" onClick={copiar} className="px-2.5 py-1.5 text-[11px] text-texto-mudo border border-borda hover:border-borda-forte hover:text-texto-suave rounded-lg transition-colors">
             {copiado ? "Copiado ✓" : "Copiar link"}
           </button>
           <button
@@ -191,7 +191,7 @@ export function CartaoProposta({ p, baseUrlPublico, compacto }: { p: Proposta; b
                 setBaixando(false);
               }
             }}
-            className="px-2.5 py-1.5 text-[11px] text-[#968F88] border border-[#311C45] hover:border-[#5A496A] hover:text-[#DDDBD9] rounded-lg transition-colors"
+            className="px-2.5 py-1.5 text-[11px] text-texto-mudo border border-borda hover:border-borda-forte hover:text-texto-suave rounded-lg transition-colors"
           >
             {baixando ? "Gerando…" : "PDF"}
           </button>
@@ -199,16 +199,16 @@ export function CartaoProposta({ p, baseUrlPublico, compacto }: { p: Proposta; b
       </div>
 
       {/* Situação do acompanhamento */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[#968F88]">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-texto-mudo">
         {p.enviada_em && <span>Enviada {fmtRelativo(p.enviada_em)}</span>}
         {p.vista_em ? <span className="text-brand-400">Aberta pelo cliente {fmtRelativo(p.vista_em)}</span> : p.enviada_em && <span>Ainda não aberta</span>}
-        {p.respondida_em && <span className={p.status === "aceita" ? "text-emerald-400" : "text-amber-400"}>Respondida {fmtRelativo(p.respondida_em)}</span>}
+        {p.respondida_em && <span className={p.status === "aceita" ? "text-sucesso-cor" : "text-alerta-cor"}>Respondida {fmtRelativo(p.respondida_em)}</span>}
       </div>
 
       {p.resposta_cliente && (
-        <div className="rounded-lg border border-[#311C45] bg-[#1B0F26] px-3 py-2.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88] mb-1">O cliente escreveu</p>
-          <p className="text-xs text-[#C5C2BE] leading-relaxed">{p.resposta_cliente}</p>
+        <div className="rounded-lg border border-borda bg-campo px-3 py-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo mb-1">O cliente escreveu</p>
+          <p className="text-xs text-texto-sutil leading-relaxed">{p.resposta_cliente}</p>
         </div>
       )}
 
@@ -223,17 +223,17 @@ export function CartaoProposta({ p, baseUrlPublico, compacto }: { p: Proposta; b
               </div>
             </form>
           ) : (
-            <details className="rounded-lg border border-[#311C45] bg-[#150C1D]">
+            <details className="rounded-lg border border-borda bg-fundo">
               <summary className="px-3 py-2 text-[11px] text-brand-400 cursor-pointer">Ver o texto da proposta</summary>
               <div className="px-4 py-3 max-h-80 overflow-y-auto">
-                <pre className="whitespace-pre-wrap text-[11px] text-[#968F88] font-sans leading-relaxed">{texto.replace(/^#+ /gm, "")}</pre>
+                <pre className="whitespace-pre-wrap text-[11px] text-texto-mudo font-sans leading-relaxed">{texto.replace(/^#+ /gm, "")}</pre>
               </div>
             </details>
           )}
         </>
       )}
 
-      <div className="flex flex-wrap items-center gap-2 border-t border-[#311C45] pt-4">
+      <div className="flex flex-wrap items-center gap-2 border-t border-borda pt-4">
         {p.status === "rascunho" && (
           <>
             <button
@@ -261,7 +261,7 @@ export function CartaoProposta({ p, baseUrlPublico, compacto }: { p: Proposta; b
               type="button"
               disabled={pendente}
               onClick={() => iniciar(async () => setErro((await responderProposta(p.id, "aceita")).erro ?? null))}
-              className="px-3 py-2 text-xs text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors"
+              className="px-3 py-2 text-xs text-sucesso-cor border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors"
             >
               Marcar aceita
             </button>
@@ -269,7 +269,7 @@ export function CartaoProposta({ p, baseUrlPublico, compacto }: { p: Proposta; b
               type="button"
               disabled={pendente}
               onClick={() => iniciar(async () => setErro((await responderProposta(p.id, "recusada")).erro ?? null))}
-              className="px-3 py-2 text-xs text-[#968F88] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors"
+              className="px-3 py-2 text-xs text-texto-mudo border border-borda hover:border-borda-forte rounded-lg transition-colors"
             >
               Marcar recusada
             </button>
@@ -280,11 +280,11 @@ export function CartaoProposta({ p, baseUrlPublico, compacto }: { p: Proposta; b
             Converter em cliente →
           </Link>
         )}
-        {erro && <span className="text-[11px] text-red-400">{erro}</span>}
+        {erro && <span className="text-[11px] text-falha-cor">{erro}</span>}
         <button
           type="button"
           onClick={() => confirm("Excluir esta proposta?") && iniciar(() => excluirProposta(p.id, p.lead_id))}
-          className="ml-auto text-[11px] text-[#968F88] hover:text-red-400 transition-colors"
+          className="ml-auto text-[11px] text-texto-mudo hover:text-falha-cor transition-colors"
         >
           Excluir
         </button>

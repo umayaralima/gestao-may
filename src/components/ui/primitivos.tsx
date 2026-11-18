@@ -22,10 +22,10 @@ export function Header({
   className?: string;
 }) {
   return (
-    <header className={cn("flex flex-col gap-3 px-4 py-4 border-b border-[#311C45] shrink-0 md:flex-row md:items-center md:justify-between md:gap-4 md:px-6", className)}>
+    <header className={cn("flex flex-col gap-3 px-4 py-4 border-b border-borda shrink-0 md:flex-row md:items-center md:justify-between md:gap-4 md:px-6", className)}>
       <div className="min-w-0">
-        <h1 className="text-base font-semibold text-[#F5F5F4]">{titulo}</h1>
-        {sub && <p className="text-xs text-[#968F88]">{sub}</p>}
+        <h1 className="text-base font-semibold text-texto">{titulo}</h1>
+        {sub && <p className="text-xs text-texto-mudo">{sub}</p>}
       </div>
       {children && <div className="flex flex-wrap items-center gap-2 md:gap-3 md:shrink-0">{Children.toArray(children)}</div>}
     </header>
@@ -34,7 +34,7 @@ export function Header({
 
 /** Barra secundária abaixo do header (filtros, contadores). */
 export function Subbar({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("flex flex-wrap items-center gap-3 px-4 py-3 border-b border-[#311C45] shrink-0 md:px-6", className)}>{Children.toArray(children)}</div>;
+  return <div className={cn("flex flex-wrap items-center gap-3 px-4 py-3 border-b border-borda shrink-0 md:px-6", className)}>{Children.toArray(children)}</div>;
 }
 
 /** Área rolável do conteúdo. */
@@ -48,14 +48,14 @@ export function Tela({ children, className }: { children: React.ReactNode; class
 }
 
 export function Card({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("bg-[#231431] border border-[#311C45] rounded-xl p-5", className)}>{children}</div>;
+  return <div className={cn("cartao bg-superficie border border-borda rounded-xl p-5", className)}>{children}</div>;
 }
 
 export function CardTitulo({ children, sub }: { children: React.ReactNode; sub?: React.ReactNode }) {
   return (
     <div>
-      <p className="text-sm font-semibold text-[#F5F5F4]">{children}</p>
-      {sub && <p className="text-xs text-[#968F88] mt-0.5">{sub}</p>}
+      <p className="text-sm font-semibold text-texto">{children}</p>
+      {sub && <p className="text-xs text-texto-mudo mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -81,25 +81,25 @@ export function KpiCard({
   meta?: { valor: number; atual: number };
 }) {
   const conteudo = (
-    <div className={cn("bg-[#231431] border border-[#311C45] rounded-xl p-5 flex flex-col gap-3 h-full", href && "hover:border-[#5A496A] transition-colors")}>
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-[#968F88]">{label}</p>
+    <div className={cn("bg-superficie border border-borda rounded-xl p-5 flex flex-col gap-3 h-full", href && "hover:border-borda-forte transition-colors")}>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-texto-mudo">{label}</p>
       <div>
-        <p className={cn("text-2xl font-semibold font-mono tracking-tight", accent ?? "text-[#F5F5F4]")}>{value}</p>
-        {sub && <p className="text-xs text-[#968F88] mt-0.5">{sub}</p>}
+        <p className={cn("text-2xl font-semibold font-mono tracking-tight", accent ?? "text-texto")}>{value}</p>
+        {sub && <p className="text-xs text-texto-mudo mt-0.5">{sub}</p>}
       </div>
       {meta && meta.valor > 0 && (
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] text-[#968F88]">Meta {fmtK(meta.valor)}</span>
+            <span className="text-[10px] text-texto-mudo">Meta {fmtK(meta.valor)}</span>
             <span className="text-[10px] font-mono text-brand-400">{Math.min(100, Math.round((meta.atual / meta.valor) * 100))}%</span>
           </div>
-          <div className="h-1 bg-[#311C45] rounded-full overflow-hidden">
+          <div className="h-1 bg-superficie-2 rounded-full overflow-hidden">
             <div className="h-full bg-brand-400 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (meta.atual / meta.valor) * 100)}%` }} />
           </div>
         </div>
       )}
       {trend && (
-        <div className={cn("inline-flex items-center gap-1 text-xs font-medium", trendUp ? "text-emerald-400" : "text-red-400")}>
+        <div className={cn("inline-flex items-center gap-1 text-xs font-medium", trendUp ? "text-sucesso-cor" : "text-falha-cor")}>
           <span>{trendUp ? "↑" : "↓"}</span>
           {trend}
         </div>
@@ -149,7 +149,7 @@ export function BotaoGhost({
   ...rest
 }: { children: React.ReactNode; href?: string; className?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const classes = cn(
-    "px-3 py-2 text-xs text-[#968F88] border border-[#311C45] hover:border-[#5A496A] hover:text-[#DDDBD9] rounded-lg transition-colors whitespace-nowrap disabled:opacity-40",
+    "px-3 py-2 text-xs text-texto-mudo border border-borda hover:border-borda-forte hover:text-texto-suave rounded-lg transition-colors whitespace-nowrap disabled:opacity-40",
     className,
   );
   if (href)
@@ -168,7 +168,7 @@ export function BotaoGhost({
 /** Botãozinho de linha ("Abrir", "Ver"). */
 export function BotaoLinha({ children, href, className, ...rest }: { children: React.ReactNode; href?: string; className?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const classes = cn(
-    "px-2.5 py-1 text-[11px] text-[#968F88] hover:text-brand-400 border border-[#311C45] hover:border-brand-400/30 rounded-lg transition-colors whitespace-nowrap",
+    "px-2.5 py-1 text-[11px] text-texto-mudo hover:text-brand-400 border border-borda hover:border-brand-400/30 rounded-lg transition-colors whitespace-nowrap",
     className,
   );
   if (href)
@@ -187,12 +187,12 @@ export function BotaoLinha({ children, href, className, ...rest }: { children: R
 /** Pílula de status com pontinho. */
 export function Pill({ tom, children, dot = true }: { tom: "success" | "warning" | "error" | "info" | "brand" | "muted"; children: React.ReactNode; dot?: boolean }) {
   const map = {
-    success: ["bg-emerald-500/10 border border-emerald-500/20 text-emerald-400", "bg-emerald-400"],
-    warning: ["bg-amber-500/10 border border-amber-500/20 text-amber-400", "bg-amber-400"],
-    error: ["bg-red-500/10 border border-red-500/20 text-red-400", "bg-red-400"],
-    info: ["bg-sky-500/10 border border-sky-500/20 text-sky-400", "bg-sky-400"],
+    success: ["bg-emerald-500/10 border border-emerald-500/20 text-sucesso-cor", "bg-emerald-400"],
+    warning: ["bg-amber-500/10 border border-amber-500/20 text-alerta-cor", "bg-amber-400"],
+    error: ["bg-red-500/10 border border-red-500/20 text-falha-cor", "bg-red-400"],
+    info: ["bg-sky-500/10 border border-sky-500/20 text-info-cor", "bg-sky-400"],
     brand: ["bg-brand-400/12 border border-brand-400/20 text-brand-400", "bg-brand-400"],
-    muted: ["bg-white/5 border border-[#5A496A] text-[#968F88]", "bg-[#968F88]"],
+    muted: ["bg-superficie-2 border border-borda-forte text-texto-mudo", "bg-texto-mudo"],
   } as const;
   const [cls, dotCls] = map[tom];
   return (
@@ -204,7 +204,7 @@ export function Pill({ tom, children, dot = true }: { tom: "success" | "warning"
 }
 
 /** Avatar de iniciais com cor derivada do nome (estilo dos cards do protótipo). */
-const PALETA = ["#B159C7", "#C17AD2", "#A151B5", "#34D399", "#FBBF24", "#60A5FA", "#FB923C", "#F472B6", "#38BDF8"];
+const PALETA = ["var(--acento-texto)", "var(--acento-texto)", "var(--acento-texto)", "var(--sucesso-cor)", "var(--alerta-cor)", "var(--info-cor)", "#FB923C", "#F472B6", "var(--info-cor)"];
 export function corDoNome(nome: string) {
   let h = 0;
   for (const c of nome) h = (h * 31 + c.charCodeAt(0)) >>> 0;
@@ -231,7 +231,7 @@ export function Avatar({ nome, tamanho = 8, className }: { nome: string; tamanho
 export function Busca({ placeholder, defaultValue, name = "q", className }: { placeholder: string; defaultValue?: string; name?: string; className?: string }) {
   return (
     <form className="relative flex-1 min-w-[180px] sm:flex-none">
-      <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#968F88]" width="12" height="12" viewBox="0 0 14 14" fill="none">
+      <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-texto-mudo" width="12" height="12" viewBox="0 0 14 14" fill="none">
         <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.5" />
         <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
@@ -241,7 +241,7 @@ export function Busca({ placeholder, defaultValue, name = "q", className }: { pl
         placeholder={placeholder}
         defaultValue={defaultValue}
         className={cn(
-          "bg-[#231431] border border-[#311C45] rounded-lg pl-8 pr-3 py-2 text-xs text-[#DDDBD9] placeholder:text-[#968F88] outline-none focus:border-brand-400/60 focus:ring-1 focus:ring-brand-400/20 transition-all w-full sm:w-56",
+          "bg-superficie border border-borda rounded-lg pl-8 pr-3 py-2 text-xs text-texto-suave placeholder:text-texto-mudo outline-none focus:border-brand-400/60 focus:ring-1 focus:ring-brand-400/20 transition-all w-full sm:w-56",
           className,
         )}
       />
@@ -253,31 +253,31 @@ export function Busca({ placeholder, defaultValue, name = "q", className }: { pl
 export function Vazio({ icone = "🔍", titulo, sub }: { icone?: string; titulo: string; sub?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-12 h-12 rounded-full bg-[#231431] border border-[#311C45] flex items-center justify-center text-xl mb-3">{icone}</div>
-      <p className="text-sm font-medium text-[#DDDBD9]">{titulo}</p>
-      {sub && <p className="text-xs text-[#968F88] mt-1">{sub}</p>}
+      <div className="w-12 h-12 rounded-full bg-superficie border border-borda flex items-center justify-center text-xl mb-3">{icone}</div>
+      <p className="text-sm font-medium text-texto-suave">{titulo}</p>
+      {sub && <p className="text-xs text-texto-mudo mt-1">{sub}</p>}
     </div>
   );
 }
 
 /* Tabela do protótipo */
 export function Th({ children, className }: { children?: React.ReactNode; className?: string }) {
-  return <th className={cn("px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-[#968F88]", className)}>{children}</th>;
+  return <th className={cn("px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-texto-mudo", className)}>{children}</th>;
 }
 export function Td({ children, className }: { children?: React.ReactNode; className?: string }) {
-  return <td className={cn("px-5 py-3.5 text-xs text-[#C5C2BE] align-middle", className)}>{children}</td>;
+  return <td className={cn("px-5 py-3.5 text-xs text-texto-sutil align-middle", className)}>{children}</td>;
 }
 export function Tr({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <tr className={cn("border-b border-[#311C45]/60 hover:bg-white/[0.02] transition-colors", className)}>{children}</tr>;
+  return <tr className={cn("border-b border-borda/60 hover:bg-white/[0.02] transition-colors", className)}>{children}</tr>;
 }
 
 /* Formulários */
 export const campoCls =
-  "w-full bg-[#150C1D] border border-[#311C45] rounded-lg px-3 py-2.5 text-sm text-[#DDDBD9] placeholder:text-[#968F88] outline-none focus:border-brand-400/60 focus:ring-1 focus:ring-brand-400/20 transition-all disabled:opacity-40";
+  "w-full bg-fundo border border-borda rounded-lg px-3 py-2.5 text-sm text-texto-suave placeholder:text-texto-mudo outline-none focus:border-brand-400/60 focus:ring-1 focus:ring-brand-400/20 transition-all disabled:opacity-40";
 
 export function Rotulo({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
   return (
-    <label htmlFor={htmlFor} className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88] block mb-1.5">
+    <label htmlFor={htmlFor} className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo block mb-1.5">
       {children}
     </label>
   );
@@ -300,14 +300,14 @@ export function Campo({ label, htmlFor, children, hint }: { label: string; htmlF
     <div>
       <Rotulo htmlFor={htmlFor}>{label}</Rotulo>
       {children}
-      {hint && <p className="mt-1 text-[11px] text-[#968F88]">{hint}</p>}
+      {hint && <p className="mt-1 text-[11px] text-texto-mudo">{hint}</p>}
     </div>
   );
 }
 export function MensagemErro({ children }: { children?: React.ReactNode }) {
   if (!children) return null;
   return (
-    <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+    <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-falha-cor">
       {children}
     </p>
   );

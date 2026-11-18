@@ -34,18 +34,18 @@ export function Despesas({
       {editando && <DespesaModal categorias={categorias} projetos={projetos} despesa={editando} onClose={() => setEditando(null)} />}
 
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88]">{despesas.length} lançamento(s)</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo">{despesas.length} lançamento(s)</p>
         <BotaoPrimario onClick={() => setNova(true)}>Nova despesa</BotaoPrimario>
       </div>
 
       {despesas.length === 0 ? (
         <Vazio icone="🧾" titulo="Nenhuma despesa lançada" sub="Hospedagem, licenças, ferramentas, anúncios — tudo que sai entra aqui." />
       ) : (
-        <div className="bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden">
+        <div className="bg-superficie border border-borda rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-sm">
-              <thead className="sticky top-0 bg-[#150C1D] z-10">
-                <tr className="border-b border-[#311C45]">
+              <thead className="sticky top-0 bg-fundo z-10">
+                <tr className="border-b border-borda">
                   {["Descrição", "Categoria", "Projeto", "Data", "Valor", "Situação", ""].map((h) => (
                     <Th key={h}>{h}</Th>
                   ))}
@@ -74,19 +74,19 @@ function LinhaDespesa({ d, icone, onEditar }: { d: DespesaLinha; icone: string; 
     <Tr className={cn(pendente && "opacity-40")}>
       <Td>
         <button type="button" onClick={onEditar} className="text-left">
-          <span className="text-xs font-medium text-[#DDDBD9] hover:text-brand-400 transition-colors">{d.descricao}</span>
-          {d.fornecedor && <span className="block text-[10px] text-[#968F88]">{d.fornecedor}</span>}
+          <span className="text-xs font-medium text-texto-suave hover:text-brand-400 transition-colors">{d.descricao}</span>
+          {d.fornecedor && <span className="block text-[10px] text-texto-mudo">{d.fornecedor}</span>}
         </button>
       </Td>
       <Td>
-        <span className="text-[11px] text-[#C5C2BE] whitespace-nowrap">
+        <span className="text-[11px] text-texto-sutil whitespace-nowrap">
           {icone} {d.categoria}
         </span>
         {d.recorrente && d.periodicidade && <span className="block text-[10px] text-brand-400">↻ {PERIODICIDADE_LABEL[d.periodicidade]}</span>}
       </Td>
-      <Td className="text-[11px] text-[#968F88] max-w-[160px] truncate">{d.projetoNome ?? "—"}</Td>
-      <Td className={cn("font-mono text-[11px]", vencida ? "text-red-400" : "text-[#968F88]")}>{formatDate(d.data)}</Td>
-      <Td className="font-mono text-sm font-semibold text-[#DDDBD9]">{formatBRL(d.valor)}</Td>
+      <Td className="text-[11px] text-texto-mudo max-w-[160px] truncate">{d.projetoNome ?? "—"}</Td>
+      <Td className={cn("font-mono text-[11px]", vencida ? "text-falha-cor" : "text-texto-mudo")}>{formatDate(d.data)}</Td>
+      <Td className="font-mono text-sm font-semibold text-texto-suave">{formatBRL(d.valor)}</Td>
       <Td>
         {pago ? (
           <Pill tom="success">Pago {formatDate(d.pago_em)}</Pill>
@@ -103,7 +103,7 @@ function LinhaDespesa({ d, icone, onEditar }: { d: DespesaLinha; icone: string; 
             onClick={() => iniciar(() => alternarPagamentoDespesa(d.id, !pago))}
             className={cn(
               "px-2.5 py-1 text-[11px] rounded-lg border transition-colors whitespace-nowrap",
-              pago ? "text-[#968F88] border-[#311C45] hover:border-[#5A496A]" : "text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10",
+              pago ? "text-texto-mudo border-borda hover:border-borda-forte" : "text-sucesso-cor border-emerald-500/30 hover:bg-emerald-500/10",
             )}
           >
             {pago ? "Desfazer" : "Marcar pago"}
@@ -111,7 +111,7 @@ function LinhaDespesa({ d, icone, onEditar }: { d: DespesaLinha; icone: string; 
           <button
             type="button"
             onClick={() => confirm("Excluir esta despesa?") && iniciar(() => excluirDespesa(d.id))}
-            className="w-6 h-6 rounded flex items-center justify-center text-[#5A496A] hover:text-red-400 transition-colors"
+            className="w-6 h-6 rounded flex items-center justify-center text-texto-apagado hover:text-falha-cor transition-colors"
             title="Excluir"
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
@@ -199,7 +199,7 @@ function DespesaModal({
           </Select>
         </Campo>
 
-        <div className="rounded-lg border border-[#311C45] bg-[#1B0F26] px-4 py-3 space-y-3">
+        <div className="rounded-lg border border-borda bg-campo px-4 py-3 space-y-3">
           <Marcador ativo={recorrente} onChange={setRecorrente} label="É uma despesa que se repete" />
           {recorrente && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -217,7 +217,7 @@ function DespesaModal({
               </Campo>
             </div>
           )}
-          <p className="text-[11px] text-[#5A496A]">O sistema lança a próxima sozinho quando a data chegar.</p>
+          <p className="text-[11px] text-texto-apagado">O sistema lança a próxima sozinho quando a data chegar.</p>
         </div>
 
         <Marcador ativo={pago} onChange={setPago} label="Já está paga" />
@@ -238,8 +238,8 @@ function DespesaModal({
 
 function Marcador({ ativo, onChange, label }: { ativo: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
-    <button type="button" onClick={() => onChange(!ativo)} className="flex items-center gap-2 text-xs text-[#C5C2BE]">
-      <span className={cn("w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0", ativo ? "bg-brand-400 border-brand-400" : "border-[#5A496A]")}>
+    <button type="button" onClick={() => onChange(!ativo)} className="flex items-center gap-2 text-xs text-texto-sutil">
+      <span className={cn("w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0", ativo ? "bg-brand-400 border-brand-400" : "border-borda-forte")}>
         {ativo && (
           <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
             <path d="M1.5 4.5l2.5 2.5 4-5" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />

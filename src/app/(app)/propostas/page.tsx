@@ -48,20 +48,20 @@ export default async function PropostasPage({ searchParams }: { searchParams: Pr
           rotulo="Situação"
           opcoes={[
             { valor: "", label: "Todas" },
-            { valor: "rascunho", label: "Rascunho", cor: "#968F88" },
-            { valor: "enviada", label: "Enviada", cor: "#FBBF24" },
-            { valor: "aceita", label: "Aceita", cor: "#34D399" },
-            { valor: "recusada", label: "Pediu ajuste", cor: "#F87171" },
-            { valor: "expirada", label: "Vencida", cor: "#5A496A" },
+            { valor: "rascunho", label: "Rascunho", cor: "var(--texto-mudo)" },
+            { valor: "enviada", label: "Enviada", cor: "var(--alerta-cor)" },
+            { valor: "aceita", label: "Aceita", cor: "var(--sucesso-cor)" },
+            { valor: "recusada", label: "Pediu ajuste", cor: "var(--falha-cor)" },
+            { valor: "expirada", label: "Vencida", cor: "var(--texto-apagado)" },
           ]}
         />
-        <span className="text-[11px] font-mono text-[#968F88]">{lista.length} proposta(s)</span>
+        <span className="text-[11px] font-mono text-texto-mudo">{lista.length} proposta(s)</span>
       </Subbar>
 
       <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-5">
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 entrar">
-          <KpiCard label="Aguardando" value={String(aguardando.length)} sub={formatBRL(soma((p) => p.status === "enviada"))} accent="text-amber-400" />
-          <KpiCard label="Aceitas" value={String(aceitas.length)} sub={formatBRL(soma((p) => p.status === "aceita"))} accent="text-emerald-400" />
+          <KpiCard label="Aguardando" value={String(aguardando.length)} sub={formatBRL(soma((p) => p.status === "enviada"))} accent="text-alerta-cor" />
+          <KpiCard label="Aceitas" value={String(aceitas.length)} sub={formatBRL(soma((p) => p.status === "aceita"))} accent="text-sucesso-cor" />
           <KpiCard label="Taxa de aceite" value={taxa !== null ? `${taxa}%` : "—"} sub={respondidas.length ? `${aceitas.length} de ${respondidas.length} respondidas` : "sem respostas ainda"} />
           <KpiCard label="Abertas pelo cliente" value={`${aguardando.filter((p) => p.vista_em).length}/${aguardando.length}`} sub="das que estão aguardando" />
         </div>
@@ -75,7 +75,7 @@ export default async function PropostasPage({ searchParams }: { searchParams: Pr
                 {p.dono && (
                   <Link
                     href={p.dono.tipo === "lead" ? `/pipeline/${p.dono.id}` : `/clientes/${p.dono.id}`}
-                    className="inline-block text-[11px] text-[#968F88] hover:text-brand-400 transition-colors"
+                    className="inline-block text-[11px] text-texto-mudo hover:text-brand-400 transition-colors"
                   >
                     {p.dono.empresa ?? p.dono.nome} ↗
                   </Link>

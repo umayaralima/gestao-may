@@ -52,12 +52,12 @@ export function Kanban({ leads, tipos, abrirNovo, busca, filtro, diasParado }: P
         >
           {busca}
           {filtro}
-          <div className="w-px h-5 bg-[#311C45]" />
+          <div className="w-px h-5 bg-superficie-2" />
           <BotaoPrimario onClick={() => setNovo("novo")}>Novo negócio</BotaoPrimario>
         </Header>
 
         {/* Faixa de resumo: valor por etapa + barra proporcional */}
-        <div className="flex items-center px-4 md:px-6 py-3 border-b border-[#311C45] gap-0 shrink-0 overflow-x-auto">
+        <div className="flex items-center px-4 md:px-6 py-3 border-b border-borda gap-0 shrink-0 overflow-x-auto">
           {colunas.map((c, i) => {
             const pct = total > 0 ? (c.total / total) * 100 : 0;
             const cor = ETAPA_LEAD_COR[c.etapa];
@@ -65,18 +65,18 @@ export function Kanban({ leads, tipos, abrirNovo, busca, filtro, diasParado }: P
               <div key={c.etapa} className="flex items-center">
                 <div className="flex items-center gap-3 px-4 py-1.5">
                   <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-[10px] text-[#968F88]">{ETAPA_LEAD_LABEL[c.etapa]}</span>
+                    <span className="text-[10px] text-texto-mudo">{ETAPA_LEAD_LABEL[c.etapa]}</span>
                     <span className="text-xs font-mono font-semibold" style={{ color: cor }}>
                       {fmtK(c.total)}
                     </span>
                   </div>
-                  <div className="h-6 w-16 bg-[#311C45] rounded-full overflow-hidden">
+                  <div className="h-6 w-16 bg-superficie-2 rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: cor, opacity: 0.7 }} />
                   </div>
-                  <span className="text-[10px] font-mono text-[#968F88]">{pct.toFixed(0)}%</span>
+                  <span className="text-[10px] font-mono text-texto-mudo">{pct.toFixed(0)}%</span>
                 </div>
                 {i < colunas.length - 1 && (
-                  <svg width="8" height="12" viewBox="0 0 8 12" fill="none" className="text-[#5A496A] shrink-0">
+                  <svg width="8" height="12" viewBox="0 0 8 12" fill="none" className="text-texto-apagado shrink-0">
                     <path d="M1 1l6 5-6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
@@ -126,12 +126,12 @@ function Coluna({
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cor }} />
-          <span className="text-xs font-semibold text-[#DDDBD9]">{ETAPA_LEAD_LABEL[etapa]}</span>
+          <span className="text-xs font-semibold text-texto-suave">{ETAPA_LEAD_LABEL[etapa]}</span>
           <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: `${cor}20`, color: cor }}>
             {itens.length}
           </span>
         </div>
-        <span className="text-[11px] font-mono text-[#968F88]">{fmt(total)}</span>
+        <span className="text-[11px] font-mono text-texto-mudo">{fmt(total)}</span>
       </div>
       <div className="h-0.5 rounded-full mb-3 mx-1" style={{ backgroundColor: `${cor}30` }}>
         <div className="h-full rounded-full transition-all duration-500" style={{ backgroundColor: cor, width: `${Math.min(100, (itens.length / 5) * 100)}%` }} />
@@ -143,7 +143,7 @@ function Coluna({
         <button
           type="button"
           onClick={onAdicionar}
-          className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-[#311C45] rounded-xl text-[11px] text-[#968F88] hover:text-[#C5C2BE] hover:border-[#5A496A] transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-borda rounded-xl text-[11px] text-texto-mudo hover:text-texto-sutil hover:border-borda-forte transition-colors"
         >
           <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
             <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -166,7 +166,7 @@ function CardNegocio({ lead, cor, podeVoltar, podeAvancar, diasParado }: { lead:
     <Link
       href={`/pipeline/${lead.id}`}
       className={cn(
-        "block bg-[#231431] border border-[#311C45] rounded-xl p-4 cursor-pointer hover:border-[#5A496A] transition-all duration-150 group select-none",
+        "block bg-superficie border border-borda rounded-xl p-4 cursor-pointer hover:border-borda-forte transition-all duration-150 group select-none",
         pending && "opacity-50",
       )}
     >
@@ -176,8 +176,8 @@ function CardNegocio({ lead, cor, podeVoltar, podeAvancar, diasParado }: { lead:
             {iniciais(lead.empresa ?? lead.nome)}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-[#DDDBD9] leading-tight truncate">{lead.empresa ?? lead.nome}</p>
-            <p className="text-[10px] text-[#968F88] mt-0.5 truncate">{lead.empresa ? lead.nome : lead.servico_interesse ?? ""}</p>
+            <p className="text-xs font-semibold text-texto-suave leading-tight truncate">{lead.empresa ?? lead.nome}</p>
+            <p className="text-[10px] text-texto-mudo mt-0.5 truncate">{lead.empresa ? lead.nome : lead.servico_interesse ?? ""}</p>
           </div>
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -189,7 +189,7 @@ function CardNegocio({ lead, cor, podeVoltar, podeAvancar, diasParado }: { lead:
                 mover("prev");
               }}
               title="Mover para etapa anterior"
-              className="w-5 h-5 rounded flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/8 transition-colors"
+              className="w-5 h-5 rounded flex items-center justify-center text-texto-mudo hover:text-texto-suave hover:bg-superficie-2 transition-colors"
             >
               <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                 <path d="M6 2L3 5l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -204,7 +204,7 @@ function CardNegocio({ lead, cor, podeVoltar, podeAvancar, diasParado }: { lead:
                 mover("next");
               }}
               title="Mover para próxima etapa"
-              className="w-5 h-5 rounded flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/8 transition-colors"
+              className="w-5 h-5 rounded flex items-center justify-center text-texto-mudo hover:text-texto-suave hover:bg-superficie-2 transition-colors"
             >
               <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                 <path d="M4 2l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -214,22 +214,22 @@ function CardNegocio({ lead, cor, podeVoltar, podeAvancar, diasParado }: { lead:
         </div>
       </div>
 
-      <p className="text-base font-semibold text-[#F5F5F4] font-mono mb-3">{lead.valor_estimado !== null ? fmt(lead.valor_estimado) : "—"}</p>
+      <p className="text-base font-semibold text-texto font-mono mb-3">{lead.valor_estimado !== null ? fmt(lead.valor_estimado) : "—"}</p>
 
       {lead.servico_interesse && lead.empresa && (
         <div className="flex flex-wrap gap-1 mb-3">
-          <span className="px-1.5 py-0.5 rounded text-[10px] text-[#968F88] bg-[#311C45] border border-[#5A496A]">{lead.servico_interesse}</span>
+          <span className="px-1.5 py-0.5 rounded text-[10px] text-texto-mudo bg-superficie-2 border border-borda-forte">{lead.servico_interesse}</span>
         </div>
       )}
 
-      <div className={cn("flex items-center gap-1.5 mb-3 p-2 rounded-lg bg-[#150C1D]", followAtrasado && "ring-1 ring-red-500/40")}>
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={cn("shrink-0", followAtrasado ? "text-red-400" : "text-[#968F88]")}>
+      <div className={cn("flex items-center gap-1.5 mb-3 p-2 rounded-lg bg-fundo", followAtrasado && "ring-1 ring-red-500/40")}>
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={cn("shrink-0", followAtrasado ? "text-falha-cor" : "text-texto-mudo")}>
           <circle cx="5" cy="5" r="4" stroke="currentColor" strokeWidth="1.2" />
           <path d="M5 3v2.5l1.5 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
         </svg>
-        <span className="text-[10px] text-[#C5C2BE] flex-1 truncate">{lead.nota_followup ?? (lead.proximo_followup ? "Follow-up" : "Sem próxima ação")}</span>
+        <span className="text-[10px] text-texto-sutil flex-1 truncate">{lead.nota_followup ?? (lead.proximo_followup ? "Follow-up" : "Sem próxima ação")}</span>
         {lead.proximo_followup && (
-          <span className={cn("text-[10px] font-mono shrink-0", followAtrasado ? "text-red-400" : "text-[#968F88]")}>{rotuloDia(lead.proximo_followup)}</span>
+          <span className={cn("text-[10px] font-mono shrink-0", followAtrasado ? "text-falha-cor" : "text-texto-mudo")}>{rotuloDia(lead.proximo_followup)}</span>
         )}
       </div>
 
@@ -242,11 +242,11 @@ function CardNegocio({ lead, cor, podeVoltar, podeAvancar, diasParado }: { lead:
         </div>
         <div className="flex items-center gap-2">
           {parado ? (
-            <span className="text-[10px] text-amber-400 font-mono" title="Há muito tempo nesta etapa">
+            <span className="text-[10px] text-alerta-cor font-mono" title="Há muito tempo nesta etapa">
               ⚠ {dias}d
             </span>
           ) : (
-            dias > 0 && <span className="text-[10px] text-[#968F88] font-mono">{dias}d</span>
+            dias > 0 && <span className="text-[10px] text-texto-mudo font-mono">{dias}d</span>
           )}
           <div className="w-5 h-5 rounded-full bg-gradient-to-br from-brand-300 to-brand-600 flex items-center justify-center text-[9px] font-bold text-white" title="Mayara">
             MA

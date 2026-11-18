@@ -62,6 +62,59 @@
   --texto-sutil: #c5c2be;
   --texto-mudo: #968f88;
   --texto-rotulo: #968f88;
+  --campo: var(--lavanda-800);        /* fundo de input, code e card interno */
+  --texto-apagado: var(--lavanda-400); /* legenda, "a fazer", texto de apoio */
+  --acento-texto: var(--rosa-400);     /* rosa legível SOBRE o fundo do tema */
+  --sucesso-cor: #34d399;
+  --alerta-cor: #fbbf24;
+  --falha-cor: #f87171;
+  --info-cor: #60a5fa;
+  /* Séries de gráfico: precisam ser distinguíveis ENTRE SI, não semânticas.
+     São os 7 tons de rosa/roxo do guia; no claro eles escurecem, porque
+     lavanda clara sobre branco não se enxerga. */
+  --serie-1: #b159c7;
+  --serie-2: #c17ad2;
+  --serie-3: #d8b3e5;
+  --serie-4: #a151b5;
+  --serie-5: #cb90d9;
+  --serie-6: #61316d;
+  --serie-7: #e7ccee;
+  --esquema: dark;
+}
+
+/* ---------- Tema claro ----------
+   Só os SEMÂNTICOS mudam; a paleta da marca (rosa-*, lavanda-*) é a mesma nos dois.
+   O tema vive num atributo no <html>, escrito antes do primeiro paint em layout.tsx,
+   igual à sidebar recolhível: o CSS faz todo o trabalho, sem estado no React. */
+[data-tema="claro"] {
+  --fundo: #faf8fb;
+  --sidebar: #ffffff;
+  --superficie: #ffffff;
+  --superficie-2: #f2ecf5;
+  --superficie-hover: #e8dfed;
+  --campo: #ffffff;
+  --borda: #e7e1ec;
+  --borda-forte: #cfc6d7;
+  --texto: #1a1020;
+  --texto-suave: #2f2537;
+  --texto-sutil: #574d60;
+  --texto-mudo: #6b6273;
+  --texto-rotulo: #6b6273;
+  --texto-apagado: #8a8192;
+  /* rosa da marca escurecido: #b159c7 sobre branco não tem contraste pra texto pequeno */
+  --acento-texto: var(--rosa-700);
+  --sucesso-cor: #0f8a3c;
+  --alerta-cor: #b45309;
+  --falha-cor: #c02626;
+  --info-cor: #2563eb;
+  --serie-1: #a151b5;
+  --serie-2: #7e3f8d;
+  --serie-3: #c17ad2;
+  --serie-4: #61316d;
+  --serie-5: #b159c7;
+  --serie-6: #4a2554;
+  --serie-7: #cb90d9;
+  --esquema: light;
 }
 
 @theme inline {
@@ -154,6 +207,13 @@
   --color-texto-suave: var(--texto-suave);
   --color-texto-mudo: var(--texto-mudo);
   --color-texto-rotulo: var(--texto-rotulo);
+  --color-campo: var(--campo);
+  --color-texto-apagado: var(--texto-apagado);
+  --color-acento-texto: var(--acento-texto);
+  --color-sucesso-cor: var(--sucesso-cor);
+  --color-alerta-cor: var(--alerta-cor);
+  --color-falha-cor: var(--falha-cor);
+  --color-info-cor: var(--info-cor);
 
   --font-sans: var(--font-jakarta), system-ui, sans-serif;
   --font-serif: var(--font-dm-serif), Georgia, serif;
@@ -168,7 +228,7 @@ body {
   min-height: 100%;
   background: var(--fundo);
   color: var(--texto);
-  color-scheme: dark;
+  color-scheme: var(--esquema);
   font-family: var(--font-sans);
   font-weight: 400;
   line-height: 1.5;
@@ -193,12 +253,13 @@ h1, h2, h3, .titulo {
 
 /* Inputs de data/select no tema escuro */
 input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+[data-tema="claro"] input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
 
 /* Scrollbar fina do protótipo */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--lavanda-500); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--lavanda-400); }
+::-webkit-scrollbar-thumb { background: var(--borda-forte); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--texto-apagado); }
 
 /* Entrada suave das telas (a "leve animação" da tela inicial) */
 @keyframes entrar {
@@ -288,4 +349,24 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
+}
+
+
+/* ---------- Tema claro/escuro: o que troca por CSS ----------
+   Como a sidebar recolhível, quem decide é o atributo no <html>. O botão
+   (src/components/botao-tema.tsx) só reescreve o atributo. */
+.tema-icone-lua { display: none; }
+[data-tema="claro"] .tema-icone-sol { display: none; }
+[data-tema="claro"] .tema-icone-lua { display: block; }
+
+/* Símbolo da marca: o de fundo gradiente no escuro, o de traço no claro.
+   Esconde SEMPRE o do tema oposto, nunca força `display:block` no certo — assim
+   não briga com a regra da sidebar, que é quem decide se o símbolo aparece. */
+[data-tema="escuro"] .marca-simbolo-claro { display: none; }
+[data-tema="claro"] .marca-simbolo-gradiente { display: none; }
+
+/* No claro o card branco precisa de uma sombra discreta pra separar do fundo,
+   já que a borda sozinha some. No escuro, card é só borda (regra do wireframe). */
+[data-tema="claro"] .cartao {
+  box-shadow: 0 1px 2px rgb(26 16 32 / 0.04), 0 1px 3px rgb(26 16 32 / 0.06);
 }

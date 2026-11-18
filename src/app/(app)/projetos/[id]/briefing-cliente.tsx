@@ -73,13 +73,13 @@ export function BriefingCliente({
     return (
       <Card className="space-y-4">
         <div>
-          <p className="text-sm font-semibold text-[#F5F5F4] mb-1">Briefing do cliente</p>
-          <p className="text-xs text-[#968F88] leading-relaxed max-w-prose">
+          <p className="text-sm font-semibold text-texto mb-1">Briefing do cliente</p>
+          <p className="text-xs text-texto-mudo leading-relaxed max-w-prose">
             Gera um link pro cliente responder as perguntas sozinho. Ele salva conforme escreve e pode voltar depois,
             então não precisa terminar de uma vez. Você recebe um e-mail quando ele enviar.
           </p>
         </div>
-        {erro && <p className="text-xs text-red-400">{erro}</p>}
+        {erro && <p className="text-xs text-falha-cor">{erro}</p>}
         <button
           type="button"
           disabled={pendente}
@@ -99,8 +99,8 @@ export function BriefingCliente({
       <Card className="space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-[#F5F5F4] mb-1">Briefing do cliente</p>
-            <p className="text-[11px] text-[#968F88]">
+            <p className="text-sm font-semibold text-texto mb-1">Briefing do cliente</p>
+            <p className="text-[11px] text-texto-mudo">
               {respondido
                 ? `Enviado pelo cliente em ${fmtData(briefing.respondido_em)}`
                 : briefing.vista_em
@@ -114,7 +114,7 @@ export function BriefingCliente({
         </div>
 
         <div className="flex items-center gap-2">
-          <code className="flex-1 min-w-0 truncate text-[11px] font-mono text-[#968F88] bg-[#1B0F27] border border-[#311C45] rounded-lg px-3 py-2">
+          <code className="flex-1 min-w-0 truncate text-[11px] font-mono text-texto-mudo bg-campo border border-borda rounded-lg px-3 py-2">
             {link}
           </code>
           <button
@@ -128,24 +128,24 @@ export function BriefingCliente({
             href={link ?? "#"}
             target="_blank"
             rel="noreferrer"
-            className="px-3 py-2 text-[11px] text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors whitespace-nowrap"
+            className="px-3 py-2 text-[11px] text-texto-mudo hover:text-texto-suave border border-borda hover:border-borda-forte rounded-lg transition-colors whitespace-nowrap"
           >
             Abrir
           </a>
         </div>
 
         <div className="flex items-center gap-4 text-[11px]">
-          <span className="text-[#968F88]">
+          <span className="text-texto-mudo">
             {p.respondidas} de {p.total} respondidas
-            {p.naoSei > 0 && <span className="text-amber-400/80"> · {p.naoSei} sem resposta do cliente</span>}
+            {p.naoSei > 0 && <span className="text-alerta-cor/80"> · {p.naoSei} sem resposta do cliente</span>}
           </span>
-          <div className="flex-1 h-1 rounded-full bg-[#311C45] overflow-hidden">
+          <div className="flex-1 h-1 rounded-full bg-superficie-2 overflow-hidden">
             <div className="h-full bg-brand-400" style={{ width: `${p.percentual}%` }} />
           </div>
-          <span className="font-mono text-[#968F88]">{p.percentual}%</span>
+          <span className="font-mono text-texto-mudo">{p.percentual}%</span>
         </div>
 
-        {erro && <p className="text-xs text-red-400">{erro}</p>}
+        {erro && <p className="text-xs text-falha-cor">{erro}</p>}
 
         <div className="flex flex-wrap gap-2 pt-1">
           {respondido && (
@@ -153,7 +153,7 @@ export function BriefingCliente({
               type="button"
               disabled={pendente}
               onClick={() => rodar(() => reabrirBriefing(projetoId))}
-              className="px-3 py-1.5 text-[11px] text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors"
+              className="px-3 py-1.5 text-[11px] text-texto-mudo hover:text-texto-suave border border-borda hover:border-borda-forte rounded-lg transition-colors"
             >
               Reabrir pro cliente editar
             </button>
@@ -162,7 +162,7 @@ export function BriefingCliente({
             type="button"
             disabled={pendente}
             onClick={() => confirm("Gerar um link novo derruba o atual. O cliente precisará do endereço novo. Continuar?") && rodar(() => trocarTokenBriefing(projetoId))}
-            className="px-3 py-1.5 text-[11px] text-[#5A496A] hover:text-red-400 transition-colors"
+            className="px-3 py-1.5 text-[11px] text-texto-apagado hover:text-falha-cor transition-colors"
           >
             Gerar link novo
           </button>
@@ -171,7 +171,7 @@ export function BriefingCliente({
 
       {p.naoSei > 0 && (
         <Card className="border-amber-500/20 bg-amber-500/5">
-          <p className="text-xs text-amber-200/90 leading-relaxed">
+          <p className="text-xs text-alerta-cor/90 leading-relaxed">
             O cliente marcou <strong>{p.naoSei}</strong>{" "}
             {p.naoSei === 1 ? "pergunta" : "perguntas"} como &ldquo;não sei responder&rdquo;. É onde ele precisa de você —
             aparecem destacadas abaixo.
@@ -181,7 +181,7 @@ export function BriefingCliente({
 
       {grupos.map((g) => (
         <Card key={g.secao} className="space-y-5">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-[#968F88] pb-2 border-b border-[#311C45]">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-texto-mudo pb-2 border-b border-borda">
             {g.secao}
           </p>
           {g.perguntas.map((pergunta) => (
@@ -222,7 +222,7 @@ function LinhaResposta({
 
   return (
     <div>
-      <p className="text-[11px] text-[#968F88] leading-relaxed mb-1">{pergunta.texto}</p>
+      <p className="text-[11px] text-texto-mudo leading-relaxed mb-1">{pergunta.texto}</p>
 
       {editando ? (
         <div className="space-y-2">
@@ -231,7 +231,7 @@ function LinhaResposta({
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
             autoFocus
-            className="w-full bg-[#1B0F27] border border-[#311C45] rounded-lg px-3 py-2 text-sm text-[#DDDBD9] focus:outline-none focus:border-brand-400 transition-colors leading-relaxed"
+            className="w-full bg-campo border border-borda rounded-lg px-3 py-2 text-sm text-texto-suave focus:outline-none focus:border-brand-400 transition-colors leading-relaxed"
           />
           <div className="flex gap-2">
             <button
@@ -245,7 +245,7 @@ function LinhaResposta({
             <button
               type="button"
               onClick={() => { setTexto(resposta?.t ?? ""); setEditando(false); }}
-              className="px-3 py-1.5 text-[11px] text-[#968F88] hover:text-[#DDDBD9] transition-colors"
+              className="px-3 py-1.5 text-[11px] text-texto-mudo hover:text-texto-suave transition-colors"
             >
               Cancelar
             </button>
@@ -259,10 +259,10 @@ function LinhaResposta({
           className={cn(
             "w-full text-left text-sm rounded-lg px-3 py-2 border transition-colors",
             naoSei
-              ? "text-amber-300/90 bg-amber-500/10 border-amber-500/25 italic"
+              ? "text-alerta-cor/90 bg-amber-500/10 border-amber-500/25 italic"
               : vazia
-                ? "text-[#5A496A] border-dashed border-[#311C45] hover:border-[#5A496A] italic"
-                : "text-[#DDDBD9] bg-[#1B0F27] border-[#311C45] hover:border-[#5A496A] whitespace-pre-wrap leading-relaxed",
+                ? "text-texto-apagado border-dashed border-borda hover:border-borda-forte italic"
+                : "text-texto-suave bg-campo border-borda hover:border-borda-forte whitespace-pre-wrap leading-relaxed",
           )}
         >
           {naoSei

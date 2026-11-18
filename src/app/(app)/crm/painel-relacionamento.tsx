@@ -35,38 +35,38 @@ export function PainelRelacionamento({ followup, interacoes, acoes }: Props) {
       <Card className={cn(atrasado && "border-red-500/40", ehHoje && "border-amber-500/40")}>
         <div className="flex items-center justify-between mb-3">
           <CardTitulo>Próximo follow-up</CardTitulo>
-          {atrasado && <span className="px-2 py-0.5 rounded border bg-red-500/10 border-red-500/20 text-[10px] font-medium text-red-400">Atrasado</span>}
-          {ehHoje && <span className="px-2 py-0.5 rounded border bg-amber-500/10 border-amber-500/20 text-[10px] font-medium text-amber-400">Hoje</span>}
+          {atrasado && <span className="px-2 py-0.5 rounded border bg-red-500/10 border-red-500/20 text-[10px] font-medium text-falha-cor">Atrasado</span>}
+          {ehHoje && <span className="px-2 py-0.5 rounded border bg-amber-500/10 border-amber-500/20 text-[10px] font-medium text-alerta-cor">Hoje</span>}
         </div>
 
         {followup.data ? (
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
-              <p className={cn("text-lg font-mono font-semibold", atrasado ? "text-red-400" : ehHoje ? "text-amber-400" : "text-[#F5F5F4]")}>
-                {rotuloDia(followup.data)} <span className="text-xs font-normal text-[#968F88]">· {fmtData(followup.data)}</span>
+              <p className={cn("text-lg font-mono font-semibold", atrasado ? "text-falha-cor" : ehHoje ? "text-alerta-cor" : "text-texto")}>
+                {rotuloDia(followup.data)} <span className="text-xs font-normal text-texto-mudo">· {fmtData(followup.data)}</span>
               </p>
-              {followup.nota && <p className="mt-0.5 text-xs text-[#C5C2BE]">{followup.nota}</p>}
+              {followup.nota && <p className="mt-0.5 text-xs text-texto-sutil">{followup.nota}</p>}
             </div>
             <div className="flex gap-1.5 shrink-0">
               <form action={acoes.concluirFollowup}>
-                <button type="submit" className="px-2.5 py-1 text-[11px] text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors">
+                <button type="submit" className="px-2.5 py-1 text-[11px] text-sucesso-cor border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors">
                   Feito
                 </button>
               </form>
               <form action={() => acoes.adiarFollowup(1)}>
-                <button type="submit" className="px-2.5 py-1 text-[11px] text-[#968F88] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+                <button type="submit" className="px-2.5 py-1 text-[11px] text-texto-mudo border border-borda hover:border-borda-forte rounded-lg transition-colors">
                   +1 dia
                 </button>
               </form>
               <form action={() => acoes.adiarFollowup(7)}>
-                <button type="submit" className="px-2.5 py-1 text-[11px] text-[#968F88] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+                <button type="submit" className="px-2.5 py-1 text-[11px] text-texto-mudo border border-borda hover:border-borda-forte rounded-lg transition-colors">
                   +1 sem
                 </button>
               </form>
             </div>
           </div>
         ) : (
-          <p className="mb-4 text-xs text-[#968F88]">Nenhum follow-up agendado.</p>
+          <p className="mb-4 text-xs text-texto-mudo">Nenhum follow-up agendado.</p>
         )}
 
         <FollowupForm action={acoes.salvarFollowup} atual={followup} />
@@ -79,26 +79,26 @@ export function PainelRelacionamento({ followup, interacoes, acoes }: Props) {
         </div>
 
         {interacoes.length === 0 ? (
-          <p className="mt-4 text-xs text-[#968F88]">Nenhuma interação registrada.</p>
+          <p className="mt-4 text-xs text-texto-mudo">Nenhuma interação registrada.</p>
         ) : (
           <div className="relative mt-5">
-            <div className="absolute left-3 top-0 bottom-0 w-px bg-[#311C45]" />
+            <div className="absolute left-3 top-0 bottom-0 w-px bg-superficie-2" />
             <div className="space-y-4 pl-8">
               {interacoes.map((i) => (
                 <div key={i.id} className="relative group">
-                  <div className="absolute -left-[26px] w-5 h-5 rounded-full bg-[#311C45] border border-[#5A496A] flex items-center justify-center text-[10px]">
+                  <div className="absolute -left-[26px] w-5 h-5 rounded-full bg-superficie-2 border border-borda-forte flex items-center justify-center text-[10px]">
                     {ICONE[i.canal ?? "outro"] ?? "📝"}
                   </div>
                   <div className="flex items-baseline justify-between gap-3">
-                    <p className="text-xs font-medium text-[#DDDBD9]">{i.canal ? CANAL_INTERACAO_LABEL[i.canal as keyof typeof CANAL_INTERACAO_LABEL] ?? i.canal : "Interação"}</p>
+                    <p className="text-xs font-medium text-texto-suave">{i.canal ? CANAL_INTERACAO_LABEL[i.canal as keyof typeof CANAL_INTERACAO_LABEL] ?? i.canal : "Interação"}</p>
                     <form action={() => acoes.excluirInteracao(i.id)}>
-                      <button type="submit" className="opacity-0 group-hover:opacity-100 text-[10px] text-[#968F88] hover:text-red-400 transition-all">
+                      <button type="submit" className="opacity-0 group-hover:opacity-100 text-[10px] text-texto-mudo hover:text-falha-cor transition-all">
                         excluir
                       </button>
                     </form>
                   </div>
-                  <p className="text-[10px] font-mono text-[#968F88] mt-0.5">{fmtData(i.data)}</p>
-                  <p className="text-[11px] text-[#C5C2BE] mt-1 leading-relaxed whitespace-pre-wrap">{i.resumo}</p>
+                  <p className="text-[10px] font-mono text-texto-mudo mt-0.5">{fmtData(i.data)}</p>
+                  <p className="text-[11px] text-texto-sutil mt-1 leading-relaxed whitespace-pre-wrap">{i.resumo}</p>
                 </div>
               ))}
             </div>
@@ -112,7 +112,7 @@ export function PainelRelacionamento({ followup, interacoes, acoes }: Props) {
 function FollowupForm({ action, atual }: { action: (prev: FormState, fd: FormData) => Promise<FormState>; atual: { data: string | null; nota: string | null } }) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
   return (
-    <form action={formAction} className="space-y-3 border-t border-[#311C45] pt-4">
+    <form action={formAction} className="space-y-3 border-t border-borda pt-4">
       <div className="grid gap-3 sm:grid-cols-[150px_1fr]">
         <Campo label={atual.data ? "Reagendar" : "Agendar"} htmlFor="proximo_followup">
           <Input id="proximo_followup" name="proximo_followup" type="date" defaultValue={atual.data ?? ""} className="py-2 text-xs" />
@@ -125,7 +125,7 @@ function FollowupForm({ action, atual }: { action: (prev: FormState, fd: FormDat
       <button
         type="submit"
         disabled={pending}
-        className="px-3 py-2 text-xs text-[#968F88] border border-[#311C45] hover:border-[#5A496A] hover:text-[#DDDBD9] rounded-lg transition-colors disabled:opacity-40"
+        className="px-3 py-2 text-xs text-texto-mudo border border-borda hover:border-borda-forte hover:text-texto-suave rounded-lg transition-colors disabled:opacity-40"
       >
         {pending ? "Salvando…" : "Salvar follow-up"}
       </button>

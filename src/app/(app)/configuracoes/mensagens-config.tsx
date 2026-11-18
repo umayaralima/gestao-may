@@ -26,8 +26,8 @@ export function MensagensConfig({ modelos, onSalvo }: { modelos: ModeloMensagem[
   return (
     <div className="space-y-5 entrar">
       <div>
-        <h2 className="text-lg font-semibold text-[#F5F5F4] mb-0.5">Mensagens</h2>
-        <p className="text-xs text-[#968F88]">
+        <h2 className="text-lg font-semibold text-texto mb-0.5">Mensagens</h2>
+        <p className="text-xs text-texto-mudo">
           Os textos que você repete toda semana. Ficam a um clique na tela onde você está, já preenchidos com o nome,
           o valor e a data certos.
         </p>
@@ -38,12 +38,12 @@ export function MensagensConfig({ modelos, onSalvo }: { modelos: ModeloMensagem[
         return (
           <Secao key={s.id} titulo={s.label} sub={s.descricao} contagem={daSituacao.length}>
             {daSituacao.length === 0 && (
-              <p className="px-6 py-5 text-xs text-[#968F88]">Nenhum modelo nesta situação ainda.</p>
+              <p className="px-6 py-5 text-xs text-texto-mudo">Nenhum modelo nesta situação ainda.</p>
             )}
             {daSituacao.map((m) => (
               <ModeloEditor key={m.id} modelo={m} onSalvo={onSalvo} />
             ))}
-            <div className="px-6 py-4 border-t border-[#311C45]">
+            <div className="px-6 py-4 border-t border-borda">
               {criando === s.id ? (
                 <NovoModelo situacao={s.id} onPronto={() => { setCriando(null); onSalvo("Modelo criado"); }} onCancelar={() => setCriando(null)} />
               ) : (
@@ -75,18 +75,18 @@ function ModeloEditor({ modelo, onSalvo }: { modelo: ModeloMensagem; onSalvo: (m
   }, [estado.ok, onSalvo]);
 
   return (
-    <div className="border-b border-[#311C45] last:border-b-0">
+    <div className="border-b border-borda last:border-b-0">
       <div className="flex items-center gap-3 px-6 py-3">
         <button
           type="button"
           onClick={() => setAberto((v) => !v)}
           className="flex-1 flex items-center gap-2.5 text-left min-w-0"
         >
-          <span className={cn("text-[#5A496A] transition-transform text-[10px]", aberto && "rotate-90")}>▶</span>
-          <span className={cn("text-xs truncate", modelo.ativo ? "text-[#DDDBD9]" : "text-[#5A496A] line-through")}>
+          <span className={cn("text-texto-apagado transition-transform text-[10px]", aberto && "rotate-90")}>▶</span>
+          <span className={cn("text-xs truncate", modelo.ativo ? "text-texto-suave" : "text-texto-apagado line-through")}>
             {modelo.nome}
           </span>
-          <span className="text-[10px] text-[#5A496A] shrink-0">
+          <span className="text-[10px] text-texto-apagado shrink-0">
             {CANAIS.find((c) => c.id === modelo.canal)?.label}
           </span>
         </button>
@@ -95,7 +95,7 @@ function ModeloEditor({ modelo, onSalvo }: { modelo: ModeloMensagem; onSalvo: (m
           type="button"
           disabled={pendente}
           onClick={() => iniciar(async () => { await alternarModeloMensagem(modelo.id, !modelo.ativo); onSalvo(modelo.ativo ? "Modelo desativado" : "Modelo ativado"); })}
-          className="text-[10px] text-[#968F88] hover:text-[#DDDBD9] transition-colors shrink-0"
+          className="text-[10px] text-texto-mudo hover:text-texto-suave transition-colors shrink-0"
           title={modelo.ativo ? "Desativar (some das telas, sem apagar)" : "Ativar"}
         >
           {modelo.ativo ? "ativo" : "inativo"}
@@ -105,7 +105,7 @@ function ModeloEditor({ modelo, onSalvo }: { modelo: ModeloMensagem; onSalvo: (m
           type="button"
           disabled={pendente}
           onClick={() => confirm(`Excluir o modelo "${modelo.nome}"?`) && iniciar(async () => { await excluirModeloMensagem(modelo.id); onSalvo("Modelo excluído"); })}
-          className="w-6 h-6 rounded flex items-center justify-center text-[#5A496A] hover:text-red-400 transition-colors shrink-0"
+          className="w-6 h-6 rounded flex items-center justify-center text-texto-apagado hover:text-falha-cor transition-colors shrink-0"
           title="Excluir"
         >
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
@@ -140,7 +140,7 @@ function NovoModelo({ situacao, onPronto, onCancelar }: { situacao: Situacao; on
       <CamposModelo situacao={situacao} novo />
       <MensagemErro>{estado.erro}</MensagemErro>
       <div className="flex justify-end gap-2">
-        <button type="button" onClick={onCancelar} className="px-4 py-2 text-xs text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+        <button type="button" onClick={onCancelar} className="px-4 py-2 text-xs text-texto-mudo hover:text-texto-suave border border-borda hover:border-borda-forte rounded-lg transition-colors">
           Cancelar
         </button>
         <BotaoConfirmar disabled={enviando}>{enviando ? "Criando…" : "Criar modelo"}</BotaoConfirmar>
@@ -203,16 +203,16 @@ function CamposModelo({ modelo, situacao, novo = false }: { modelo?: ModeloMensa
         />
       </Campo>
 
-      <div className="rounded-lg border border-[#311C45] bg-[#1B0F27] px-4 py-3">
-        <p className="text-[10px] uppercase tracking-wider text-[#5A496A] mb-2">Variáveis disponíveis aqui</p>
+      <div className="rounded-lg border border-borda bg-campo px-4 py-3">
+        <p className="text-[10px] uppercase tracking-wider text-texto-apagado mb-2">Variáveis disponíveis aqui</p>
         <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1">
           {variaveis.map((v) => (
-            <p key={v.chave} className="text-[10px] text-[#968F88] leading-relaxed">
+            <p key={v.chave} className="text-[10px] text-texto-mudo leading-relaxed">
               <code className="text-brand-400 font-mono">{`{{${v.chave}}}`}</code> — {v.descricao}
             </p>
           ))}
         </div>
-        <p className="text-[10px] text-[#5A496A] mt-2 leading-relaxed">
+        <p className="text-[10px] text-texto-apagado mt-2 leading-relaxed">
           Variável sem valor no cadastro vira texto vazio, e a linha dela some da mensagem. Você revisa tudo antes de mandar.
         </p>
       </div>
@@ -222,13 +222,13 @@ function CamposModelo({ modelo, situacao, novo = false }: { modelo?: ModeloMensa
 
 function Secao({ titulo, sub, contagem, children }: { titulo: string; sub?: string; contagem: number; children: React.ReactNode }) {
   return (
-    <div className="bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden">
-      <div className="px-6 py-4 border-b border-[#311C45] flex items-center justify-between gap-3">
+    <div className="bg-superficie border border-borda rounded-xl overflow-hidden">
+      <div className="px-6 py-4 border-b border-borda flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-[#F5F5F4]">{titulo}</p>
-          {sub && <p className="text-xs text-[#968F88] mt-0.5 leading-relaxed">{sub}</p>}
+          <p className="text-sm font-semibold text-texto">{titulo}</p>
+          {sub && <p className="text-xs text-texto-mudo mt-0.5 leading-relaxed">{sub}</p>}
         </div>
-        <span className="text-[10px] text-[#5A496A] font-mono shrink-0">{contagem}</span>
+        <span className="text-[10px] text-texto-apagado font-mono shrink-0">{contagem}</span>
       </div>
       {children}
     </div>

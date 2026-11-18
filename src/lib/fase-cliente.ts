@@ -18,10 +18,10 @@ export const FASE_CLIENTE_LABEL: Record<FaseCliente, string> = {
   sem_projeto: "Sem projeto",
 };
 export const FASE_CLIENTE_COR: Record<FaseCliente, string> = {
-  em_andamento: "#C17AD2",
-  entregue: "#FBBF24",
-  concluido: "#34D399",
-  sem_projeto: "#968F88",
+  em_andamento: "var(--acento-texto)",
+  entregue: "var(--alerta-cor)",
+  concluido: "var(--sucesso-cor)",
+  sem_projeto: "var(--texto-mudo)",
 };
 export const FASE_CLIENTE_TOM: Record<FaseCliente, "brand" | "warning" | "success" | "muted"> = {
   em_andamento: "brand",

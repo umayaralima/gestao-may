@@ -62,14 +62,14 @@ export function PortalCliente({
     return (
       <Card className="space-y-4">
         <div>
-          <p className="text-sm font-semibold text-[#F5F5F4] mb-1">Portal do cliente</p>
-          <p className="text-xs text-[#968F88] leading-relaxed max-w-prose">
+          <p className="text-sm font-semibold text-texto mb-1">Portal do cliente</p>
+          <p className="text-xs text-texto-mudo leading-relaxed max-w-prose">
             Gera um link onde o cliente acompanha as etapas, aprova layout e manda material, sem precisar te chamar pra
             perguntar como está. Ele vê a fase do projeto, o andamento e as parcelas — não vê observação interna nem
             prazo de etapa.
           </p>
         </div>
-        {erro && <p className="text-xs text-red-400">{erro}</p>}
+        {erro && <p className="text-xs text-falha-cor">{erro}</p>}
         <button
           type="button"
           disabled={pendente}
@@ -90,8 +90,8 @@ export function PortalCliente({
       <Card className="space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-[#F5F5F4] mb-1">Portal do cliente</p>
-            <p className="text-[11px] text-[#968F88]">
+            <p className="text-sm font-semibold text-texto mb-1">Portal do cliente</p>
+            <p className="text-[11px] text-texto-mudo">
               {vistaEm
                 ? `Aberto pelo cliente em ${fmtData(vistaEm.slice(0, 10))}`
                 : liberadoEm
@@ -103,26 +103,26 @@ export function PortalCliente({
         </div>
 
         <div className="flex items-center gap-2">
-          <code className="flex-1 min-w-0 truncate text-[11px] font-mono text-[#968F88] bg-[#1B0F27] border border-[#311C45] rounded-lg px-3 py-2">
+          <code className="flex-1 min-w-0 truncate text-[11px] font-mono text-texto-mudo bg-campo border border-borda rounded-lg px-3 py-2">
             {link}
           </code>
           <button
             type="button"
             onClick={copiar}
-            className="shrink-0 px-3 py-2 border border-[#311C45] hover:border-brand-400 text-[#DDDBD9] text-xs font-semibold rounded-lg transition-colors"
+            className="shrink-0 px-3 py-2 border border-borda hover:border-brand-400 text-texto-suave text-xs font-semibold rounded-lg transition-colors"
           >
             {copiado ? "Copiado!" : "Copiar"}
           </button>
         </div>
 
-        {erro && <p className="text-xs text-red-400">{erro}</p>}
+        {erro && <p className="text-xs text-falha-cor">{erro}</p>}
 
         <div className="flex flex-wrap gap-3 pt-1">
           <button
             type="button"
             disabled={pendente}
             onClick={() => rodar(() => trocarTokenPortal(projetoId))}
-            className="text-[11px] text-[#968F88] hover:text-[#DDDBD9] underline underline-offset-2 disabled:opacity-40"
+            className="text-[11px] text-texto-mudo hover:text-texto-suave underline underline-offset-2 disabled:opacity-40"
           >
             Gerar link novo (derruba o atual)
           </button>
@@ -130,7 +130,7 @@ export function PortalCliente({
             type="button"
             disabled={pendente}
             onClick={() => rodar(() => revogarPortal(projetoId))}
-            className="text-[11px] text-red-400 hover:text-red-300 underline underline-offset-2 disabled:opacity-40"
+            className="text-[11px] text-falha-cor hover:text-falha-cor underline underline-offset-2 disabled:opacity-40"
           >
             Revogar acesso
           </button>
@@ -141,7 +141,7 @@ export function PortalCliente({
 
       {aguardando.length > 0 && (
         <Card className="space-y-3">
-          <p className="text-sm font-semibold text-[#F5F5F4]">Esperando o cliente</p>
+          <p className="text-sm font-semibold text-texto">Esperando o cliente</p>
           {aguardando.map((a) => (
             <LinhaAprovacao key={a.id} aprovacao={a} projetoId={projetoId} />
           ))}
@@ -150,7 +150,7 @@ export function PortalCliente({
 
       {respondidas.length > 0 && (
         <Card className="space-y-3">
-          <p className="text-sm font-semibold text-[#F5F5F4]">Respondido</p>
+          <p className="text-sm font-semibold text-texto">Respondido</p>
           {respondidas.map((a) => (
             <LinhaAprovacao key={a.id} aprovacao={a} projetoId={projetoId} />
           ))}
@@ -180,11 +180,11 @@ function LinhaAprovacao({ aprovacao, projetoId }: { aprovacao: Aprovacao; projet
   const rotulo = aprovacao.status === "aprovado" ? "Aprovado" : aprovacao.status === "ajuste" ? "Ajuste pedido" : "Aguardando";
 
   return (
-    <div className="rounded-lg border border-[#311C45] bg-[#1B0F27] p-3 space-y-2">
+    <div className="rounded-lg border border-borda bg-campo p-3 space-y-2">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-sm text-[#F5F5F4] font-medium">{aprovacao.titulo}</p>
-          <p className="text-[11px] text-[#5A496A]">
+          <p className="text-sm text-texto font-medium">{aprovacao.titulo}</p>
+          <p className="text-[11px] text-texto-apagado">
             Aberto em {fmtData(aprovacao.criado_em.slice(0, 10))}
             {aprovacao.decidido_em && <> · respondido em {fmtData(aprovacao.decidido_em.slice(0, 10))}</>}
             {aprovacao.decidido_por && <> por {aprovacao.decidido_por}</>}
@@ -193,7 +193,7 @@ function LinhaAprovacao({ aprovacao, projetoId }: { aprovacao: Aprovacao; projet
         <Pill tom={tom}>{rotulo}</Pill>
       </div>
 
-      {aprovacao.descricao && <p className="text-xs text-[#968F88] whitespace-pre-line leading-relaxed">{aprovacao.descricao}</p>}
+      {aprovacao.descricao && <p className="text-xs text-texto-mudo whitespace-pre-line leading-relaxed">{aprovacao.descricao}</p>}
 
       {aprovacao.link && (
         <a
@@ -208,12 +208,12 @@ function LinhaAprovacao({ aprovacao, projetoId }: { aprovacao: Aprovacao; projet
 
       {aprovacao.comentario_cliente && (
         <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2">
-          <p className="text-[10px] uppercase tracking-[1px] text-amber-300/70 mb-1">O cliente pediu</p>
-          <p className="text-xs text-amber-100/90 whitespace-pre-line leading-relaxed">{aprovacao.comentario_cliente}</p>
+          <p className="text-[10px] uppercase tracking-[1px] text-alerta-cor/70 mb-1">O cliente pediu</p>
+          <p className="text-xs text-alerta-cor/90 whitespace-pre-line leading-relaxed">{aprovacao.comentario_cliente}</p>
         </div>
       )}
 
-      {erro && <p className="text-xs text-red-400">{erro}</p>}
+      {erro && <p className="text-xs text-falha-cor">{erro}</p>}
 
       <div className="flex flex-wrap gap-3 pt-0.5">
         {aprovacao.status !== "aguardando" && (
@@ -221,7 +221,7 @@ function LinhaAprovacao({ aprovacao, projetoId }: { aprovacao: Aprovacao; projet
             type="button"
             disabled={pendente}
             onClick={() => rodar(() => reabrirAprovacao(aprovacao.id, projetoId))}
-            className="text-[11px] text-[#968F88] hover:text-[#DDDBD9] underline underline-offset-2 disabled:opacity-40"
+            className="text-[11px] text-texto-mudo hover:text-texto-suave underline underline-offset-2 disabled:opacity-40"
           >
             Pedir aprovação de novo
           </button>
@@ -230,7 +230,7 @@ function LinhaAprovacao({ aprovacao, projetoId }: { aprovacao: Aprovacao; projet
           type="button"
           disabled={pendente}
           onClick={() => rodar(() => excluirAprovacao(aprovacao.id, projetoId))}
-          className="text-[11px] text-red-400 hover:text-red-300 underline underline-offset-2 disabled:opacity-40"
+          className="text-[11px] text-falha-cor hover:text-falha-cor underline underline-offset-2 disabled:opacity-40"
         >
           Excluir
         </button>
@@ -248,8 +248,8 @@ function NovaAprovacao({ criar }: { criar: (prev: FormState, fd: FormData) => Pr
 
   return (
     <Card>
-      <p className="text-sm font-semibold text-[#F5F5F4] mb-1">Pedir aprovação</p>
-      <p className="text-xs text-[#968F88] mb-4 max-w-prose">
+      <p className="text-sm font-semibold text-texto mb-1">Pedir aprovação</p>
+      <p className="text-xs text-texto-mudo mb-4 max-w-prose">
         Aparece no portal com os botões de aprovar e pedir ajuste. O cliente escreve o nome dele ao responder, então
         fica registrado quem aprovou.
       </p>

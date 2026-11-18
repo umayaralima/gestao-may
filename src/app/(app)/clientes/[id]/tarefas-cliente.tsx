@@ -16,10 +16,10 @@ export function TarefasCliente({ tarefas, categorias }: { tarefas: Item[]; categ
   const hoje = hojeISO();
   const abertas = tarefas.filter((t) => !t.concluida_em).sort((a, b) => (a.vencimento ?? "9999").localeCompare(b.vencimento ?? "9999")).slice(0, 8);
 
-  if (abertas.length === 0) return <p className="text-xs text-[#5A496A]">Nada pendente pra este cliente.</p>;
+  if (abertas.length === 0) return <p className="text-xs text-texto-apagado">Nada pendente pra este cliente.</p>;
 
   return (
-    <ul className="divide-y divide-[#311C45]/60">
+    <ul className="divide-y divide-borda/60">
       {abertas.map((t) => {
         const dias = t.vencimento ? diffDias(hoje, t.vencimento) : null;
         return <Linha key={t.id} t={t} icone={icones[t.categoria] ?? "•"} atrasada={dias !== null && dias < 0} />;
@@ -42,13 +42,13 @@ function Linha({ t, icone, atrasada }: { t: Item; icone: string; atrasada: boole
       <button
         type="button"
         onClick={() => start(() => alternarTarefa(t.id, true))}
-        className="w-4 h-4 rounded-full border-2 border-[#5A496A] hover:border-brand-400 shrink-0 transition-colors"
+        className="w-4 h-4 rounded-full border-2 border-borda-forte hover:border-brand-400 shrink-0 transition-colors"
         title="Concluir"
       />
       <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: PRIORIDADE_COR[t.prioridade] }} />
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-[#DDDBD9] truncate">{t.titulo}</p>
-        <p className="text-[10px] text-[#968F88] truncate">
+        <p className="text-xs text-texto-suave truncate">{t.titulo}</p>
+        <p className="text-[10px] text-texto-mudo truncate">
           {icone} {t.categoria}
           {t.projetoNome && (
             <>
@@ -58,7 +58,7 @@ function Linha({ t, icone, atrasada }: { t: Item; icone: string; atrasada: boole
           )}
         </p>
       </div>
-      {t.vencimento && <span className={cn("text-[10px] font-mono whitespace-nowrap", atrasada ? "text-red-400" : "text-[#968F88]")}>{fmtData(t.vencimento, false)}</span>}
+      {t.vencimento && <span className={cn("text-[10px] font-mono whitespace-nowrap", atrasada ? "text-falha-cor" : "text-texto-mudo")}>{fmtData(t.vencimento, false)}</span>}
     </li>
   );
 }

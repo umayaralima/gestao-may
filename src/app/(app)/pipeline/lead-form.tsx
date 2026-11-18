@@ -97,7 +97,7 @@ export function LeadFormModal({ action, tipos, lead, etapaInicial = "novo", onCl
           <Input id="nota_followup" name="nota_followup" placeholder="Ex.: enviar proposta, ligar, mandar portfólio" defaultValue={lead?.nota_followup ?? ""} />
         </Campo>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88] block mb-2">Prioridade</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo block mb-2">Prioridade</p>
           <Escolha
             opcoes={PRIORIDADES.map((p) => ({ valor: p, label: PRIORIDADE_LABEL[p], dot: PRIORIDADE_COR[p] }))}
             valor={prioridade}

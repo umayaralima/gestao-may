@@ -103,11 +103,11 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
         titulo={projeto.nome}
         sub={
           <>
-            <Link href="/projetos" className="hover:text-[#DDDBD9]">
+            <Link href="/projetos" className="hover:text-texto-suave">
               Projetos
             </Link>{" "}
             ›{" "}
-            <Link href={`/clientes/${projeto.cliente_id}`} className="hover:text-[#DDDBD9]">
+            <Link href={`/clientes/${projeto.cliente_id}`} className="hover:text-texto-suave">
               {clienteNome}
             </Link>
             {projeto.tipo && ` · ${projeto.tipo}`}
@@ -133,7 +133,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
       </Header>
 
       {/* Abas */}
-      <div className="flex items-center gap-1 px-4 md:px-6 border-b border-[#311C45] shrink-0 overflow-x-auto">
+      <div className="flex items-center gap-1 px-4 md:px-6 border-b border-borda shrink-0 overflow-x-auto">
         {ABAS.map((a) => {
           const marcador =
             (a.id === "briefing" && briefing) || (a.id === "contrato" && temAssinado) || (a.id === "etapas" && etapas.length > 0 && etapasFeitas === etapas.length)
@@ -147,7 +147,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
               href={`/projetos/${projeto.id}?aba=${a.id}`}
               className={cn(
                 "px-3 py-2.5 text-[11px] font-medium transition-colors border-b-2 -mb-px flex items-center gap-1.5",
-                aba === a.id ? "border-brand-400 text-brand-400" : "border-transparent text-[#968F88] hover:text-[#DDDBD9]",
+                aba === a.id ? "border-brand-400 text-brand-400" : "border-transparent text-texto-mudo hover:text-texto-suave",
               )}
             >
               {a.label}
@@ -161,17 +161,17 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
       <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-5">
         {atrasados.length > 0 && (
           <div className="flex items-center justify-between gap-4 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-3 entrar">
-            <p className="text-xs text-red-400 font-medium">
+            <p className="text-xs text-falha-cor font-medium">
               {atrasados.length} pagamento(s) vencido(s) · <span className="font-mono">{fmt(totalAtrasado)}</span>
             </p>
-            <Link href={`/projetos/${projeto.id}?aba=pagamentos`} className="text-xs text-red-400 hover:text-red-300 font-medium">
+            <Link href={`/projetos/${projeto.id}?aba=pagamentos`} className="text-xs text-falha-cor hover:text-falha-cor font-medium">
               Ver parcelas →
             </Link>
           </div>
         )}
         {sugerirEtapas && (
           <div className="flex items-center justify-between gap-4 rounded-xl border border-brand-400/30 bg-brand-400/10 px-5 py-3 entrar">
-            <p className="text-xs text-[#DDDBD9]">
+            <p className="text-xs text-texto-suave">
               Projeto aprovado. Quer criar as etapas padrão de <strong className="text-brand-300">{projeto.tipo}</strong> pra começar a produção?
             </p>
             <Link href={`/projetos/${projeto.id}?aba=etapas`} className="px-3 py-1.5 bg-brand-400 hover:bg-brand-300 text-white text-xs font-semibold rounded-lg transition-colors whitespace-nowrap">
@@ -181,7 +181,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
         )}
         {sugerirDesenvolvimento && (
           <div className="flex items-center justify-between gap-4 rounded-xl border border-brand-400/30 bg-brand-400/10 px-5 py-3 entrar">
-            <p className="text-xs text-[#DDDBD9]">
+            <p className="text-xs text-texto-suave">
               Produção começou ({etapasFeitas}/{etapas.length} etapas). Mudar o projeto pra <strong className="text-brand-300">Em desenvolvimento</strong>?
             </p>
             <form action={mudarStatusSugerido.bind(null, projeto.id, "em_desenvolvimento")}>
@@ -193,8 +193,8 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
         )}
         {sugerirRevisao && (
           <div className="flex items-center justify-between gap-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 entrar">
-            <p className="text-xs text-[#DDDBD9]">
-              Todas as etapas concluídas. Mudar o projeto pra <strong className="text-emerald-300">Em revisão</strong>?
+            <p className="text-xs text-texto-suave">
+              Todas as etapas concluídas. Mudar o projeto pra <strong className="text-sucesso-cor">Em revisão</strong>?
             </p>
             <form action={mudarStatusSugerido.bind(null, projeto.id, "em_revisao")}>
               <button type="submit" className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-semibold rounded-lg transition-colors whitespace-nowrap">
@@ -205,7 +205,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
         )}
         {sugerirAprovado && (
           <div className="flex items-center justify-between gap-4 rounded-xl border border-brand-400/30 bg-brand-400/10 px-5 py-3 entrar">
-            <p className="text-xs text-[#DDDBD9]">
+            <p className="text-xs text-texto-suave">
               Contrato assinado. Quer mudar o projeto pra <strong className="text-brand-300">Aprovado</strong>?
             </p>
             <form action={aprovar}>
@@ -220,12 +220,12 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
           <>
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 entrar">
               <KpiCard label="Valor do projeto" value={fmt(projeto.valor_total)} sub={naoParcelado !== null && Math.abs(naoParcelado) > 0.009 ? `${fmt(naoParcelado)} sem parcela` : "tudo parcelado"} />
-              <KpiCard label="Recebido" value={fmt(totalPago)} accent="text-emerald-400" sub={`${lista.filter((p) => p.status === "pago").length} pago(s)`} />
-              <KpiCard label="A receber" value={fmt(totalPendente + totalAtrasado)} accent={totalAtrasado > 0 ? "text-red-400" : "text-amber-400"} sub={totalAtrasado > 0 ? `${fmt(totalAtrasado)} vencido` : `${lista.filter((p) => p.status === "pendente").length} pendente(s)`} />
+              <KpiCard label="Recebido" value={fmt(totalPago)} accent="text-sucesso-cor" sub={`${lista.filter((p) => p.status === "pago").length} pago(s)`} />
+              <KpiCard label="A receber" value={fmt(totalPendente + totalAtrasado)} accent={totalAtrasado > 0 ? "text-falha-cor" : "text-alerta-cor"} sub={totalAtrasado > 0 ? `${fmt(totalAtrasado)} vencido` : `${lista.filter((p) => p.status === "pendente").length} pendente(s)`} />
               <KpiCard
                 label="Prazo"
                 value={projeto.prazo_entrega ? fmtData(projeto.prazo_entrega, false) : "—"}
-                accent={diasPrazo !== null && emAndamento && diasPrazo < 0 ? "text-red-400" : diasPrazo !== null && emAndamento && diasPrazo <= 7 ? "text-amber-400" : undefined}
+                accent={diasPrazo !== null && emAndamento && diasPrazo < 0 ? "text-falha-cor" : diasPrazo !== null && emAndamento && diasPrazo <= 7 ? "text-alerta-cor" : undefined}
                 sub={diasPrazo === null ? "sem prazo definido" : !emAndamento ? STATUS_PROJETO_LABEL[projeto.status] : diasPrazo < 0 ? `${Math.abs(diasPrazo)} dia(s) atrasado` : diasPrazo === 0 ? "entrega hoje" : `faltam ${diasPrazo} dia(s)`}
               />
             </div>
@@ -255,9 +255,9 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
                   </Item>
                   <Item k="Criado em">{fmtData(projeto.criado_em)}</Item>
                 </dl>
-                <div className="border-t border-[#311C45] pt-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88] mb-1.5">Observações</p>
-                  {projeto.observacoes ? <p className="text-xs text-[#C5C2BE] leading-relaxed whitespace-pre-wrap">{projeto.observacoes}</p> : <p className="text-xs text-[#5A496A]">Nada anotado ainda.</p>}
+                <div className="border-t border-borda pt-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo mb-1.5">Observações</p>
+                  {projeto.observacoes ? <p className="text-xs text-texto-sutil leading-relaxed whitespace-pre-wrap">{projeto.observacoes}</p> : <p className="text-xs text-texto-apagado">Nada anotado ainda.</p>}
                 </div>
               </Card>
 
@@ -301,7 +301,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
                   </div>
                 </Card>
                 <form action={excluir}>
-                  <button type="submit" className="text-[11px] text-[#968F88] hover:text-red-400 transition-colors">
+                  <button type="submit" className="text-[11px] text-texto-mudo hover:text-falha-cor transition-colors">
                     Excluir projeto (apaga briefing, contratos e pagamentos)
                   </button>
                 </form>
@@ -368,26 +368,26 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
 function Item({ k, children }: { k: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-[10px] uppercase tracking-wider text-[#968F88]">{k}</dt>
-      <dd className="mt-0.5 text-[#DDDBD9]">{children}</dd>
+      <dt className="text-[10px] uppercase tracking-wider text-texto-mudo">{k}</dt>
+      <dd className="mt-0.5 text-texto-suave">{children}</dd>
     </div>
   );
 }
 
 function Passo({ ok, alerta, label, acao, href }: { ok: boolean; alerta?: boolean; label: string; acao: string; href: string }) {
   return (
-    <Link href={href} className="flex items-center justify-between gap-3 rounded-lg border border-[#311C45] hover:border-[#5A496A] px-3 py-2.5 transition-colors">
+    <Link href={href} className="flex items-center justify-between gap-3 rounded-lg border border-borda hover:border-borda-forte px-3 py-2.5 transition-colors">
       <div className="flex items-center gap-2.5">
-        <span className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", ok ? "bg-emerald-500 border-emerald-500" : alerta ? "border-amber-400" : "border-[#5A496A]")}>
+        <span className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", ok ? "bg-emerald-500 border-emerald-500" : alerta ? "border-amber-400" : "border-borda-forte")}>
           {ok && (
             <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
               <path d="M1.5 4.5l2.5 2.5 4-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           )}
         </span>
-        <span className="text-xs font-medium text-[#DDDBD9]">{label}</span>
+        <span className="text-xs font-medium text-texto-suave">{label}</span>
       </div>
-      <span className={cn("text-[11px]", ok ? "text-emerald-400" : alerta ? "text-amber-400" : "text-[#968F88]")}>{acao}</span>
+      <span className={cn("text-[11px]", ok ? "text-sucesso-cor" : alerta ? "text-alerta-cor" : "text-texto-mudo")}>{acao}</span>
     </Link>
   );
 }

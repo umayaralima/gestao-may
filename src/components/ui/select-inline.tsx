@@ -19,14 +19,14 @@ export function SelectInline({ name, label, value, opcoes, action, className }: 
 
   return (
     <form ref={formRef} action={(fd) => startTransition(() => action(fd))} className="flex items-center gap-2">
-      {label && <span className="text-xs text-[#968F88]">{label}:</span>}
+      {label && <span className="text-xs text-texto-mudo">{label}:</span>}
       <select
         name={name}
         defaultValue={value}
         disabled={pending}
         onChange={() => formRef.current?.requestSubmit()}
         className={cn(
-          "bg-[#231431] border border-brand-400/40 rounded-lg px-2.5 py-2 text-xs font-medium text-brand-400 outline-none focus:border-brand-400/60 cursor-pointer disabled:opacity-50",
+          "bg-superficie border border-brand-400/40 rounded-lg px-2.5 py-2 text-xs font-medium text-brand-400 outline-none focus:border-brand-400/60 cursor-pointer disabled:opacity-50",
           className,
         )}
       >
@@ -36,7 +36,7 @@ export function SelectInline({ name, label, value, opcoes, action, className }: 
           </option>
         ))}
       </select>
-      {pending && <span className="text-[10px] text-[#968F88]">salvando…</span>}
+      {pending && <span className="text-[10px] text-texto-mudo">salvando…</span>}
     </form>
   );
 }

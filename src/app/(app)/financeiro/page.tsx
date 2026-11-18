@@ -99,9 +99,9 @@ export default async function FinanceiroPage({
           param="status"
           opcoes={[
             { valor: "", label: "Todos" },
-            { valor: "pendente", label: "Pendente", cor: "#FBBF24" },
-            { valor: "atrasado", label: "Vencido", cor: "#F87171" },
-            { valor: "pago", label: "Pago", cor: "#34D399" },
+            { valor: "pendente", label: "Pendente", cor: "var(--alerta-cor)" },
+            { valor: "atrasado", label: "Vencido", cor: "var(--falha-cor)" },
+            { valor: "pago", label: "Pago", cor: "var(--sucesso-cor)" },
           ]}
         />
       }

@@ -620,3 +620,44 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   cliente respondeu, com o comentário de ajuste em destaque âmbar (é o briefing do retrabalho).
 - Conferido com `tsc --noEmit`, `npm run lint` (0 erros) e `npm run build` — a rota `/c/[token]` entra no manifesto.
   Falta rodar a 019 no Supabase e testar no publicado.
+
+## Tema claro (2026-11-18)
+
+- Pedido da May: "uma versão light do sistema". Decidido com ela: **botão pra alternar** (não substituir o escuro,
+  nem seguir o tema do sistema operacional — ela precisa escolher na hora de gravar vídeo ou tirar print), e as
+  páginas públicas **abrindo claras, com botão** pro cliente trocar também.
+- O transplante do Figma Make tinha deixado **1.248 cores literais em 52 arquivos**. Todas viraram token semântico
+  (os tokens `--fundo/--superficie/--borda/--texto-*` já existiam desde 2026-09-19; o que faltava era dar a eles um
+  segundo conjunto de valores). Agora **cor literal em `src/` é bug**, com três exceções documentadas abaixo.
+- Tokens novos em `globals.css`: `--campo` (fundo de input/code), `--texto-apagado` (o antigo `#5A496A`),
+  `--acento-texto` (o rosa da marca legível SOBRE o fundo do tema: claro no escuro, `rosa-700` no claro),
+  `--sucesso-cor/--alerta-cor/--falha-cor/--info-cor` e `--serie-1..7`. A paleta da marca (`rosa-*`, `lavanda-*`)
+  **não muda** entre temas — só os semânticos.
+- A conversão foi mecânica, com regra por tipo de utilitário: `bg-` e `border-` do mesmo literal viram tokens
+  DIFERENTES (`#311C45` era borda e realce ao mesmo tempo). Textos de estado em classe nomeada do Tailwind
+  (`text-red-400`, `text-emerald-400`, `text-amber-400`…) também viraram token — em fundo branco eles sumiam.
+  Fundos translúcidos `bg-white/4|5|8` viraram `bg-superficie-2`: branco a 5% não existe sobre branco.
+- **Três lugares mantêm hex fixo de propósito:** (1) o HTML dos e-mails (`propostas/actions.ts`, `resumo-diario.ts`)
+  — cliente de e-mail não entende `var()`; (2) os fundos/bordas translúcidos de estado (`bg-amber-500/10`), que
+  funcionam nos dois temas; (3) o PDF (jsPDF), que não vê CSS.
+- **`--serie-1..7` existe porque cor de gráfico não é semântica.** A conversão automática tinha jogado três tons de
+  rosa diferentes no mesmo token, e séries vizinhas ficaram idênticas (duas barras iguais em "Atividade semanal",
+  `em_contato` e `proposta_enviada` iguais no donut do Pipeline, e a paleta de 7 de Relatórios virando 7 iguais).
+  As séries têm valores próprios por tema: no claro elas escurecem, porque lavanda clara sobre branco não se enxerga.
+- Mecanismo: `data-tema` no `<html>`, escrito pelo script inline do `layout.tsx` antes do primeiro paint, igual à
+  sidebar recolhível — o CSS faz o resto e o React não tem estado de tema. `src/components/botao-tema.tsx` só
+  reescreve o atributo e grava no `localStorage`; **até o ícone do botão (sol/lua) troca por CSS**.
+- **Sem escolha salva, o padrão vem da rota**: `/p/`, `/b/` e `/c/` nascem claras (leitura longa, o cliente imprime),
+  o resto nasce escuro. **Nada de regex nesse script**: a barra invertida se perde na string e o script inteiro
+  morre com SyntaxError — foi o que aconteceu na primeira tentativa, e junto com o tema caiu a sidebar recolhível,
+  que depende do mesmo script. Comparar `location.pathname.slice(0, 3)` resolve sem escape nenhum.
+- Marca: a May mandou o símbolo em duas versões (2026-11-18). `simbolo-gradiente.png` (fundo gradiente) no escuro e
+  `simbolo-claro.png` (traço, transparente) no claro, trocados por CSS. A regra esconde SEMPRE o símbolo do tema
+  oposto e nunca força `display:block` no certo — senão briga com a regra da sidebar, que é quem decide se o símbolo
+  aparece. A logo completa (`logo-gradiente.png`) é roxa e serve nos dois fundos, não precisou de variante.
+- No claro o `Card` ganha sombra discreta (classe `.cartao`), porque card branco sobre fundo quase branco some só
+  com borda. No escuro segue sendo só borda, como manda o wireframe.
+- Conferido no navegador nos dois temas (amostra temporária em `/b/teste`, já removida): primitivos, hierarquia de
+  texto, pílulas, botões, campos, tabela, faixas de aviso, sidebar expandida e recolhida, login e os três gráficos
+  do Dashboard. Console limpo em produção. **Não dá pra conferir as telas internas sem a senha dela** — ficou pra
+  ela passar o olho no publicado.

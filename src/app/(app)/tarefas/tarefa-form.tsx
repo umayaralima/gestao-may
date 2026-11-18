@@ -80,7 +80,7 @@ export function TarefaFormModal({ action, vinculos, categorias, tarefa, vinculoI
             <Input id="vencimento" name="vencimento" type="date" defaultValue={tarefa?.vencimento ?? dataInicial ?? ""} />
           </Campo>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#968F88] block mb-1.5">Prioridade</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-texto-mudo block mb-1.5">Prioridade</p>
             <Escolha opcoes={PRIORIDADES.map((p) => ({ valor: p, label: PRIORIDADE_LABEL[p], dot: PRIORIDADE_COR[p] }))} valor={prioridade} onChange={setPrioridade} />
           </div>
         </div>

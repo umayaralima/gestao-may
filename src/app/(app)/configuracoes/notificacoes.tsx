@@ -52,8 +52,8 @@ export function Notificacoes({
   return (
     <div className="space-y-5 entrar">
       <div>
-        <h2 className="text-lg font-semibold text-[#F5F5F4] mb-0.5">Notificações</h2>
-        <p className="text-xs text-[#968F88]">Resumo do dia por e-mail e agenda no seu calendário</p>
+        <h2 className="text-lg font-semibold text-texto mb-0.5">Notificações</h2>
+        <p className="text-xs text-texto-mudo">Resumo do dia por e-mail e agenda no seu calendário</p>
       </div>
 
       <form action={action} className="space-y-5">
@@ -65,7 +65,7 @@ export function Notificacoes({
               onClick={() => setLigado((v) => !v)}
               role="switch"
               aria-checked={ligado}
-              className={cn("relative w-9 h-5 rounded-full transition-colors shrink-0", ligado ? "bg-brand-400" : "bg-[#311C45]")}
+              className={cn("relative w-9 h-5 rounded-full transition-colors shrink-0", ligado ? "bg-brand-400" : "bg-superficie-2")}
             >
               <span className={cn("absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform", ligado ? "translate-x-4" : "translate-x-0")} />
             </button>
@@ -76,17 +76,17 @@ export function Notificacoes({
               type="email"
               defaultValue={email ?? ""}
               placeholder={emailLogin}
-              className="bg-[#1B0F26] border border-[#311C45] rounded-lg px-3 py-2 text-sm text-[#DDDBD9] placeholder:text-[#5A496A] outline-none focus:border-brand-400/60 focus:ring-1 focus:ring-brand-400/20 transition-all w-full sm:w-64"
+              className="bg-campo border border-borda rounded-lg px-3 py-2 text-sm text-texto-suave placeholder:text-texto-apagado outline-none focus:border-brand-400/60 focus:ring-1 focus:ring-brand-400/20 transition-all w-full sm:w-64"
             />
           </Linha>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4">
-            <div className="text-[11px] text-[#968F88]">
+            <div className="text-[11px] text-texto-mudo">
               {ultimoEnvio ? (
                 ultimoEnvio.erro ? (
-                  <span className="text-red-400">Último envio ({fmtData(ultimoEnvio.dia)}) falhou: {ultimoEnvio.erro}</span>
+                  <span className="text-falha-cor">Último envio ({fmtData(ultimoEnvio.dia)}) falhou: {ultimoEnvio.erro}</span>
                 ) : (
                   <>
-                    Último envio em <span className="text-[#C5C2BE]">{fmtData(ultimoEnvio.dia)}</span> para {ultimoEnvio.destino} · {ultimoEnvio.itens} item(ns)
+                    Último envio em <span className="text-texto-sutil">{fmtData(ultimoEnvio.dia)}</span> para {ultimoEnvio.destino} · {ultimoEnvio.itens} item(ns)
                   </>
                 )
               ) : (
@@ -94,7 +94,7 @@ export function Notificacoes({
               )}
             </div>
             <div className="flex items-center gap-3">
-              {erroEnvio && <span className="text-[11px] text-red-400">{erroEnvio}</span>}
+              {erroEnvio && <span className="text-[11px] text-falha-cor">{erroEnvio}</span>}
               <button
                 type="button"
                 disabled={enviando}
@@ -114,7 +114,7 @@ export function Notificacoes({
         </Secao>
 
         <div className="flex items-center justify-end gap-3">
-          {state.erro && <p className="text-xs text-red-400">{state.erro}</p>}
+          {state.erro && <p className="text-xs text-falha-cor">{state.erro}</p>}
           <button type="submit" disabled={pending} className="px-4 py-2 bg-brand-400 hover:bg-brand-300 disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors">
             {pending ? "Salvando…" : "Salvar"}
           </button>
@@ -130,7 +130,7 @@ export function Notificacoes({
                   readOnly
                   value={linkAgenda}
                   onFocus={(e) => e.currentTarget.select()}
-                  className="flex-1 min-w-0 bg-[#1B0F26] border border-[#311C45] rounded-lg px-3 py-2 text-xs font-mono text-[#C5C2BE] outline-none focus:border-brand-400/60"
+                  className="flex-1 min-w-0 bg-campo border border-borda rounded-lg px-3 py-2 text-xs font-mono text-texto-sutil outline-none focus:border-brand-400/60"
                 />
                 <button type="button" onClick={copiar} className="px-3 py-2 text-xs text-brand-400 border border-brand-400/30 hover:bg-brand-400/10 rounded-lg transition-colors whitespace-nowrap">
                   {copiado ? "Copiado ✓" : "Copiar link"}
@@ -149,16 +149,16 @@ export function Notificacoes({
                   type="button"
                   disabled={trocando}
                   onClick={() => iniciarTroca(() => trocarTokenAgenda())}
-                  className="text-[11px] text-[#968F88] hover:text-red-400 transition-colors disabled:opacity-40"
+                  className="text-[11px] text-texto-mudo hover:text-falha-cor transition-colors disabled:opacity-40"
                   title="Invalida o link atual e gera outro"
                 >
                   {trocando ? "Gerando…" : "Gerar novo link"}
                 </button>
               </div>
-              <p className="text-[11px] text-[#5A496A]">O Google atualiza calendários assinados a cada poucas horas — mudanças não aparecem na hora.</p>
+              <p className="text-[11px] text-texto-apagado">O Google atualiza calendários assinados a cada poucas horas — mudanças não aparecem na hora.</p>
             </>
           ) : (
-            <p className="text-xs text-[#968F88]">Rode a migração 009_notificacoes.sql no Supabase pra gerar o link.</p>
+            <p className="text-xs text-texto-mudo">Rode a migração 009_notificacoes.sql no Supabase pra gerar o link.</p>
           )}
         </div>
       </Secao>
@@ -168,12 +168,12 @@ export function Notificacoes({
 
 function Secao({ titulo, sub, children }: { titulo: string; sub?: string; children: React.ReactNode }) {
   return (
-    <div className="bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden">
-      <div className="px-6 py-4 border-b border-[#311C45]">
-        <p className="text-sm font-semibold text-[#F5F5F4]">{titulo}</p>
-        {sub && <p className="text-xs text-[#968F88] mt-0.5 leading-relaxed">{sub}</p>}
+    <div className="bg-superficie border border-borda rounded-xl overflow-hidden">
+      <div className="px-6 py-4 border-b border-borda">
+        <p className="text-sm font-semibold text-texto">{titulo}</p>
+        {sub && <p className="text-xs text-texto-mudo mt-0.5 leading-relaxed">{sub}</p>}
       </div>
-      <div className="divide-y divide-[#311C45]/60">{children}</div>
+      <div className="divide-y divide-borda/60">{children}</div>
     </div>
   );
 }
@@ -182,8 +182,8 @@ function Linha({ rotulo, descricao, children }: { rotulo: string; descricao?: st
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 gap-3 sm:gap-6">
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-[#DDDBD9] font-medium">{rotulo}</p>
-        {descricao && <p className="text-xs text-[#968F88] mt-0.5 leading-relaxed">{descricao}</p>}
+        <p className="text-sm text-texto-suave font-medium">{rotulo}</p>
+        {descricao && <p className="text-xs text-texto-mudo mt-0.5 leading-relaxed">{descricao}</p>}
       </div>
       {children}
     </div>

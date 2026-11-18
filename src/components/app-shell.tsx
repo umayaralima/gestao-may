@@ -21,7 +21,7 @@ export function AppShell({ email, nome, titulo, sair, children }: { email: strin
   }, [aberto]);
 
   return (
-    <div className="flex h-dvh bg-[#150C1D] overflow-hidden">
+    <div className="flex h-dvh bg-fundo overflow-hidden">
       {/* Fundo escurecido da gaveta (só mobile) */}
       <div
         onClick={() => setAberto(false)}
@@ -45,12 +45,12 @@ export function AppShell({ email, nome, titulo, sair, children }: { email: strin
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Barra superior só no mobile */}
-        <div className="flex items-center gap-3 px-4 h-14 border-b border-[#311C45] bg-[#1B0F26] shrink-0 lg:hidden">
+        <div className="flex items-center gap-3 px-4 h-14 border-b border-borda bg-campo shrink-0 lg:hidden">
           <button
             type="button"
             onClick={() => setAberto(true)}
             aria-label="Abrir menu"
-            className="w-9 h-9 -ml-1 rounded-lg flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:bg-white/5 transition-colors"
+            className="w-9 h-9 -ml-1 rounded-lg flex items-center justify-center text-texto-mudo hover:text-texto-suave hover:bg-superficie-2 transition-colors"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path d="M2.5 4.5h13M2.5 9h13M2.5 13.5h13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

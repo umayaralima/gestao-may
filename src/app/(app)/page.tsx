@@ -124,7 +124,7 @@ export default async function DashboardPage() {
         <Link
           href="/tarefas"
           title={pendencias ? `${pendencias} pendência(s) pra hoje` : "Nada pendente"}
-          className="w-8 h-8 rounded-lg bg-[#231431] border border-[#311C45] flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] hover:border-[#5A496A] transition-colors relative"
+          className="w-8 h-8 rounded-lg bg-superficie border border-borda flex items-center justify-center text-texto-mudo hover:text-texto-suave hover:border-borda-forte transition-colors relative"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M7 1.5a4 4 0 0 0-4 4v2L1.5 9.5h11L11 7.5v-2a4 4 0 0 0-4-4Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
@@ -172,19 +172,19 @@ export default async function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 entrar entrar-2">
           <AtividadeSemanal dados={atividade} />
-          <div className="bg-[#231431] border border-[#311C45] rounded-xl p-5 flex flex-col">
-            <p className="text-sm font-semibold text-[#F5F5F4] mb-4">Atividade recente</p>
+          <div className="bg-superficie border border-borda rounded-xl p-5 flex flex-col">
+            <p className="text-sm font-semibold text-texto mb-4">Atividade recente</p>
             <div className="space-y-3 flex-1">
-              {listaInteracoes.length === 0 && <p className="text-xs text-[#968F88]">Nenhuma interação nos últimos 7 dias.</p>}
+              {listaInteracoes.length === 0 && <p className="text-xs text-texto-mudo">Nenhuma interação nos últimos 7 dias.</p>}
               {listaInteracoes.slice(0, 5).map((a) => (
                 <div key={a.id} className="flex gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-[#311C45] flex items-center justify-center text-sm shrink-0">{iconeCanal[a.canal ?? "outro"] ?? "📝"}</div>
+                  <div className="w-7 h-7 rounded-lg bg-superficie-2 flex items-center justify-center text-sm shrink-0">{iconeCanal[a.canal ?? "outro"] ?? "📝"}</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-[#DDDBD9] leading-snug line-clamp-2">
+                    <p className="text-xs text-texto-suave leading-snug line-clamp-2">
                       {a.resumo}
-                      <span className="text-[#968F88]"> — {a.leads?.nome ?? a.clientes?.nome}</span>
+                      <span className="text-texto-mudo"> — {a.leads?.nome ?? a.clientes?.nome}</span>
                     </p>
-                    <p className="text-[10px] text-[#968F88] mt-0.5 font-mono">
+                    <p className="text-[10px] text-texto-mudo mt-0.5 font-mono">
                       {fmtRelativo(a.criado_em)}
                       {a.canal && ` · ${CANAL_INTERACAO_LABEL[a.canal as keyof typeof CANAL_INTERACAO_LABEL] ?? a.canal}`}
                     </p>
@@ -198,53 +198,53 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden entrar entrar-3">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#311C45]">
+        <div className="bg-superficie border border-borda rounded-xl overflow-hidden entrar entrar-3">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-borda">
             <div>
-              <p className="text-sm font-semibold text-[#F5F5F4]">Produção</p>
-              <p className="text-xs text-[#968F88]">
+              <p className="text-sm font-semibold text-texto">Produção</p>
+              <p className="text-xs text-texto-mudo">
                 {producao.length} projeto(s) em andamento
-                {producao.some((p) => p.atrasadas) && <span className="text-red-400"> · {producao.reduce((s, p) => s + p.atrasadas, 0)} etapa(s) atrasada(s)</span>}
+                {producao.some((p) => p.atrasadas) && <span className="text-falha-cor"> · {producao.reduce((s, p) => s + p.atrasadas, 0)} etapa(s) atrasada(s)</span>}
               </p>
             </div>
-            <Link href="/projetos" className="px-3 py-1.5 text-xs text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+            <Link href="/projetos" className="px-3 py-1.5 text-xs text-texto-mudo hover:text-texto-suave border border-borda hover:border-borda-forte rounded-lg transition-colors">
               Ver projetos
             </Link>
           </div>
           {producao.length === 0 ? (
-            <p className="px-5 py-8 text-center text-xs text-[#968F88]">Nenhum projeto em produção agora.</p>
+            <p className="px-5 py-8 text-center text-xs text-texto-mudo">Nenhum projeto em produção agora.</p>
           ) : (
-            <ul className="divide-y divide-[#311C45]/60">
+            <ul className="divide-y divide-borda/60">
               {producao.map((p) => {
                 const dias = p.prazo_entrega ? diffDias(hoje, p.prazo_entrega) : null;
                 return (
                   <li key={p.id} className="px-5 py-3.5 grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)_auto] gap-x-6 gap-y-2 items-center">
                     <div className="min-w-0">
-                      <Link href={`/projetos/${p.id}?aba=etapas`} className="text-xs font-medium text-[#DDDBD9] hover:text-brand-400 transition-colors truncate block">
+                      <Link href={`/projetos/${p.id}?aba=etapas`} className="text-xs font-medium text-texto-suave hover:text-brand-400 transition-colors truncate block">
                         {p.nome}
                       </Link>
-                      <p className="text-[10px] text-[#968F88] truncate">
+                      <p className="text-[10px] text-texto-mudo truncate">
                         {p.clienteNome} · {STATUS_PROJETO_LABEL[p.status as keyof typeof STATUS_PROJETO_LABEL] ?? p.status}
                       </p>
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-3">
-                        <div className="flex-1 h-1 bg-[#311C45] rounded-full overflow-hidden">
+                        <div className="flex-1 h-1 bg-superficie-2 rounded-full overflow-hidden">
                           <div className={cn("h-full rounded-full", p.atrasadas ? "bg-red-400" : "bg-brand-400")} style={{ width: `${p.pct}%` }} />
                         </div>
-                        <span className="text-[10px] font-mono text-[#968F88] whitespace-nowrap">{p.total ? `${p.feitas}/${p.total}` : "sem etapas"}</span>
+                        <span className="text-[10px] font-mono text-texto-mudo whitespace-nowrap">{p.total ? `${p.feitas}/${p.total}` : "sem etapas"}</span>
                       </div>
                       {p.proxima && (
-                        <p className="text-[10px] text-[#968F88] truncate mt-1">
-                          Próxima: <span className={cn(p.proxima.vencimento && p.proxima.vencimento < hoje ? "text-red-400" : "text-[#C5C2BE]")}>{p.proxima.titulo}</span>
+                        <p className="text-[10px] text-texto-mudo truncate mt-1">
+                          Próxima: <span className={cn(p.proxima.vencimento && p.proxima.vencimento < hoje ? "text-falha-cor" : "text-texto-sutil")}>{p.proxima.titulo}</span>
                           {p.proxima.vencimento && <span className="font-mono"> · {fmtData(p.proxima.vencimento, false)}</span>}
                         </p>
                       )}
                     </div>
                     <div className="text-right whitespace-nowrap">
-                      {p.atrasadas > 0 && <p className="text-[10px] font-medium text-red-400">{p.atrasadas} atrasada(s)</p>}
+                      {p.atrasadas > 0 && <p className="text-[10px] font-medium text-falha-cor">{p.atrasadas} atrasada(s)</p>}
                       {p.prazo_entrega && (
-                        <p className={cn("text-[10px] font-mono", dias !== null && dias < 0 ? "text-red-400" : dias !== null && dias <= 7 ? "text-amber-400" : "text-[#968F88]")}>
+                        <p className={cn("text-[10px] font-mono", dias !== null && dias < 0 ? "text-falha-cor" : dias !== null && dias <= 7 ? "text-alerta-cor" : "text-texto-mudo")}>
                           entrega {fmtData(p.prazo_entrega, false)}
                         </p>
                       )}
@@ -256,23 +256,23 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        <div className="bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden entrar entrar-4">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#311C45]">
+        <div className="bg-superficie border border-borda rounded-xl overflow-hidden entrar entrar-4">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-borda">
             <div>
-              <p className="text-sm font-semibold text-[#F5F5F4]">Clientes recentes</p>
-              <p className="text-xs text-[#968F88]">{recentes.length} registros</p>
+              <p className="text-sm font-semibold text-texto">Clientes recentes</p>
+              <p className="text-xs text-texto-mudo">{recentes.length} registros</p>
             </div>
-            <Link href="/clientes" className="px-3 py-1.5 text-xs text-[#968F88] hover:text-[#DDDBD9] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+            <Link href="/clientes" className="px-3 py-1.5 text-xs text-texto-mudo hover:text-texto-suave border border-borda hover:border-borda-forte rounded-lg transition-colors">
               Ver todos
             </Link>
           </div>
           {recentes.length === 0 ? (
-            <p className="px-5 py-8 text-center text-xs text-[#968F88]">Nenhum cliente cadastrado ainda.</p>
+            <p className="px-5 py-8 text-center text-xs text-texto-mudo">Nenhum cliente cadastrado ainda.</p>
           ) : (
             <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
-                <tr className="border-b border-[#311C45]">
+                <tr className="border-b border-borda">
                   <Th>Cliente</Th>
                   <Th>Nicho</Th>
                   <Th>Status</Th>
@@ -289,8 +289,8 @@ export default async function DashboardPage() {
                       <div className="flex items-center gap-3">
                         <Avatar nome={c.empresa ?? c.nome} tamanho={7} />
                         <div>
-                          <p className="text-xs font-medium text-[#DDDBD9]">{c.empresa ?? c.nome}</p>
-                          {c.empresa && <p className="text-[10px] text-[#968F88]">{c.nome}</p>}
+                          <p className="text-xs font-medium text-texto-suave">{c.empresa ?? c.nome}</p>
+                          {c.empresa && <p className="text-[10px] text-texto-mudo">{c.nome}</p>}
                         </div>
                       </div>
                     </Td>
@@ -298,9 +298,9 @@ export default async function DashboardPage() {
                     <Td>
                       <BadgeStatusCliente status={c.status} />
                     </Td>
-                    <Td className="font-mono text-[#DDDBD9]">{fmt(c.valor)}</Td>
-                    <Td className="font-mono text-[#968F88]">{c.negocios}</Td>
-                    <Td className="font-mono text-[#968F88]">{fmtData(c.criado_em)}</Td>
+                    <Td className="font-mono text-texto-suave">{fmt(c.valor)}</Td>
+                    <Td className="font-mono text-texto-mudo">{c.negocios}</Td>
+                    <Td className="font-mono text-texto-mudo">{fmtData(c.criado_em)}</Td>
                     <Td>
                       <BotaoLinha href={`/clientes/${c.id}`}>Ver</BotaoLinha>
                     </Td>

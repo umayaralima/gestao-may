@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { BotaoTema } from "@/components/botao-tema";
 import { useMemo, useState, useTransition } from "react";
 import { cn } from "@/lib/cn";
 import { fmt, fmtData } from "@/lib/format";
@@ -61,34 +62,34 @@ export function PortalPublico({
   return (
     <Moldura contato={contato}>
       <header className="mb-8">
-        <p className="text-[11px] uppercase tracking-[1px] text-[#5A496A] mb-2">
+        <p className="text-[11px] uppercase tracking-[1px] text-texto-apagado mb-2">
           {cliente ? `Projeto de ${cliente}` : "Seu projeto"}
         </p>
-        <h1 className="text-2xl sm:text-3xl text-[#F5F5F4] mb-3">{projeto.nome}</h1>
+        <h1 className="text-2xl sm:text-3xl text-texto mb-3">{projeto.nome}</h1>
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-400/15 text-brand-300 text-[11px] font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
             {fase.rotulo}
           </span>
-          {projeto.tipo && <span className="text-[11px] text-[#5A496A]">{projeto.tipo}</span>}
+          {projeto.tipo && <span className="text-[11px] text-texto-apagado">{projeto.tipo}</span>}
         </div>
-        <p className="text-sm text-[#968F88] leading-relaxed">{fase.frase}</p>
+        <p className="text-sm text-texto-mudo leading-relaxed">{fase.frase}</p>
         {projeto.prazo && (
-          <p className="text-xs text-[#5A496A] mt-2">
-            Previsão de entrega: <strong className="text-[#968F88]">{fmtData(projeto.prazo)}</strong>
+          <p className="text-xs text-texto-apagado mt-2">
+            Previsão de entrega: <strong className="text-texto-mudo">{fmtData(projeto.prazo)}</strong>
           </p>
         )}
       </header>
 
       {pendencias.length > 0 && (
         <div className="mb-8 rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3">
-          <p className="text-xs text-amber-200/90 leading-relaxed">
+          <p className="text-xs text-alerta-cor/90 leading-relaxed">
             <strong>Esperando você:</strong> {pendencias.join(" · ")}.
           </p>
           {linkBriefing && (
             <a
               href={linkBriefing}
-              className="inline-block mt-2 text-xs font-semibold text-amber-200 underline underline-offset-2 hover:text-amber-100"
+              className="inline-block mt-2 text-xs font-semibold text-alerta-cor underline underline-offset-2 hover:text-alerta-cor"
             >
               Responder o briefing
             </a>
@@ -98,7 +99,7 @@ export function PortalPublico({
 
       {aguardando.length > 0 && (
         <section className="mb-10">
-          <h2 className="text-[11px] uppercase tracking-[1px] text-[#5A496A] mb-3">Para você aprovar</h2>
+          <h2 className="text-[11px] uppercase tracking-[1px] text-texto-apagado mb-3">Para você aprovar</h2>
           <div className="space-y-3">
             {aguardando.map((a) => (
               <CartaoAprovacao key={a.id} aprovacao={a} token={token} onDecidir={registrar} />
@@ -109,37 +110,37 @@ export function PortalPublico({
 
       <section className="mb-10">
         <div className="flex items-center justify-between gap-3 mb-3">
-          <h2 className="text-[11px] uppercase tracking-[1px] text-[#5A496A]">Andamento</h2>
+          <h2 className="text-[11px] uppercase tracking-[1px] text-texto-apagado">Andamento</h2>
           {p.total > 0 && (
-            <span className="text-[11px] font-mono text-[#968F88]">
+            <span className="text-[11px] font-mono text-texto-mudo">
               {p.feitas}/{p.total} · {p.percentual}%
             </span>
           )}
         </div>
 
         {p.total === 0 ? (
-          <p className="text-sm text-[#968F88]">As etapas aparecem aqui quando a produção começar.</p>
+          <p className="text-sm text-texto-mudo">As etapas aparecem aqui quando a produção começar.</p>
         ) : (
           <>
-            <div className="h-1 rounded-full bg-[#311C45] overflow-hidden mb-5">
+            <div className="h-1 rounded-full bg-superficie-2 overflow-hidden mb-5">
               <div className="h-full bg-brand-400 transition-all duration-500" style={{ width: `${p.percentual}%` }} />
             </div>
             <ol className="space-y-0">
               {etapas.map((e) => (
-                <li key={e.id} className="flex gap-3 py-2.5 border-b border-[#311C45] last:border-0">
+                <li key={e.id} className="flex gap-3 py-2.5 border-b border-borda last:border-0">
                   <Marcador estado={e.estado} />
                   <div className="min-w-0 flex-1">
                     <p
                       className={cn(
                         "text-sm leading-snug",
-                        e.estado === "feita" && "text-[#968F88]",
-                        e.estado === "atual" && "text-[#F5F5F4] font-semibold",
-                        e.estado === "proxima" && "text-[#5A496A]",
+                        e.estado === "feita" && "text-texto-mudo",
+                        e.estado === "atual" && "text-texto font-semibold",
+                        e.estado === "proxima" && "text-texto-apagado",
                       )}
                     >
                       {e.titulo}
                     </p>
-                    <p className="text-[11px] text-[#5A496A] mt-0.5">
+                    <p className="text-[11px] text-texto-apagado mt-0.5">
                       {e.estado === "feita" && `Concluída em ${fmtData(e.concluidaEm)}`}
                       {e.estado === "atual" && "Em andamento agora"}
                       {e.estado === "proxima" && "A fazer"}
@@ -154,22 +155,22 @@ export function PortalPublico({
 
       {parcelas.length > 0 && (
         <section className="mb-10">
-          <h2 className="text-[11px] uppercase tracking-[1px] text-[#5A496A] mb-3">Pagamentos</h2>
+          <h2 className="text-[11px] uppercase tracking-[1px] text-texto-apagado mb-3">Pagamentos</h2>
           <ul className="space-y-0">
             {parcelas.map((parcela) => (
-              <li key={parcela.id} className="flex items-center justify-between gap-3 py-2.5 border-b border-[#311C45] last:border-0">
+              <li key={parcela.id} className="flex items-center justify-between gap-3 py-2.5 border-b border-borda last:border-0">
                 <div className="min-w-0">
-                  <p className="text-sm text-[#DDDBD9]">{fmt(parcela.valor)}</p>
-                  <p className="text-[11px] text-[#5A496A]">
+                  <p className="text-sm text-texto-suave">{fmt(parcela.valor)}</p>
+                  <p className="text-[11px] text-texto-apagado">
                     {parcela.status === "pago" ? "Pago" : `Vence em ${fmtData(parcela.vencimento)}`}
                   </p>
                 </div>
                 <span
                   className={cn(
                     "shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide",
-                    parcela.status === "pago" && "bg-emerald-500/15 text-emerald-300",
-                    parcela.status === "pendente" && "bg-[#311C45] text-[#968F88]",
-                    parcela.status === "atrasado" && "bg-red-500/20 text-red-300",
+                    parcela.status === "pago" && "bg-emerald-500/15 text-sucesso-cor",
+                    parcela.status === "pendente" && "bg-superficie-2 text-texto-mudo",
+                    parcela.status === "atrasado" && "bg-red-500/20 text-falha-cor",
                   )}
                 >
                   {parcela.status === "pago" ? "Pago" : parcela.status === "atrasado" ? "Vencido" : "A pagar"}
@@ -182,17 +183,17 @@ export function PortalPublico({
 
       {decididas.length > 0 && (
         <section className="mb-10">
-          <h2 className="text-[11px] uppercase tracking-[1px] text-[#5A496A] mb-3">Já respondido</h2>
+          <h2 className="text-[11px] uppercase tracking-[1px] text-texto-apagado mb-3">Já respondido</h2>
           <ul className="space-y-2">
             {decididas.map((a) => (
-              <li key={a.id} className="text-xs text-[#968F88] leading-relaxed">
-                <strong className={a.status === "aprovado" ? "text-emerald-300" : "text-amber-300"}>
+              <li key={a.id} className="text-xs text-texto-mudo leading-relaxed">
+                <strong className={a.status === "aprovado" ? "text-sucesso-cor" : "text-alerta-cor"}>
                   {a.status === "aprovado" ? "Aprovado" : "Ajuste pedido"}
                 </strong>{" "}
                 · {a.titulo}
-                {a.decidido_em && <span className="text-[#5A496A]"> · {fmtData(a.decidido_em.slice(0, 10))}</span>}
-                {a.decidido_por && <span className="text-[#5A496A]"> · por {a.decidido_por}</span>}
-                {a.comentario_cliente && <span className="block text-[#5A496A] mt-0.5">“{a.comentario_cliente}”</span>}
+                {a.decidido_em && <span className="text-texto-apagado"> · {fmtData(a.decidido_em.slice(0, 10))}</span>}
+                {a.decidido_por && <span className="text-texto-apagado"> · por {a.decidido_por}</span>}
+                {a.comentario_cliente && <span className="block text-texto-apagado mt-0.5">“{a.comentario_cliente}”</span>}
               </li>
             ))}
           </ul>
@@ -212,7 +213,7 @@ function Marcador({ estado }: { estado: EtapaPortal["estado"] }) {
         "mt-1 shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center text-[9px] font-bold",
         estado === "feita" && "border-brand-400 bg-brand-400 text-white",
         estado === "atual" && "border-brand-400 text-brand-400",
-        estado === "proxima" && "border-[#311C45]",
+        estado === "proxima" && "border-borda",
       )}
     >
       {estado === "feita" ? "✓" : ""}
@@ -243,10 +244,10 @@ function CartaoAprovacao({
     });
 
   return (
-    <div className="rounded-xl border border-[#311C45] bg-[#1B0F27] p-4 sm:p-5 space-y-4">
+    <div className="rounded-xl border border-borda bg-campo p-4 sm:p-5 space-y-4">
       <div>
-        <p className="text-sm font-semibold text-[#F5F5F4] mb-1">{aprovacao.titulo}</p>
-        {aprovacao.descricao && <p className="text-xs text-[#968F88] leading-relaxed whitespace-pre-line">{aprovacao.descricao}</p>}
+        <p className="text-sm font-semibold text-texto mb-1">{aprovacao.titulo}</p>
+        {aprovacao.descricao && <p className="text-xs text-texto-mudo leading-relaxed whitespace-pre-line">{aprovacao.descricao}</p>}
       </div>
 
       {aprovacao.link && (
@@ -262,29 +263,29 @@ function CartaoAprovacao({
 
       <div className="space-y-3 pt-1">
         <label className="block">
-          <span className="block text-[11px] text-[#968F88] mb-1.5">Seu nome</span>
+          <span className="block text-[11px] text-texto-mudo mb-1.5">Seu nome</span>
           <input
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             placeholder="Quem está respondendo?"
-            className="w-full bg-[#150C1D] border border-[#311C45] rounded-lg px-3 py-2 text-sm text-[#DDDBD9] placeholder:text-[#5A496A] focus:border-brand-400 focus:outline-none"
+            className="w-full bg-fundo border border-borda rounded-lg px-3 py-2 text-sm text-texto-suave placeholder:text-texto-apagado focus:border-brand-400 focus:outline-none"
           />
         </label>
 
         {pedindoAjuste && (
           <label className="block">
-            <span className="block text-[11px] text-[#968F88] mb-1.5">O que você quer que eu ajuste?</span>
+            <span className="block text-[11px] text-texto-mudo mb-1.5">O que você quer que eu ajuste?</span>
             <textarea
               value={comentario}
               onChange={(e) => setComentario(e.target.value)}
               rows={4}
               placeholder="Quanto mais específico, mais rápido eu resolvo."
-              className="w-full bg-[#150C1D] border border-[#311C45] rounded-lg px-3 py-2 text-sm text-[#DDDBD9] placeholder:text-[#5A496A] focus:border-brand-400 focus:outline-none resize-y"
+              className="w-full bg-fundo border border-borda rounded-lg px-3 py-2 text-sm text-texto-suave placeholder:text-texto-apagado focus:border-brand-400 focus:outline-none resize-y"
             />
           </label>
         )}
 
-        {erro && <p className="text-xs text-red-400">{erro}</p>}
+        {erro && <p className="text-xs text-falha-cor">{erro}</p>}
 
         <div className="flex flex-wrap gap-2">
           {pedindoAjuste ? (
@@ -293,7 +294,7 @@ function CartaoAprovacao({
                 type="button"
                 disabled={enviando}
                 onClick={() => decidir("ajuste")}
-                className="px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-[#150C1D] text-sm font-semibold transition-colors disabled:opacity-40"
+                className="px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-fundo text-sm font-semibold transition-colors disabled:opacity-40"
               >
                 {enviando ? "Enviando…" : "Enviar pedido de ajuste"}
               </button>
@@ -301,7 +302,7 @@ function CartaoAprovacao({
                 type="button"
                 disabled={enviando}
                 onClick={() => setPedindoAjuste(false)}
-                className="px-4 py-2.5 rounded-lg text-sm text-[#968F88] hover:text-[#DDDBD9] transition-colors"
+                className="px-4 py-2.5 rounded-lg text-sm text-texto-mudo hover:text-texto-suave transition-colors"
               >
                 Voltar
               </button>
@@ -323,7 +324,7 @@ function CartaoAprovacao({
                   setErro(null);
                   setPedindoAjuste(true);
                 }}
-                className="px-4 py-2.5 rounded-lg border border-[#311C45] text-sm text-[#968F88] hover:text-[#DDDBD9] hover:border-[#5A496A] transition-colors"
+                className="px-4 py-2.5 rounded-lg border border-borda text-sm text-texto-mudo hover:text-texto-suave hover:border-borda-forte transition-colors"
               >
                 Pedir ajuste
               </button>
@@ -344,9 +345,9 @@ function Recado({ token }: { token: string }) {
 
   if (enviado) {
     return (
-      <section className="pt-8 border-t border-[#311C45]">
+      <section className="pt-8 border-t border-borda">
         <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-4 py-3">
-          <p className="text-xs text-emerald-200/90 leading-relaxed">
+          <p className="text-xs text-sucesso-cor/90 leading-relaxed">
             Recebi, obrigada! Vou responder por aqui ou pelo WhatsApp.
           </p>
         </div>
@@ -357,7 +358,7 @@ function Recado({ token }: { token: string }) {
             setTexto("");
             setLink("");
           }}
-          className="mt-3 text-xs text-[#968F88] hover:text-[#DDDBD9] underline underline-offset-2"
+          className="mt-3 text-xs text-texto-mudo hover:text-texto-suave underline underline-offset-2"
         >
           Mandar outro recado
         </button>
@@ -366,10 +367,10 @@ function Recado({ token }: { token: string }) {
   }
 
   return (
-    <section className="pt-8 border-t border-[#311C45] space-y-3">
+    <section className="pt-8 border-t border-borda space-y-3">
       <div>
-        <h2 className="text-sm font-semibold text-[#F5F5F4] mb-1">Mandar recado ou material</h2>
-        <p className="text-xs text-[#968F88] leading-relaxed">
+        <h2 className="text-sm font-semibold text-texto mb-1">Mandar recado ou material</h2>
+        <p className="text-xs text-texto-mudo leading-relaxed">
           Textos, fotos, logo: suba numa pasta do Google Drive e cole o link aqui. Se for só um recado, escreva abaixo.
         </p>
       </div>
@@ -379,16 +380,16 @@ function Recado({ token }: { token: string }) {
         onChange={(e) => setTexto(e.target.value)}
         rows={4}
         placeholder="Escreva aqui…"
-        className="w-full bg-[#1B0F27] border border-[#311C45] rounded-lg px-3 py-2 text-sm text-[#DDDBD9] placeholder:text-[#5A496A] focus:border-brand-400 focus:outline-none resize-y"
+        className="w-full bg-campo border border-borda rounded-lg px-3 py-2 text-sm text-texto-suave placeholder:text-texto-apagado focus:border-brand-400 focus:outline-none resize-y"
       />
       <input
         value={link}
         onChange={(e) => setLink(e.target.value)}
         placeholder="https://drive.google.com/… (opcional)"
-        className="w-full bg-[#1B0F27] border border-[#311C45] rounded-lg px-3 py-2 text-sm text-[#DDDBD9] placeholder:text-[#5A496A] focus:border-brand-400 focus:outline-none"
+        className="w-full bg-campo border border-borda rounded-lg px-3 py-2 text-sm text-texto-suave placeholder:text-texto-apagado focus:border-brand-400 focus:outline-none"
       />
 
-      {erro && <p className="text-xs text-red-400">{erro}</p>}
+      {erro && <p className="text-xs text-falha-cor">{erro}</p>}
 
       <button
         type="button"
@@ -413,15 +414,16 @@ function Recado({ token }: { token: string }) {
 
 function Moldura({ contato, children }: { contato: Contato; children: React.ReactNode }) {
   return (
-    <main className="min-h-dvh bg-[#150C1D] text-[#DDDBD9]">
+    <main className="min-h-dvh bg-fundo text-texto-suave">
       <div className="mx-auto max-w-2xl px-5 py-10 sm:py-14">
-        <header className="mb-8">
+        <header className="mb-8 flex items-center justify-between gap-4">
           <Image src="/marca/logo-gradiente.png" alt={contato.nome} width={531} height={131} priority className="h-8 w-auto" />
+          <BotaoTema variante="flutuante" />
         </header>
 
         {children}
 
-        <footer className="mt-14 pt-6 border-t border-[#311C45] text-[11px] text-[#5A496A] leading-relaxed">
+        <footer className="mt-14 pt-6 border-t border-borda text-[11px] text-texto-apagado leading-relaxed">
           {contato.nome} · {contato.titulo}
           {contato.email && <> · {contato.email}</>}
           {contato.telefone && <> · {contato.telefone}</>}

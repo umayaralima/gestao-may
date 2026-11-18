@@ -90,7 +90,7 @@ export function FiltroMenu({
           "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors whitespace-nowrap",
           aberto || ativo
             ? "bg-brand-400/15 text-brand-400 border-brand-400/30"
-            : "text-[#968F88] border-[#311C45] hover:border-[#5A496A] hover:text-[#DDDBD9]",
+            : "text-texto-mudo border-borda hover:border-borda-forte hover:text-texto-suave",
         )}
       >
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -104,7 +104,7 @@ export function FiltroMenu({
               e.stopPropagation();
               aplicar(todos);
             }}
-            className="ml-1 text-[#968F88] hover:text-red-400 transition-colors"
+            className="ml-1 text-texto-mudo hover:text-falha-cor transition-colors"
           >
             ×
           </span>
@@ -117,7 +117,7 @@ export function FiltroMenu({
           <div
             ref={menuRef}
             style={{ top: pos.top, left: pos.left }}
-            className="fixed z-[60] bg-[#231431] border border-[#311C45] rounded-xl shadow-xl py-1.5 min-w-[160px] entrar"
+            className="fixed z-[60] bg-superficie border border-borda rounded-xl shadow-xl py-1.5 min-w-[160px] entrar"
           >
             {opcoes.map((o) => (
               <button
@@ -126,7 +126,7 @@ export function FiltroMenu({
                 onClick={() => aplicar(o.valor)}
                 className={cn(
                   "w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left transition-colors",
-                  atual === o.valor ? "text-brand-400 bg-brand-400/10" : "text-[#C5C2BE] hover:bg-white/4",
+                  atual === o.valor ? "text-brand-400 bg-brand-400/10" : "text-texto-sutil hover:bg-superficie-2",
                 )}
               >
                 {o.cor && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: o.cor }} />}

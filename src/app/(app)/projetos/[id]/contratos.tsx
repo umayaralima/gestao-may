@@ -48,8 +48,8 @@ export function Contratos({
       <div className="space-y-3">
         <Card className="space-y-3">
           <div>
-            <p className="text-sm font-semibold text-[#F5F5F4]">Contrato do sistema</p>
-            <p className="text-xs text-[#968F88] mt-0.5">Preenche seus dados, os do cliente, valor por extenso e as parcelas. Depois é só baixar o PDF.</p>
+            <p className="text-sm font-semibold text-texto">Contrato do sistema</p>
+            <p className="text-xs text-texto-mudo mt-0.5">Preenche seus dados, os do cliente, valor por extenso e as parcelas. Depois é só baixar o PDF.</p>
           </div>
           <GerarContratoBotao projetoId={projetoId} modelo={modelo} pagamentos={pagamentos} valorProjeto={valorProjeto} pagamentoPrevisto={pagamentoPrevisto} />
         </Card>
@@ -68,8 +68,8 @@ function CartaoContrato({ c, projetoId, clienteNome, clienteEmail }: { c: Contra
     <Card className={cn("space-y-4", pending && "opacity-50")}>
       {c.numero && (
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-semibold text-[#DDDBD9]">Contrato nº {c.numero}</p>
-          {c.valor !== null && <span className="text-[11px] font-mono text-[#968F88]">{fmt(c.valor)}</span>}
+          <p className="text-xs font-semibold text-texto-suave">Contrato nº {c.numero}</p>
+          {c.valor !== null && <span className="text-[11px] font-mono text-texto-mudo">{fmt(c.valor)}</span>}
         </div>
       )}
       <ol className="flex items-center gap-2">
@@ -79,13 +79,13 @@ function CartaoContrato({ c, projetoId, clienteNome, clienteEmail }: { c: Contra
               className={cn(
                 "px-2.5 py-1 rounded-full text-[11px] font-medium border",
                 i < idx && "bg-brand-400/10 border-brand-400/20 text-brand-300",
-                i === idx && (e.id === "assinado" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-brand-400/15 border-brand-400/30 text-brand-400"),
-                i > idx && "bg-transparent border-[#311C45] text-[#5A496A]",
+                i === idx && (e.id === "assinado" ? "bg-emerald-500/10 border-emerald-500/20 text-sucesso-cor" : "bg-brand-400/15 border-brand-400/30 text-brand-400"),
+                i > idx && "bg-transparent border-borda text-texto-apagado",
               )}
             >
               {e.label}
             </span>
-            {i < ETAPAS.length - 1 && <span className={cn("h-px w-6", i < idx ? "bg-brand-400" : "bg-[#311C45]")} />}
+            {i < ETAPAS.length - 1 && <span className={cn("h-px w-6", i < idx ? "bg-brand-400" : "bg-superficie-2")} />}
           </li>
         ))}
       </ol>
@@ -96,9 +96,9 @@ function CartaoContrato({ c, projetoId, clienteNome, clienteEmail }: { c: Contra
           ["Enviado em", fmtData(c.data_envio)],
           ["Assinado em", fmtData(c.data_assinatura)],
         ].map(([k, v], i) => (
-          <div key={k} className="bg-[#1B0F26] rounded-lg p-2.5">
-            <p className="text-[9px] uppercase tracking-wider text-[#968F88]">{k}</p>
-            <p className={cn("font-mono mt-0.5", i === 2 && c.data_assinatura ? "text-emerald-400" : "text-[#DDDBD9]")}>{v}</p>
+          <div key={k} className="bg-campo rounded-lg p-2.5">
+            <p className="text-[9px] uppercase tracking-wider text-texto-mudo">{k}</p>
+            <p className={cn("font-mono mt-0.5", i === 2 && c.data_assinatura ? "text-sucesso-cor" : "text-texto-suave")}>{v}</p>
           </div>
         ))}
       </div>
@@ -109,7 +109,7 @@ function CartaoContrato({ c, projetoId, clienteNome, clienteEmail }: { c: Contra
             <Input id={`link-${c.id}`} name="link_documento" type="url" placeholder="https://" defaultValue={c.link_documento ?? ""} className="py-2 text-xs" />
           </Campo>
         </div>
-        <button type="submit" className="px-3 py-2 text-xs text-[#968F88] border border-[#311C45] hover:border-[#5A496A] hover:text-[#DDDBD9] rounded-lg transition-colors">
+        <button type="submit" className="px-3 py-2 text-xs text-texto-mudo border border-borda hover:border-borda-forte hover:text-texto-suave rounded-lg transition-colors">
           Salvar
         </button>
         {c.link_documento && (
@@ -121,7 +121,7 @@ function CartaoContrato({ c, projetoId, clienteNome, clienteEmail }: { c: Contra
 
       <DocumentoContrato contrato={c} projetoId={projetoId} clienteNome={clienteNome} clienteEmail={clienteEmail} />
 
-      <div className="flex flex-wrap items-center gap-2 border-t border-[#311C45] pt-4">
+      <div className="flex flex-wrap items-center gap-2 border-t border-borda pt-4">
         {c.status === "rascunho" && (
           <button type="button" onClick={() => run(() => marcarEnviado(c.id, c.projeto_id))} className="px-3 py-2 bg-brand-400 hover:bg-brand-300 text-white text-xs font-semibold rounded-lg transition-colors">
             Marcar como enviado
@@ -133,18 +133,18 @@ function CartaoContrato({ c, projetoId, clienteNome, clienteEmail }: { c: Contra
             onClick={() => run(() => marcarAssinado(c.id, c.projeto_id))}
             className={cn(
               "px-3 py-2 text-xs font-semibold rounded-lg transition-colors",
-              c.status === "enviado" ? "bg-emerald-500 hover:bg-emerald-400 text-white" : "text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10",
+              c.status === "enviado" ? "bg-emerald-500 hover:bg-emerald-400 text-white" : "text-sucesso-cor border border-emerald-500/30 hover:bg-emerald-500/10",
             )}
           >
             Marcar como assinado
           </button>
         )}
         {c.status !== "rascunho" && (
-          <button type="button" onClick={() => run(() => voltarParaRascunho(c.id, c.projeto_id))} className="px-3 py-2 text-xs text-[#968F88] border border-[#311C45] hover:border-[#5A496A] rounded-lg transition-colors">
+          <button type="button" onClick={() => run(() => voltarParaRascunho(c.id, c.projeto_id))} className="px-3 py-2 text-xs text-texto-mudo border border-borda hover:border-borda-forte rounded-lg transition-colors">
             Voltar pra rascunho
           </button>
         )}
-        <button type="button" onClick={() => confirm("Excluir este contrato?") && run(() => excluirContrato(c.id, c.projeto_id))} className="ml-auto text-[11px] text-[#968F88] hover:text-red-400 transition-colors">
+        <button type="button" onClick={() => confirm("Excluir este contrato?") && run(() => excluirContrato(c.id, c.projeto_id))} className="ml-auto text-[11px] text-texto-mudo hover:text-falha-cor transition-colors">
           Excluir
         </button>
       </div>
@@ -161,8 +161,8 @@ function NovoContrato({ criar }: { criar: (prev: FormState, fd: FormData) => Pro
 
   return (
     <Card>
-      <p className="text-sm font-semibold text-[#F5F5F4] mb-1">Novo contrato</p>
-      <p className="text-xs text-[#968F88] mb-4">Cria em rascunho. Depois marque enviado e assinado; as datas entram sozinhas.</p>
+      <p className="text-sm font-semibold text-texto mb-1">Novo contrato</p>
+      <p className="text-xs text-texto-mudo mb-4">Cria em rascunho. Depois marque enviado e assinado; as datas entram sozinhas.</p>
       <form ref={ref} action={formAction} className="space-y-3">
         <Campo label="Link do documento" htmlFor="link_documento" hint="Autentique, Google Docs, PDF no Drive… Pode preencher depois.">
           <Input id="link_documento" name="link_documento" type="url" placeholder="https://" />

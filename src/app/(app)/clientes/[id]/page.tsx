@@ -96,7 +96,7 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
         titulo={cliente.empresa ?? cliente.nome}
         sub={
           <>
-            <Link href="/clientes" className="hover:text-[#DDDBD9]">
+            <Link href="/clientes" className="hover:text-texto-suave">
               Clientes
             </Link>{" "}
             › {cliente.empresa ? cliente.nome : (cliente.nicho ?? "cliente")}
@@ -140,7 +140,7 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
       </Header>
 
       {/* Abas (mesmo padrão da página do projeto) */}
-      <div className="flex items-center gap-1 px-4 md:px-6 border-b border-[#311C45] shrink-0 overflow-x-auto">
+      <div className="flex items-center gap-1 px-4 md:px-6 border-b border-borda shrink-0 overflow-x-auto">
         {ABAS.map((a) => {
           const alerta = (a.id === "relacionamento" && followupAtrasado) || (a.id === "financeiro" && atrasado > 0);
           return (
@@ -149,7 +149,7 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
               href={`/clientes/${cliente.id}?aba=${a.id}`}
               className={cn(
                 "px-3 py-2.5 text-[11px] font-medium transition-colors border-b-2 -mb-px flex items-center gap-1.5 whitespace-nowrap",
-                aba === a.id ? "border-brand-400 text-brand-400" : "border-transparent text-[#968F88] hover:text-[#DDDBD9]",
+                aba === a.id ? "border-brand-400 text-brand-400" : "border-transparent text-texto-mudo hover:text-texto-suave",
               )}
             >
               {a.label}
@@ -164,12 +164,12 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
           <>
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 entrar">
               <KpiCard label="Valor total" value={fmt(valorTotal)} sub={`${ativos.length} projeto(s)`} />
-              <KpiCard label="Recebido" value={fmt(recebido)} accent="text-emerald-400" sub={`${pags.filter((p) => p.status === "pago").length} pagamento(s)`} />
-              <KpiCard label="A receber" value={fmt(pendente + atrasado)} accent={atrasado > 0 ? "text-red-400" : "text-amber-400"} sub={atrasado > 0 ? `${fmt(atrasado)} em atraso` : "nada em atraso"} />
+              <KpiCard label="Recebido" value={fmt(recebido)} accent="text-sucesso-cor" sub={`${pags.filter((p) => p.status === "pago").length} pagamento(s)`} />
+              <KpiCard label="A receber" value={fmt(pendente + atrasado)} accent={atrasado > 0 ? "text-falha-cor" : "text-alerta-cor"} sub={atrasado > 0 ? `${fmt(atrasado)} em atraso` : "nada em atraso"} />
               <KpiCard
                 label="Tarefas abertas"
                 value={String(todasTarefas.filter((t) => !t.concluida_em).length)}
-                accent={todasTarefas.some((t) => !t.concluida_em && t.vencimento && t.vencimento < hoje) ? "text-red-400" : undefined}
+                accent={todasTarefas.some((t) => !t.concluida_em && t.vencimento && t.vencimento < hoje) ? "text-falha-cor" : undefined}
                 sub={`${todasTarefas.filter((t) => t.concluida_em).length} concluída(s)`}
               />
             </div>
@@ -180,8 +180,8 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
                 <div className="flex items-center gap-3">
                   <Avatar nome={cliente.empresa ?? cliente.nome} tamanho={11} />
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-[#F5F5F4] truncate">{cliente.nome}</p>
-                    <p className="text-[11px] text-[#968F88] truncate">{cliente.nicho ?? "Nicho não informado"}</p>
+                    <p className="text-sm font-semibold text-texto truncate">{cliente.nome}</p>
+                    <p className="text-[11px] text-texto-mudo truncate">{cliente.nicho ?? "Nicho não informado"}</p>
                   </div>
                 </div>
                 <dl className="space-y-2.5 text-xs">
@@ -228,21 +228,21 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
                 </dl>
                 {cliente.endereco && (
                   <Secao titulo="Endereço">
-                    <p className="text-[11px] text-[#C5C2BE] leading-relaxed">{cliente.endereco}</p>
+                    <p className="text-[11px] text-texto-sutil leading-relaxed">{cliente.endereco}</p>
                   </Secao>
                 )}
                 {cliente.acessos && (
                   <Secao titulo="Acessos e links">
-                    <p className="text-[11px] text-[#C5C2BE] leading-relaxed whitespace-pre-wrap break-words">{cliente.acessos}</p>
+                    <p className="text-[11px] text-texto-sutil leading-relaxed whitespace-pre-wrap break-words">{cliente.acessos}</p>
                   </Secao>
                 )}
                 {cliente.observacoes && (
                   <Secao titulo="Observações">
-                    <p className="text-[11px] text-[#C5C2BE] leading-relaxed whitespace-pre-wrap">{cliente.observacoes}</p>
+                    <p className="text-[11px] text-texto-sutil leading-relaxed whitespace-pre-wrap">{cliente.observacoes}</p>
                   </Secao>
                 )}
-                <form action={excluir} className="border-t border-[#311C45] pt-3">
-                  <button type="submit" className="text-[11px] text-[#968F88] hover:text-red-400 transition-colors">
+                <form action={excluir} className="border-t border-borda pt-3">
+                  <button type="submit" className="text-[11px] text-texto-mudo hover:text-falha-cor transition-colors">
                     Excluir cliente (apaga projetos e pagamentos)
                   </button>
                 </form>
@@ -250,15 +250,15 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
 
               {/* Projetos com progresso das etapas */}
               <div className="lg:col-span-2 space-y-4">
-                <div className="bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden">
-                  <div className="flex items-center justify-between px-5 py-4 border-b border-[#311C45]">
+                <div className="bg-superficie border border-borda rounded-xl overflow-hidden">
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-borda">
                     <CardTitulo sub={`${lista.length} no total · ${ativos.filter((p) => !["entregue", "concluido"].includes(p.status)).length} em andamento`}>Projetos</CardTitulo>
                     <BotaoGhost href={`/projetos?novo=1&cliente=${cliente.id}`}>+ Projeto</BotaoGhost>
                   </div>
                   {lista.length === 0 ? (
-                    <p className="px-5 py-8 text-center text-xs text-[#968F88]">Nenhum projeto ainda.</p>
+                    <p className="px-5 py-8 text-center text-xs text-texto-mudo">Nenhum projeto ainda.</p>
                   ) : (
-                    <ul className="divide-y divide-[#311C45]/60">
+                    <ul className="divide-y divide-borda/60">
                       {lista.map((p) => {
                         const prog = progressoProjeto(p.id);
                         const dias = p.prazo_entrega ? diffDias(hoje, p.prazo_entrega) : null;
@@ -267,16 +267,16 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
                           <li key={p.id} className="px-5 py-4">
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
-                                <Link href={`/projetos/${p.id}`} className="text-sm font-medium text-[#DDDBD9] hover:text-brand-400 transition-colors">
+                                <Link href={`/projetos/${p.id}`} className="text-sm font-medium text-texto-suave hover:text-brand-400 transition-colors">
                                   {p.nome}
                                 </Link>
-                                <p className="text-[11px] text-[#968F88] mt-0.5">
+                                <p className="text-[11px] text-texto-mudo mt-0.5">
                                   {p.tipo ?? "Sem tipo"} · <span className="font-mono">{fmt(p.valor_total)}</span>
                                   {p.prazo_entrega && (
                                     <>
                                       {" "}
                                       · prazo{" "}
-                                      <span className={cn("font-mono", emAndamento && dias !== null && dias < 0 ? "text-red-400" : emAndamento && dias !== null && dias <= 7 ? "text-amber-400" : "")}>
+                                      <span className={cn("font-mono", emAndamento && dias !== null && dias < 0 ? "text-falha-cor" : emAndamento && dias !== null && dias <= 7 ? "text-alerta-cor" : "")}>
                                         {fmtData(p.prazo_entrega, false)}
                                       </span>
                                     </>
@@ -289,16 +289,16 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
                               </div>
                             </div>
                             <div className="mt-3 flex items-center gap-3">
-                              <div className="flex-1 h-1 bg-[#311C45] rounded-full overflow-hidden">
+                              <div className="flex-1 h-1 bg-superficie-2 rounded-full overflow-hidden">
                                 <div className="h-full bg-brand-400 rounded-full transition-all duration-500" style={{ width: `${prog.pct}%` }} />
                               </div>
-                              <span className="text-[10px] font-mono text-[#968F88] whitespace-nowrap">
+                              <span className="text-[10px] font-mono text-texto-mudo whitespace-nowrap">
                                 {prog.total ? `${prog.feitas}/${prog.total} etapas` : "sem etapas"}
                               </span>
                             </div>
                             {prog.proxima && (
-                              <p className="mt-1.5 text-[11px] text-[#968F88] truncate">
-                                Próxima: <span className="text-[#C5C2BE]">{prog.proxima.titulo}</span>
+                              <p className="mt-1.5 text-[11px] text-texto-mudo truncate">
+                                Próxima: <span className="text-texto-sutil">{prog.proxima.titulo}</span>
                                 {prog.proxima.vencimento && <span className="font-mono"> · {fmtData(prog.proxima.vencimento, false)}</span>}
                               </p>
                             )}
@@ -331,22 +331,22 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
           <div className="space-y-5 entrar">
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
               <KpiCard label="Contratado" value={fmt(valorTotal)} sub={`${ativos.length} projeto(s)`} />
-              <KpiCard label="Recebido" value={fmt(recebido)} accent="text-emerald-400" />
-              <KpiCard label="A receber" value={fmt(pendente)} accent="text-amber-400" />
-              <KpiCard label="Vencido" value={fmt(atrasado)} accent={atrasado > 0 ? "text-red-400" : undefined} />
+              <KpiCard label="Recebido" value={fmt(recebido)} accent="text-sucesso-cor" />
+              <KpiCard label="A receber" value={fmt(pendente)} accent="text-alerta-cor" />
+              <KpiCard label="Vencido" value={fmt(atrasado)} accent={atrasado > 0 ? "text-falha-cor" : undefined} />
             </div>
-            <div className="bg-[#231431] border border-[#311C45] rounded-xl overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-[#311C45]">
+            <div className="bg-superficie border border-borda rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-borda">
                 <CardTitulo sub={`${pags.length} lançamento(s) em todos os projetos`}>Pagamentos</CardTitulo>
                 <BotaoGhost href="/financeiro">Abrir Financeiro</BotaoGhost>
               </div>
               {pags.length === 0 ? (
-                <p className="px-5 py-8 text-center text-xs text-[#968F88]">Nenhum lançamento ainda.</p>
+                <p className="px-5 py-8 text-center text-xs text-texto-mudo">Nenhum lançamento ainda.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[560px] text-sm">
                     <thead>
-                      <tr className="border-b border-[#311C45]">
+                      <tr className="border-b border-borda">
                         <Th>Projeto</Th>
                         <Th>Tipo</Th>
                         <Th>Vencimento</Th>
@@ -359,14 +359,14 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
                     <tbody>
                       {pags.map((p) => (
                         <Tr key={p.id}>
-                          <Td className="font-medium text-[#DDDBD9]">{lista.find((x) => x.id === p.projeto_id)?.nome ?? "—"}</Td>
-                          <Td className="font-mono text-[#968F88]">{p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "—"}</Td>
-                          <Td className={cn("font-mono", p.status === "atrasado" ? "text-red-400" : "text-[#968F88]")}>{fmtData(p.vencimento)}</Td>
-                          <Td className="font-mono text-[#968F88]">
+                          <Td className="font-medium text-texto-suave">{lista.find((x) => x.id === p.projeto_id)?.nome ?? "—"}</Td>
+                          <Td className="font-mono text-texto-mudo">{p.tipo ? TIPO_PAGAMENTO_LABEL[p.tipo] : "—"}</Td>
+                          <Td className={cn("font-mono", p.status === "atrasado" ? "text-falha-cor" : "text-texto-mudo")}>{fmtData(p.vencimento)}</Td>
+                          <Td className="font-mono text-texto-mudo">
                             {p.data_pagamento ? fmtData(p.data_pagamento) : "—"}
                             {p.forma_pagamento && <span className="ml-1.5 text-[10px]">{FORMA_PAGAMENTO_LABEL[p.forma_pagamento as keyof typeof FORMA_PAGAMENTO_LABEL] ?? p.forma_pagamento}</span>}
                           </Td>
-                          <Td className={cn("font-mono font-semibold", p.status === "pago" ? "text-emerald-400" : p.status === "atrasado" ? "text-red-400" : "text-[#DDDBD9]")}>{fmt(p.valor)}</Td>
+                          <Td className={cn("font-mono font-semibold", p.status === "pago" ? "text-sucesso-cor" : p.status === "atrasado" ? "text-falha-cor" : "text-texto-suave")}>{fmt(p.valor)}</Td>
                           <Td>{p.status === "pago" ? <Pill tom="success">Pago</Pill> : p.status === "atrasado" ? <Pill tom="error">Vencido</Pill> : <Pill tom="warning">Pendente</Pill>}</Td>
                           <Td>
                             <BotaoLinha href={`/projetos/${p.projeto_id}?aba=pagamentos`}>Abrir</BotaoLinha>
@@ -388,16 +388,16 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
 function Linha({ k, children }: { k: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <dt className="text-[#968F88] shrink-0">{k}</dt>
-      <dd className="text-[#DDDBD9] truncate">{children}</dd>
+      <dt className="text-texto-mudo shrink-0">{k}</dt>
+      <dd className="text-texto-suave truncate">{children}</dd>
     </div>
   );
 }
 
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <div className="border-t border-[#311C45] pt-3">
-      <p className="text-[10px] font-semibold text-[#968F88] uppercase tracking-wider mb-1.5">{titulo}</p>
+    <div className="border-t border-borda pt-3">
+      <p className="text-[10px] font-semibold text-texto-mudo uppercase tracking-wider mb-1.5">{titulo}</p>
       {children}
     </div>
   );

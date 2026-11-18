@@ -67,7 +67,7 @@ export function BotoesCobranca({
             {copiado ? "Copiado ✓" : "Copiar link"}
           </button>
           {zap && (
-            <a href={zap} target="_blank" rel="noreferrer" className="px-2.5 py-1 text-[11px] text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors whitespace-nowrap">
+            <a href={zap} target="_blank" rel="noreferrer" className="px-2.5 py-1 text-[11px] text-sucesso-cor border border-emerald-500/30 hover:bg-emerald-500/10 rounded-lg transition-colors whitespace-nowrap">
               WhatsApp
             </a>
           )}
@@ -75,7 +75,7 @@ export function BotoesCobranca({
             type="button"
             disabled={pendente}
             onClick={() => iniciar(async () => setErro((await conferirCobranca(pagamentoId, projetoId)).erro ?? null))}
-            className="w-6 h-6 rounded flex items-center justify-center text-[#968F88] hover:text-[#DDDBD9] transition-colors"
+            className="w-6 h-6 rounded flex items-center justify-center text-texto-mudo hover:text-texto-suave transition-colors"
             title="Conferir pagamento na InfinitePay"
           >
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
@@ -86,7 +86,7 @@ export function BotoesCobranca({
             type="button"
             disabled={pendente}
             onClick={() => confirm("Remover o link desta parcela?") && iniciar(() => removerLinkCobranca(pagamentoId, projetoId))}
-            className="w-6 h-6 rounded flex items-center justify-center text-[#5A496A] hover:text-red-400 transition-colors"
+            className="w-6 h-6 rounded flex items-center justify-center text-texto-apagado hover:text-falha-cor transition-colors"
             title="Remover link"
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
@@ -95,7 +95,7 @@ export function BotoesCobranca({
           </button>
         </>
       )}
-      {erro && <span className="text-[10px] text-red-400 max-w-[180px] truncate" title={erro}>{erro}</span>}
+      {erro && <span className="text-[10px] text-falha-cor max-w-[180px] truncate" title={erro}>{erro}</span>}
     </div>
   );
 }

@@ -36,6 +36,10 @@ export type Projeto = {
   link_projeto: string | null;
   observacoes: string | null;
   criado_em: string;
+  // Portal do cliente (migração 019). Token nulo = portal não liberado ou revogado.
+  portal_token: string | null;
+  portal_liberado_em: string | null;
+  portal_vista_em: string | null;
 };
 
 export type StatusPagamento = "pendente" | "pago" | "atrasado";

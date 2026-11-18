@@ -444,3 +444,107 @@ export async function ajustarRespostaBriefing(projetoId: string, chave: string, 
   revalidar(projetoId);
   return { ok: true };
 }
+
+// ---------- Portal do cliente (migração 019) ----------
+
+/*
+ * Libera o portal gerando o token. Se já existe, não troca: o link que o cliente
+ * salvou continua valendo (trocar é ação separada e consciente).
+ */
+export async function liberarPortal(projetoId: string): Promise<FormState> {
+  const supabase = await createClient();
+  const { data: projeto } = await supabase
+    .from("projetos")
+    .select("portal_token")
+    .eq("id", projetoId)
+    .maybeSingle<{ portal_token: string | null }>();
+  if (!projeto) return { erro: "Projeto não encontrado." };
+  if (projeto.portal_token) return { ok: true };
+
+  const { error } = await supabase
+    .from("projetos")
+    .update({ portal_token: crypto.randomUUID(), portal_liberado_em: new Date().toISOString(), portal_vista_em: null })
+    .eq("id", projetoId);
+  if (error) return { erro: "Não foi possível liberar o portal." };
+
+  revalidar(projetoId);
+  return { ok: true };
+}
+
+/** Novo token: derruba o link antigo, caso tenha ido pra pessoa errada. */
+export async function trocarTokenPortal(projetoId: string): Promise<FormState> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("projetos")
+    .update({ portal_token: crypto.randomUUID(), portal_liberado_em: new Date().toISOString(), portal_vista_em: null })
+    .eq("id", projetoId);
+  if (error) return { erro: "Não foi possível gerar um link novo." };
+
+  revalidar(projetoId);
+  return { ok: true };
+}
+
+/*
+ * Revoga: o link para de abrir. As aprovações ficam — são o registro de quem
+ * aprovou o quê, e isso não se apaga junto com um link.
+ */
+export async function revogarPortal(projetoId: string): Promise<FormState> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("projetos")
+    .update({ portal_token: null, portal_vista_em: null })
+    .eq("id", projetoId);
+  if (error) return { erro: "Não foi possível revogar o portal." };
+
+  revalidar(projetoId);
+  return { ok: true };
+}
+
+const aprovacaoSchema = z.object({
+  titulo: z.string().trim().min(2, "Informe o que o cliente vai aprovar."),
+  descricao: z.preprocess(vazioParaNull, z.string().trim().max(4000).nullable()),
+  link: z.preprocess(vazioParaNull, z.string().trim().url("Link inválido (inclua https://).").nullable()),
+});
+
+export async function criarAprovacao(projetoId: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  const dados = aprovacaoSchema.safeParse({
+    titulo: formData.get("titulo"),
+    descricao: formData.get("descricao"),
+    link: formData.get("link"),
+  });
+  if (!dados.success) return { erro: dados.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("aprovacoes").insert({ projeto_id: projetoId, ...dados.data });
+  if (error) return { erro: "Não foi possível criar o pedido de aprovação." };
+
+  revalidar(projetoId);
+  return { ok: true };
+}
+
+/*
+ * Reabre um pedido já respondido — o caminho normal depois de um "ajuste":
+ * ela corrige o layout e pede a aprovação de novo, no mesmo pedido, pra não
+ * encher a tela do cliente de cartões repetidos.
+ */
+export async function reabrirAprovacao(id: string, projetoId: string): Promise<FormState> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("aprovacoes")
+    .update({ status: "aguardando", comentario_cliente: null, decidido_por: null, decidido_em: null })
+    .eq("id", id)
+    .eq("projeto_id", projetoId);
+  if (error) return { erro: "Não foi possível reabrir." };
+
+  revalidar(projetoId);
+  return { ok: true };
+}
+
+export async function excluirAprovacao(id: string, projetoId: string): Promise<FormState> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("aprovacoes").delete().eq("id", id).eq("projeto_id", projetoId);
+  if (error) return { erro: "Não foi possível excluir." };
+
+  revalidar(projetoId);
+  return { ok: true };
+}

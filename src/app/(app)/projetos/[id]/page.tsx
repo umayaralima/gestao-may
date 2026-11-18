@@ -9,15 +9,17 @@ import { createClient } from "@/lib/supabase/server";
 import { getConfiguracoes } from "@/lib/configuracoes";
 import { baseUrl } from "@/lib/enviar-resumo";
 import type { PerguntaBriefing } from "@/lib/briefing";
+import type { Aprovacao } from "@/lib/portal";
 import { blocoPagamento } from "@/lib/contrato";
 import type { Briefing, CategoriaTarefa, Contrato, ModeloContrato, Pagamento, Projeto, Tarefa } from "@/lib/types";
-import { aprovarProjeto, criarContrato, excluirProjeto, mudarStatusProjeto, mudarStatusSugerido } from "../actions";
+import { aprovarProjeto, criarAprovacao, criarContrato, excluirProjeto, mudarStatusProjeto, mudarStatusSugerido } from "../actions";
 import { tomStatus } from "../status-tom";
 import { BriefingCliente } from "./briefing-cliente";
 import { Contratos } from "./contratos";
 import { EditarProjetoBotao } from "./editar-botao";
 import { EtapasProjeto } from "./etapas-projeto";
 import { PagamentosProjeto } from "./pagamentos-projeto";
+import { PortalCliente } from "./portal-cliente";
 import { BotaoMensagem } from "@/components/mensagem/botao-mensagem";
 import { modelosDaSituacao } from "@/lib/modelos-mensagem";
 
@@ -26,6 +28,7 @@ const ABAS = [
   { id: "geral", label: "Visão geral" },
   { id: "etapas", label: "Etapas" },
   { id: "briefing", label: "Briefing" },
+  { id: "portal", label: "Portal" },
   { id: "contrato", label: "Contrato" },
   { id: "pagamentos", label: "Pagamentos" },
 ] as const;
@@ -37,7 +40,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
   const aba: Aba = ABAS.some((a) => a.id === abaParam) ? (abaParam as Aba) : "geral";
   const supabase = await createClient();
 
-  const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }, { data: tarefas }, { data: categorias }, config, { data: modelosContrato }, { data: perguntasBriefingRaw }] = await Promise.all([
+  const [{ data: projeto }, { data: pagamentos }, { data: briefing }, { data: contratos }, { data: clientes }, { data: tipos }, { data: tarefas }, { data: categorias }, config, { data: modelosContrato }, { data: perguntasBriefingRaw }, { data: aprovacoes }] = await Promise.all([
     supabase.from("projetos").select("*, clientes(id, nome, empresa, email, whatsapp)").eq("id", id).single<ProjetoJoin>(),
     supabase.from("pagamentos_view").select("*").eq("projeto_id", id).order("vencimento").returns<Pagamento[]>(),
     supabase.from("briefings").select("*").eq("projeto_id", id).maybeSingle<Briefing>(),
@@ -49,6 +52,7 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
     getConfiguracoes(),
     supabase.from("modelos_contrato").select("*").returns<ModeloContrato[]>(),
     supabase.from("briefing_perguntas").select("*").eq("ativa", true).order("ordem").returns<PerguntaBriefing[]>(),
+    supabase.from("aprovacoes").select("*").eq("projeto_id", id).order("criado_em", { ascending: false }).returns<Aprovacao[]>(),
   ]);
   if (!projeto) notFound();
 
@@ -79,6 +83,11 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
 
   const mudarStatus = mudarStatusProjeto.bind(null, projeto.id);
   const criarContratoDoProjeto = criarContrato.bind(null, projeto.id);
+  const criarAprovacaoDoProjeto = criarAprovacao.bind(null, projeto.id);
+  const listaAprovacoes = aprovacoes ?? [];
+  const aprovacoesAguardando = listaAprovacoes.filter((a) => a.status === "aguardando").length;
+  // "ajuste" é o que exige ação DELA: o cliente respondeu e pediu mudança.
+  const aprovacoesAjuste = listaAprovacoes.filter((a) => a.status === "ajuste").length;
   const aprovar = aprovarProjeto.bind(null, projeto.id);
   const excluir = excluirProjeto.bind(null, projeto.id, projeto.cliente_id);
   const clienteNome = projeto.clientes?.empresa ?? projeto.clientes?.nome ?? "—";
@@ -271,6 +280,23 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
                       href={`/projetos/${projeto.id}?aba=etapas`}
                       acao={etapas.length ? `${etapasFeitas}/${etapas.length} feitas${etapasAtrasadas ? ` · ${etapasAtrasadas} atrasada(s)` : ""}` : "Gerar"}
                     />
+                    <Passo
+                      ok={!!projeto.portal_token && aprovacoesAjuste === 0}
+                      alerta={aprovacoesAjuste > 0}
+                      label="Portal"
+                      href={`/projetos/${projeto.id}?aba=portal`}
+                      acao={
+                        !projeto.portal_token
+                          ? "Liberar"
+                          : aprovacoesAjuste > 0
+                            ? `${aprovacoesAjuste} ajuste(s) pedido(s)`
+                            : aprovacoesAguardando > 0
+                              ? `${aprovacoesAguardando} esperando o cliente`
+                              : projeto.portal_vista_em
+                                ? "Em uso"
+                                : "Link gerado"
+                      }
+                    />
                     <Passo ok={lista.length > 0 && atrasados.length === 0} alerta={atrasados.length > 0} label="Pagamentos" href={`/projetos/${projeto.id}?aba=pagamentos`} acao={lista.length ? `${lista.filter((p) => p.status === "pago").length}/${lista.length} pagos` : "Cadastrar parcelas"} />
                   </div>
                 </Card>
@@ -297,6 +323,19 @@ export default async function ProjetoPage({ params, searchParams }: { params: Pr
               tipoProjeto={projeto.tipo}
               perguntas={perguntasBriefing}
               briefing={briefing ?? null}
+              linkBase={baseUrl()}
+            />
+          </div>
+        )}
+        {aba === "portal" && (
+          <div className="entrar">
+            <PortalCliente
+              projetoId={projeto.id}
+              portalToken={projeto.portal_token}
+              liberadoEm={projeto.portal_liberado_em}
+              vistaEm={projeto.portal_vista_em}
+              aprovacoes={listaAprovacoes}
+              criar={criarAprovacaoDoProjeto}
               linkBase={baseUrl()}
             />
           </div>

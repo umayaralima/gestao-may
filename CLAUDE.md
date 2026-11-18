@@ -561,3 +561,62 @@ depende de serviço externo e resolve dor diária (proposta esquecida).
   de aprovações, quando ele entrar.
 - Pendente: editor das perguntas em Configurações (hoje só por SQL) — a May vai querer reescrever depois dos
   primeiros clientes reais.
+
+## Seed de demonstração (2026-11-13)
+
+- A May precisa mostrar o sistema (prints, demonstração ao vivo) e a base real está quase vazia. `supabase/seed-demo.sql`
+  cria 7 clientes, **9 projetos** (um em cada fase, incluindo dois projetos do mesmo cliente e um upsell), 8 leads
+  (um em cada etapa do pipeline, com um follow-up atrasado pro anel vermelho aparecer), 3 propostas (enviada / aceita /
+  aguardando), 5 contratos (4 assinados + 1 esperando assinatura), 14 parcelas (pagas, a receber e uma vencida),
+  14 despesas (5 recorrentes + avulsas dos últimos 3 meses, 2 com custo direto de projeto), 32 tarefas
+  (25 etapas de produção ordenadas em 3 projetos + 7 avulsas na agenda) e 10 interações.
+- **Todas as datas são relativas a `current_date`** — o seed nunca "envelhece", pode ser usado em qualquer mês.
+- **Todo id começa com `dddddddd-`** e é fixo. `supabase/limpar-demo.sql` apaga por esse prefixo, na ordem filho→pai,
+  sem tocar em nada real. O seed é idempotente (`on conflict (id) do nothing`), pode rodar duas vezes.
+- Os textos das 3 propostas já vão congelados em `propostas.documento`, no mesmo markdown que `renderizarProposta()`
+  gera — por isso o PDF e a página pública `/p/[token]` funcionam nas propostas fictícias.
+- Contratos de demonstração usam os números 001/2026 a 005/2026 e as propostas P-001 a P-003/2026. Como o sistema
+  numera por `max + 1` do ano, o primeiro contrato real depois do seed vai sair como 006/2026. Não quebra nada, só
+  pula número — se incomodar, limpar o seed antes de emitir contrato real.
+- **Parte 4 (`supabase/seed-demo-briefings.sql`, 2026-11-17):** dois briefings de cliente com token fixo —
+  Doce Encanto **respondido** (45 das 49, com 3 "não sei responder" e `tem_identidade = "nao"`, o que ativa o bloco C
+  de identidade visual na página pública) e Marques & Alves **enviado e aberto**, ainda em branco. Serve pra demonstrar
+  os dois estados sem depender de ninguém responder. O `select` no fim imprime os links públicos (`/p/` e `/b/`).
+- O que já demonstra sozinho com o seed, sem configurar nada: resumo diário ("Enviar agora" em Configurações →
+  Notificações monta o e-mail com as tarefas e cobranças fictícias), feed iCal, aceite de proposta em `/p/[token]`,
+  briefing em `/b/[token]`, modelos de mensagem e Relatórios. O que NÃO funciona no fictício: "Atualizar status" do
+  Autentique num contrato de demonstração (o `autentique_id` não existe lá) e link de cobrança InfinitePay (sem handle).
+  Pra mostrar contrato com PDF de verdade, gerar um no projeto 9 (LP de implantes) — é o único sem contrato.
+
+## Portal do cliente (2026-11-18)
+
+- Escolhido pela May como próximo passo depois do briefing. Fecha o ciclo: a proposta (`/p/`) traz o cliente, o
+  briefing (`/b/`) colhe o conteúdo e o portal (`/c/`) acompanha a produção até a entrega.
+- Migração 019: `projetos.portal_token` (unique parcial, só onde não é nulo) + `portal_liberado_em` + `portal_vista_em`;
+  tabela `aprovacoes` (projeto_id, titulo, descricao, link, status aguardando/aprovado/ajuste, comentario_cliente,
+  decidido_por, decidido_em).
+- **Token nulo = portal não liberado ou revogado.** `liberarPortal` não troca token já existente (o link que o cliente
+  salvou continua valendo); trocar e revogar são ações separadas e conscientes. Revogar NÃO apaga as aprovações — elas
+  são o registro de quem aprovou o quê, e isso não se apaga junto com um link.
+- **"ajuste" não é recusa.** É o cliente pedindo mudança: ela corrige e usa "Pedir aprovação de novo" no mesmo pedido,
+  em vez de abrir outro cartão. Por isso o Passo "Portal" na Visão geral fica em alerta quando há `ajuste` (ação dela)
+  e só informativo quando há `aguardando` (ação do cliente).
+- **`decidido_por` é registro, não autenticação.** O cliente digita o nome ao aprovar porque ele repassa o link pra
+  sócio ou cônjuge; serve pra ela saber com quem falou quando alguém disser "eu não aprovei isso".
+- **O portal não mostra prazo de etapa** (`etapasDoPortal` em `src/lib/portal.ts`): prazo de etapa é planejamento
+  interno e muda conforme o material chega — mostrar viraria cobrança ("você disse dia 12"). O cliente vê as etapas
+  feitas com data, a primeira pendente como "em andamento agora", o resto como "a fazer", e a data de entrega do
+  projeto no cabeçalho. `FASE_CLIENTE` traduz o status pra linguagem dele ("em_revisao" → "Em revisão: ajustes finais
+  antes de publicar").
+- Projeto `cancelado` está em `PORTAL_FECHADO`: o link para de abrir (404), sem precisar revogar na mão.
+- Recado e material do cliente entram em `interacoes` com canal `'portal'` (a coluna é texto livre, sem check), então
+  aparecem na timeline do cliente junto com WhatsApp e e-mail — sem tabela nova e sem um "chat" pra ela acompanhar.
+  Material é link de pasta do Drive, mesma decisão da pergunta 24 do briefing: o Supabase Storage segue sem uso.
+- Toda ação pública confere que o id veio DESTE projeto (`.eq("projeto_id", projeto.id)`) antes de gravar, e o update
+  de decisão repete `.eq("status", "aguardando")` pra duas abas não decidirem duas vezes. O e-mail de aviso sai em
+  `after()`, como no briefing.
+- `src/proxy.ts` agora ignora `api`, `p/`, `b/` e `c/`. Aba **Portal** em `/projetos/[id]?aba=portal`
+  (`portal-cliente.tsx`): link com copiar/trocar/revogar, formulário de pedido de aprovação e a leitura do que o
+  cliente respondeu, com o comentário de ajuste em destaque âmbar (é o briefing do retrabalho).
+- Conferido com `tsc --noEmit`, `npm run lint` (0 erros) e `npm run build` — a rota `/c/[token]` entra no manifesto.
+  Falta rodar a 019 no Supabase e testar no publicado.
